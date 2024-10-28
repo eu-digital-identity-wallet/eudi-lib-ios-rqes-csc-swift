@@ -16,7 +16,6 @@
 import Foundation
 
 public class RQES {
-
     private let infoService: InfoServiceType
     private let oauth2AuthorizeService: OAuth2AuthorizeServiceType
     private let oauth2TokenService: OAuth2TokenServiceType
@@ -26,10 +25,11 @@ public class RQES {
     private let signDocService: SignDocServiceType
     private let credentialsAuthorizeService: CSCCredentialsAuthorizeServiceType
     private let pushedAuthorizeService: CSCCredentialsPushedAuthorizeServiceType
+    private let loginService: LoginServiceType
+    private let calculateHashService: CalculateHashServiceType
     private var baseProviderUrl: String
 
     public init() async {
-        // Resolve services asynchronously from the actor ServiceLocator
         self.infoService = await ServiceLocator.shared.resolve() ?? InfoService()
         self.oauth2AuthorizeService = await ServiceLocator.shared.resolve() ?? OAuth2AuthorizeService()
         self.oauth2TokenService = await ServiceLocator.shared.resolve() ?? OAuth2TokenService()
@@ -39,6 +39,8 @@ public class RQES {
         self.signDocService = await ServiceLocator.shared.resolve() ?? SignDocService()
         self.credentialsAuthorizeService = await ServiceLocator.shared.resolve() ?? CSCCredentialsAuthorizeService()
         self.pushedAuthorizeService = await ServiceLocator.shared.resolve() ?? CSCCredentialsPushedAuthorizeService()
+        self.loginService = await ServiceLocator.shared.resolve() ?? LoginService()
+        self.calculateHashService = await ServiceLocator.shared.resolve() ?? CalculateHashService()
         self.baseProviderUrl = "https://walletcentric.signer.eudiw.dev"
     }
 
@@ -78,5 +80,13 @@ public class RQES {
 
     public func pushedAuthorize(request: CSCCredentialsPushedAuthorizeRequest, accessToken: String) async throws -> CSCCredentialsPushedAuthorizeResponse {
         return try await pushedAuthorizeService.pushedAuthorize(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
+    }
+
+    public func login(request: LoginRequest) async throws -> LoginResponse {
+        return try await loginService.login(request: request, oauth2BaseUrl: self.baseProviderUrl)
+    }
+
+    public func calculateHash(request: CalculateHashRequest, accessToken: String) async throws -> CalculateHashResponse {
+        return try await calculateHashService.calculateHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 }

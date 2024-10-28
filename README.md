@@ -10,7 +10,7 @@ the [EUDI Wallet Reference Implementation project description](https://github.co
 * [Overview](#overview)
 * [Disclaimer](#disclaimer)
 * [Use cases supported](#use-cases-supported)
-   1. [Getting Started](#getting-started)
+   1. [Getting Started (UPDATED 29/10/2024)](#getting-started-updated-29102024)
    2. [Info Service](#info-service)
    3. [OAuth2 Authorization Service](#oauth2-authorization-service)
    4. [OAuth2 Token Service](#oauth2-token-service)
@@ -227,196 +227,116 @@ The released software is an initial development release version:
 
 # Use cases supported
 
-## Getting Started
+## Getting Started (UPDATED 29/10/2024)
 
 To begin using this library, you'll need to initialize the main service object RQES(), which allows access to all the functionality required for interacting with the remote signing services. This service should be instantiated at the start of your application lifecycle and will store essential configuration details like OAuth2 provider links and other metadata retrieved from the info service.
 
-#### **Code Example (Walkthrough: Initializing RQES and Retrieving Credentials):**
+#### **Code Example (Walkthrough: Initializing RQES to Calculating Hash):**
+
+To observe the full functionality of the RQES library, including calculating document hashes, you can run the **RQESFlowTest**
 
 
 #### Step 1: Initialize the RQES Service
 
 ``` swift
-import RQES_LIBRARY
+// STEP 1: Initialize an instance of RQES to access library services
+// This initializes the RQES object for invoking various service methods
 let rqes = await RQES()
-```
 
-#### Step 2: Retrieve Service Information
-``` swift
-let infoRequest = InfoServiceRequest(lang: "en-US")
-let infoResponse = try await rqes.getInfo(request: infoRequest)
+// STEP 2: Retrieve service information using the InfoService
+let response = try await rqes.getInfo(request: request)
+JSONUtils.prettyPrintResponseAsJSON(response, message: "InfoService Response:")
 
-print("Service Info: \(infoResponse)")
+// STEP 3: Create a login request with test credentials
+let loginRequest = LoginRequest(username: "8PfCAQzTmON+FHDvH4GW/g+JUtg5eVTgtqMKZFdB/+c=;FirstName;TesterUser",
+                                password: "5adUg@35Lk_Wrm3")
 
-// Output Example:
-/*
-Service Info: {
-    "specs": "2.0.0.0",
-    "name": "ACME Trust Services",
-    "logo": "https://service.domain.org/images/logo.png",
-    "region": "En",
-    "lang": "en-US",
-    "description": "An efficient remote signature service",
-    "authType": ["basic", "oauth2code"],
-    "oauth2": "https://www.domain.org/",
-    "methods": [
-      "auth/login",
-      "auth/revoke",
-      "credentials/list",
-      "credentials/info",
-      "credentials/authorize",
-      "credentials/sendOTP",
-      "signatures/signHash"
-    ],
-    "signAlgorithms": {
-      "algos": ["1.2.840.10045.4.3.2", "1.2.840.113549.1.1.1", "1.2.840.113549.1.1.10"]
-    },
-    "signature_formats": {
-      "formats": ["C", "X", "P"],
-      "envelope_properties": [
-        ["Detached", "Attached", "Parallel"],
-        ["Enveloped", "Enveloping", "Detached"],
-        ["Certification", "Revision"]
-      ]
-    },
-    "conformance_levels": ["Ades-B-B", "Ades-B-T"]
-  }
-*/
-/*
-Note for Developers:
-Once the library successfully instantiates and retrieves the info data, 
-it will automatically store the "oauth2" provider link, making it 
-available for all subsequent calls.
-*/
-```
+// STEP 4: Perform the login operation and capture the response
+let loginResponse = try await rqes.login(request: loginRequest)
+JSONUtils.prettyPrintResponseAsJSON(loginResponse, message: "Login Response:")
 
-#### Step 3: Generate OAuth2 Authorization URL
-``` swift
+// STEP 5: Set up an authorization request using OAuth2AuthorizeRequest with required parameters
 let authorizeRequest = OAuth2AuthorizeRequest(
     responseType: "code",
-    clientId: "your_client_id",
-    redirectUri: "https://yourapp.com/callback",
+    clientId: "wallet-client",
+    redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
     scope: "service",
-    codeChallenge: "your_code_challenge",
+    codeChallenge: "V4n5D1_bu7BPMXWsTulFVkC4ASFmeS7lHXSqIf-vUwI",
     codeChallengeMethod: "S256",
-    state: "12345678",
+    state: "erv8utb5uie",
     credentialID: nil,
     signatureQualifier: nil,
     numSignatures: nil,
     hashes: nil,
     hashAlgorithmOID: nil,
-    authorizationDetails: nil
+    authorizationDetails: nil,
+    requestUri: nil,
+    cookie: loginResponse.cookie!
 )
+
 let authorizeResponse = try await rqes.getAuthorizeUrl(request: authorizeRequest)
+JSONUtils.prettyPrintResponseAsJSON(authorizeResponse, message: "Authorize Response:")
 
-// This will print the URL where the user will be redirected to authorize the app.
-print("Authorize URL: \(authorizeResponse.url)")
+// STEP 6: Request an OAuth2 Token using the authorization code
 
-// Output Example:
-/*
-  Authorize URL: "https://your_callback_url?code=HS9naJKWwp901hBcK348IUHiuH8374&state=12345678"
-*/
-
-// code extracted from the callback URL above
-let authorizationCode = "HS9naJKWwp901hBcK348IUHiuH8374" 
-```
-
-#### Step 4: Exchange Authorization Code for OAuth2 Token
-
-``` swift
-// Assume the user is redirected and the authorization code is received at the callback
 let tokenRequest = OAuth2TokenRequest(
+    clientId: "wallet-client-tester",
+    redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
     grantType: "authorization_code",
-    clientId: "your_client_id",
-    clientSecret: "your_client_secret",
-    code: authorizationCode,
-    redirectUri: "https://yourapp.com/callback"
+    codeVerifier: "z34oHaauNSc13ScLRDmbQrJ5bIR9IDzRCWZTRRAPtlV",
+    code: authorizeResponse.code,
+    state:"erv8utb5uie",
+    auth: OAuth2TokenRequest.BasicAuth(
+        username: "wallet-client",
+        password: "somesecret2"
+    )
 )
+
 let tokenResponse = try await rqes.getOAuth2Token(request: tokenRequest)
+JSONUtils.prettyPrintResponseAsJSON(tokenResponse, message: "Token Response:")  
 
-// This will print the access token returned by the OAuth2 provider.
-print("Access Token: \(tokenResponse.accessToken)")
+// STEP 7: Request the list of credentials using the access token
 
-// Output Example:
-/*
-  Access Token: "ya29.a0AfH6SMBEp5g2IAXq26IXIU_h6iu9uOX_MzGReak1Y2NkFs3hdZkFxX
-*/
-
-let accessToken = tokenResponse.accessToken
-```
-
-#### Step 5: Retrieve the List of Credentials using the Access Token
-``` swift
-let credentialsListRequest = CSCCredentialsListRequest(
+let credentialListRequest = CSCCredentialsListRequest(
     credentialInfo: true,
     certificates: "chain",
-    certInfo: true,
-    authInfo: true
-)
-let credentialsListResponse = try await rqes.getCredentialsList(
-    request: credentialsListRequest,
-    accessToken: accessToken
+    certInfo: true
 )
 
-// This will print the list of credentials available for the user, including certificate details.
-print("Credentials List: \(credentialsListResponse)")
+let credentialListResponse = try await rqes.getCredentialsList(request: credentialListRequest, accessToken: tokenResponse.accessToken)
+JSONUtils.prettyPrintResponseAsJSON(credentialListResponse, message: "Credential List Response:")
 
-// Output Example:
-/*
-Credentials List: {
-  "credentialIDs": [ "GX0112348", "HX0224685" ],
-  "credentialInfos": [
-    {
-      "credentialID": "GX0112348",
-      "key": {
-        "status": "enabled",
-        "algo": [ "1.2.840.113549.1.1.11", "1.2.840.113549.1.1.10" ],
-        "len": 2048
-      },
-      "cert": {
-        "status": "valid",
-        "certificates": [
-          "<Base64-encoded_X.509_end_entity_certificate>",
-          "<Base64-encoded_X.509_intermediate_CA_certificate>",
-          "<Base64-encoded_X.509_root_CA_certificate>"
-        ],
-        "issuerDN": "<X.500_issuer_DN_printable_string>",
-        "serialNumber": "5AAC41CD8FA22B953640",
-        "subjectDN": "<X.500_subject_DN_printable_string>",
-        "validFrom": "20200101100000Z",
-        "validTo": "20230101095959Z"
-      },
-      "auth": {
-        "mode": "explicit",
-        "expression": "PIN AND OTP",
-        "objects": [
-          {
-            "type": "Password",
-            "id": "PIN",
-            "format": "N",
-            "label": "PIN",
-            "description": "Please enter the signature PIN"
-          },
-          {
-            "type": "Password",
-            "id": "OTP",
-            "format": "N",
-            "generator": "totp",
-            "label": "Mobile OTP",
-            "description": "Please enter the 6 digit code you received by SMS"
-          }
-        ]
-      },
-      "multisign": 5,
-      "lang": "en-US"
-    },
-    {
-      "credentialID": "HX0224685"
-      // Additional credential details...
-    }
-  ]
-}
-*/
+// STEP 8: Request the list of credentials using the access token
+
+let credentialInfoRequest = CSCCredentialsInfoRequest(
+    credentialID: credentialListResponse.credentialIDs[0],
+    credentialInfo: true,
+    certificates: "chain",
+    certInfo: true
+)
+
+let credentialInfoResponse = try await rqes.getCredentialsInfo(request: credentialInfoRequest, accessToken: tokenResponse.accessToken)
+JSONUtils.prettyPrintResponseAsJSON(credentialInfoResponse, message: "Credential Info Response:")
+
+// STEP 9: Request the list of credentials using the access token
+
+let calculateHashRequest = CalculateHashRequest(
+    documents: [
+        CalculateHashRequest.Document(
+            document: encodedPdfExample,
+            signatureFormat: "P",
+            conformanceLevel: "Ades-B-B",
+            signedEnvelopeProperty: "ENVELOPED",
+            container: "No"
+        )
+    ],
+    endEntityCertificate: (credentialInfoResponse.cert?.certificates?[0])!,
+    certificateChain: [(credentialInfoResponse.cert?.certificates?[1])!],
+    hashAlgorithmOID: "1.2.840.113549.1.1.11"
+)
+
+let calculateHashResponse = try await rqes.calculateHash(request: calculateHashRequest, accessToken: tokenResponse.accessToken)
+JSONUtils.prettyPrintResponseAsJSON(calculateHashResponse, message: "Calculate Hash Response:")
 
 ```
 

@@ -15,11 +15,11 @@
  */
 import Foundation
 
-final actor CSCCredentialsListClient {
+final actor LoginClient {
 
-    static func makeRequest(for request: CSCCredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CSCCredentialsListResponse {
-        
-        let endpoint = "/csc/v2/credentials/list"
+    static func makeRequest(request: LoginRequest, oauth2BaseUrl: String) async throws -> LoginResponse {
+
+        let endpoint = "/login"
         let baseUrl = oauth2BaseUrl + endpoint
 
         guard let url = URL(string: baseUrl) else {
@@ -28,22 +28,32 @@ final actor CSCCredentialsListClient {
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
-        let jsonData = try JSONEncoder().encode(request)
-        urlRequest.httpBody = jsonData
+        let (formData, boundary) = request.toFormData()
+        urlRequest.setValue(
+            "multipart/form-data; boundary=\(boundary)",
+            forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = formData
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
-        
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            throw ClientError.invalidResponse
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode)
+        else {
+            throw LoginError.invalidResponse
         }
 
+        let cookie = httpResponse.value(forHTTPHeaderField: "Set-Cookie")
+
         do {
-            return try JSONDecoder().decode(CSCCredentialsListResponse.self, from: data)
+            var loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
+            loginResponse = LoginResponse(
+                message: loginResponse.message,
+                cookie: cookie 
+            )
+            return loginResponse
         } catch {
-            throw CSCCredentialsListError.decodingFailed
+            throw LoginError.decodingFailed
         }
     }
 }

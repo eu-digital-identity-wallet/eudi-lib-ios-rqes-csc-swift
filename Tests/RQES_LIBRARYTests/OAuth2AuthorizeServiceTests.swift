@@ -41,18 +41,17 @@ final class OAuth2AuthorizeServiceTests: XCTestCase {
             hashes: nil,
             hashAlgorithmOID: nil,
             authorizationDetails: nil,
-            requestUri: nil
+            requestUri: nil,
+            cookie: "loginResponse.cookie!"
         )
         
         do {
             let rqes = await RQES()
             try await rqes.getInfo()
             let response = try await rqes.getAuthorizeUrl(request: request)
-            
-            // Print the response to observe the result
+
             JSONUtils.prettyPrintResponseAsJSON(response)
         } catch {
-            // Print the error but don't fail the test
             if let localizedError = error as? LocalizedError {
                 print("Error: \(localizedError.errorDescription ?? "Unknown error")")
             } else {

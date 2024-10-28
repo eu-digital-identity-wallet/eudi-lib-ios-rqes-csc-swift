@@ -16,10 +16,8 @@
 import Foundation
 
 struct CSCCredentialsAuthorizeValidator: ValidatorProtocol {
-    // Define the associated type as CSCCredentialsAuthorizeRequest
     typealias Input = CSCCredentialsAuthorizeRequest
 
-    // Static method for validation
     static func validate(_ input: CSCCredentialsAuthorizeRequest) throws {
         if input.credentialID.isEmpty {
             throw CSCCredentialsAuthorizeError.missingCredentialID

@@ -17,10 +17,9 @@ import Foundation
 
 struct InfoServiceValidator: ValidatorProtocol  {
 
-    typealias Input = String // Assuming you're validating the language here as a String
+    typealias Input = String
     private static let supportedLanguages = ["en-US", "gr-GR", "it-IT"]
 
-    // Conforming to ValidatorProtocol's method signature
     static func validate(_ input: String) throws {
         guard supportedLanguages.contains(input) else {
             throw InfoServiceError.invalidLanguage

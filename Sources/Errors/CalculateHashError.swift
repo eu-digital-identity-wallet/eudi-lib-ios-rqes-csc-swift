@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Foundation
+ import Foundation
 
-struct CSCCredentialsListValidator: ValidatorProtocol {
-    typealias Input = String
-
-    static func validate(_ input: String) throws {
-        guard !input.isEmpty else {
-            throw CSCCredentialsListError.invalidClientID
-        }
-    }
+public enum CalculateHashError: Error {
+    case missingDocuments
+    case invalidDocument
+    case missingEndEntityCertificate
+    case missingCertificateChain
+    case missingHashAlgorithmID
+    case decodingFailed
 }

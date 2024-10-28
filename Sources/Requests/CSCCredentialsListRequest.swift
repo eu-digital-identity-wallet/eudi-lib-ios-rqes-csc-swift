@@ -27,9 +27,9 @@ public struct CSCCredentialsListRequest: Codable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case userID = "user_id"
-        case credentialInfo = "credential_info"
+        case credentialInfo = "credentialInfo"
         case certificates
-        case certInfo = "cert_info"
+        case certInfo = "certInfo"
         case authInfo = "auth_info"
         case onlyValid = "only_valid"
         case lang
@@ -38,11 +38,11 @@ public struct CSCCredentialsListRequest: Codable, Sendable {
 
     public init(
         userID: String? = nil,
-        credentialInfo: Bool? = false,
-        certificates: String? = "single",
-        certInfo: Bool? = false,
-        authInfo: Bool? = false,
-        onlyValid: Bool? = false,
+        credentialInfo: Bool? = nil,
+        certificates: String? = nil,
+        certInfo: Bool? = true,
+        authInfo: Bool? = nil,
+        onlyValid: Bool? = nil,
         lang: String? = nil,
         clientData: String? = nil
     ) {

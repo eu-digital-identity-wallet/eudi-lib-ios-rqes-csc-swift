@@ -15,12 +15,17 @@
  */
 import Foundation
 
-struct CSCCredentialsListValidator: ValidatorProtocol {
-    typealias Input = String
-
-    static func validate(_ input: String) throws {
-        guard !input.isEmpty else {
-            throw CSCCredentialsListError.invalidClientID
-        }
+public struct CalculateHashResponse: Codable, Sendable {
+    public let hashes: [String]
+    public let signatureDate: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case hashes
+        case signatureDate = "signature_date"
+    }
+    
+    public init(hashes: [String], signatureDate: Int) {
+        self.hashes = hashes
+        self.signatureDate = signatureDate
     }
 }

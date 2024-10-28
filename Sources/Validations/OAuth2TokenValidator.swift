@@ -26,11 +26,11 @@ struct OAuth2TokenValidator: ValidatorProtocol  {
         guard !input.grantType.isEmpty else {
             throw OAuth2TokenError.missingGrantType
         }
-        
         if input.grantType == "authorization_code" {
-            guard let redirectUri = input.redirectUri, !redirectUri.isEmpty else {
+            if input.redirectUri.isEmpty {
                 throw OAuth2TokenError.missingRedirectUri
             }
         }
+
     }
 }

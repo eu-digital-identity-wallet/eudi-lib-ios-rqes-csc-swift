@@ -18,8 +18,7 @@ import Foundation
 struct SignHashValidator: ValidatorProtocol {
 
     typealias Input = SignHashRequest
-    
-    // Conforming to ValidatorProtocol's method signature
+
     static func validate(_ input: SignHashRequest) throws {
 
         guard !input.credentialID.isEmpty else {

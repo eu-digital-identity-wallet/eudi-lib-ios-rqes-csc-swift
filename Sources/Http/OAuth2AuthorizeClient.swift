@@ -15,9 +15,9 @@
  */
 import Foundation
 
-final actor OAuth2AuthorizeClient {
+final actor OAuth2AuthorizeClient: NSObject, URLSessionDelegate {
     
-    static func makeRequest(for request: OAuth2AuthorizeRequest, oauth2BaseUrl:String) async throws -> OAuth2AuthorizeResponse {
+    static func makeRequest(for request: OAuth2AuthorizeRequest, oauth2BaseUrl: String) async throws -> OAuth2AuthorizeResponse {
         
         let endpoint = "/oauth2/authorize"
         let baseUrl = oauth2BaseUrl + endpoint
@@ -25,37 +25,64 @@ final actor OAuth2AuthorizeClient {
         guard let url = URL(string: baseUrl) else {
             throw ClientError.invalidRequestURL
         }
-
+        
         let urlRequest = try createUrlRequest(with: url, request: request)
-
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
-
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            throw ClientError.invalidResponse
-        }
-
+        let session = URLSession(configuration: .default, delegate: OAuth2AuthorizeClient(), delegateQueue: nil)
+        
         do {
-            return try JSONDecoder().decode(OAuth2AuthorizeResponse.self, from: data)
+            let (data, response) = try await session.data(for: urlRequest)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ClientError.invalidResponse
+            }
+            
+            guard let finalURL = httpResponse.url else {
+                print("No URL found in the response.")
+                throw ClientError.invalidResponse
+            }
+            
+            let components = URLComponents(url: finalURL, resolvingAgainstBaseURL: false)
+            if let code = components?.queryItems?.first(where: { $0.name == "code" })?.value,
+               let state = components?.queryItems?.first(where: { $0.name == "state" })?.value {
+                return OAuth2AuthorizeResponse(url: finalURL.absoluteString, code: code, state: state)
+            } else {
+                throw OAuth2AuthorizeError.invalidResponse
+            }
+            
         } catch {
-            throw OAuth2AuthorizeError.decodingFailed
+            throw error
         }
     }
 
     private static func createUrlRequest(with url: URL, request: OAuth2AuthorizeRequest) throws -> URLRequest {
         var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = "GET" 
+        urlRequest.httpMethod = "GET"
         urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-
+        
+        if !request.cookie.isEmpty {
+            urlRequest.setValue(request.cookie, forHTTPHeaderField: "Cookie")
+        } else {
+            print("No cookie to set in headers.")
+        }
+        
         let queryItems = request.toQueryItems()
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         components?.queryItems = queryItems
-
+        
         if let completeUrl = components?.url {
             urlRequest.url = completeUrl
         } else {
+            print("Failed to create complete URL with query items.")
             throw OAuth2AuthorizeError.invalidAuthorizationDetails
         }
         
         return urlRequest
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+                    newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        print("Intercepted redirect to \(request.url?.absoluteString ?? "unknown URL")")
+
+        completionHandler(nil)
     }
 }

@@ -15,12 +15,14 @@
  */
 import Foundation
 
-struct CSCCredentialsListValidator: ValidatorProtocol {
-    typealias Input = String
+final actor LoginService: LoginServiceType {
+    
+    public init() {}
+    
+    func login(request: LoginRequest, oauth2BaseUrl: String) async throws -> LoginResponse {
 
-    static func validate(_ input: String) throws {
-        guard !input.isEmpty else {
-            throw CSCCredentialsListError.invalidClientID
-        }
+        try LoginValidator.validate(request)
+
+        return try await LoginClient.makeRequest(request: request, oauth2BaseUrl: oauth2BaseUrl)
     }
 }

@@ -16,14 +16,15 @@
 import Foundation
 
 public struct CSCCredentialsInfoResponse: Codable, Sendable {
-
     public let description: String?
     public let signatureQualifier: String?
     public let key: KeyInfo
     public let cert: CertificateInfo?
-    public let auth: AuthInfo
+    public let auth: AuthInfo?
     public let multisign: Int
     public let lang: String?
+    public let scal: String?
+
     public struct KeyInfo: Codable, Sendable {
         public let status: String
         public let algo: [String]
@@ -42,7 +43,7 @@ public struct CSCCredentialsInfoResponse: Codable, Sendable {
     }
 
     public struct AuthInfo: Codable, Sendable {
-        public let mode: String
+        public let mode: String?
         public let expression: String?
         public let objects: [AuthObject]?
     }
@@ -60,9 +61,10 @@ public struct CSCCredentialsInfoResponse: Codable, Sendable {
         signatureQualifier: String? = nil,
         key: KeyInfo,
         cert: CertificateInfo? = nil,
-        auth: AuthInfo,
+        auth: AuthInfo? = nil,
         multisign: Int,
-        lang: String? = nil
+        lang: String? = nil,
+        scal: String? = nil
     ) {
         self.description = description
         self.signatureQualifier = signatureQualifier
@@ -71,5 +73,6 @@ public struct CSCCredentialsInfoResponse: Codable, Sendable {
         self.auth = auth
         self.multisign = multisign
         self.lang = lang
+        self.scal = scal
     }
 }

@@ -15,12 +15,6 @@
  */
 import Foundation
 
-struct CSCCredentialsListValidator: ValidatorProtocol {
-    typealias Input = String
-
-    static func validate(_ input: String) throws {
-        guard !input.isEmpty else {
-            throw CSCCredentialsListError.invalidClientID
-        }
-    }
+public protocol LoginServiceType {
+    func login(request: LoginRequest, oauth2BaseUrl:String) async throws -> LoginResponse
 }

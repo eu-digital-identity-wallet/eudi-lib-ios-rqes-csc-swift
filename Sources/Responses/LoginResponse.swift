@@ -15,12 +15,20 @@
  */
 import Foundation
 
-struct CSCCredentialsListValidator: ValidatorProtocol {
-    typealias Input = String
+public struct LoginResponse: Codable, Sendable {
+    public let message: String?
+    public let cookie: String?
 
-    static func validate(_ input: String) throws {
-        guard !input.isEmpty else {
-            throw CSCCredentialsListError.invalidClientID
-        }
+    enum CodingKeys: String, CodingKey {
+        case message
+        case cookie
+    }
+
+    public init(
+        message: String? = nil,
+        cookie: String? = nil
+    ) {
+        self.message = message
+        self.cookie = cookie
     }
 }

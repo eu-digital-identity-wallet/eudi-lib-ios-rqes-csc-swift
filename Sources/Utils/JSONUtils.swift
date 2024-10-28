@@ -17,13 +17,13 @@ import Foundation
 
 struct JSONUtils {
 
-    static func prettyPrintResponseAsJSON<T: Codable>(_ response: T) {
+    static func prettyPrintResponseAsJSON<T: Codable>(_ response: T, message:String = "Pretty Printed JSON Response:") {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         do {
             let jsonData = try encoder.encode(response)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("Pretty Printed JSON Response:")
+                print(message)
                 print(jsonString)
             }
         } catch {

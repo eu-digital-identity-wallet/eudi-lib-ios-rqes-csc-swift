@@ -15,39 +15,36 @@
  */
 import Foundation
 
-final actor OAuth2TokenClient {
-    static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> OAuth2TokenResponse {
-        let endpoint = "/oauth2/token"
-        let baseUrl = oauth2BaseUrl + endpoint
+final actor CalculateHashClient {
+
+    static func makeRequest(for request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CalculateHashResponse {
         
+        let endpoint = "/signatures/calculate_hash"
+        let baseUrl = oauth2BaseUrl + endpoint
+
         guard let url = URL(string: baseUrl) else {
             throw ClientError.invalidRequestURL
         }
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        urlRequest.httpBody = request.toFormBody()
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
-        if let auth = request.auth {
-            let loginString = "\(auth.username):\(auth.password)"
-            guard let loginData = loginString.data(using: .utf8) else {
-                throw ClientError.invalidRequestURL
-            }
-            let base64LoginString = loginData.base64EncodedString()
-            urlRequest.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        }
-        
+        let jsonData = try JSONEncoder().encode(request)
+        urlRequest.httpBody = jsonData
+
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         
         guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
             throw ClientError.invalidResponse
         }
-        
+
         do {
-            return try JSONDecoder().decode(OAuth2TokenResponse.self, from: data)
+            return try JSONDecoder().decode(CalculateHashResponse.self, from: data)
         } catch {
-            throw OAuth2TokenError.decodingFailed
+            throw CalculateHashError.decodingFailed
         }
     }
 }
+

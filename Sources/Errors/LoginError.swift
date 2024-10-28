@@ -15,12 +15,22 @@
  */
 import Foundation
 
-struct CSCCredentialsListValidator: ValidatorProtocol {
-    typealias Input = String
-
-    static func validate(_ input: String) throws {
-        guard !input.isEmpty else {
-            throw CSCCredentialsListError.invalidClientID
+public enum LoginError: LocalizedError {
+    case emptyUsername
+    case emptyPassword
+    case invalidResponse
+    case decodingFailed
+    
+    public var errorDescription: String? {
+        switch self {
+        case .emptyUsername:
+            return "Username cannot be empty."
+        case .emptyPassword:
+            return "Password cannot be empty."
+        case .invalidResponse:
+            return "The server returned an invalid response."
+        case .decodingFailed:
+            return "Failed to decode the response."
         }
     }
 }

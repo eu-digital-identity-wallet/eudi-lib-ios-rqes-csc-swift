@@ -27,18 +27,23 @@ final class OAuth2TokenServiceTests: XCTestCase {
     }
 
     func testInvokeOAuth2TokenService() async throws {
-        let request = OAuth2TokenRequest(
+        let tokenRequest = OAuth2TokenRequest(
+            clientId: "wallet-client-tester",
+            redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
             grantType: "authorization_code",
-            clientId: "myclientid",
-            clientSecret: "myclientsecret",
-            code: "FhxXf9P269L8g",
-            redirectUri: "https://myclient.com/callback"
+            codeVerifier: "z34oHaauNSc13ScLRDmbQrJ5bIR9IDzRCWZTRRAPtlV",
+            code: "sampleAuthCode123",
+            state:"erv8utb5uie",
+            auth: OAuth2TokenRequest.BasicAuth(
+                username: "wallet-client",
+                password: "somesecret2"
+            )
         )
         
         do {
             let rqes = await RQES()
             try await rqes.getInfo()
-            let response = try await rqes.getOAuth2Token(request: request)
+            let response = try await rqes.getOAuth2Token(request: tokenRequest)
             
             JSONUtils.prettyPrintResponseAsJSON(response)
         } catch {

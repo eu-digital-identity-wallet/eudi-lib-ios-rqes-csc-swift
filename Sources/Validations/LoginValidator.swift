@@ -15,12 +15,15 @@
  */
 import Foundation
 
-struct CSCCredentialsListValidator: ValidatorProtocol {
-    typealias Input = String
-
-    static func validate(_ input: String) throws {
-        guard !input.isEmpty else {
-            throw CSCCredentialsListError.invalidClientID
+struct LoginValidator: ValidatorProtocol {
+    typealias Input = LoginRequest
+    
+    static func validate(_ input: LoginRequest) throws {
+        if input.username.isEmpty {
+            throw LoginError.emptyUsername
+        }
+        if input.password.isEmpty {
+            throw LoginError.emptyPassword
         }
     }
 }
