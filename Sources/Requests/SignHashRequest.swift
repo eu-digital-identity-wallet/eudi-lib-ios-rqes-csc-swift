@@ -30,13 +30,13 @@ public struct SignHashRequest: Codable, Sendable {
     public let clientData: String?
 
     enum CodingKeys: String, CodingKey {
-        case credentialID = "credential_id"
+        case credentialID
         case SAD = "SAD"
         case hashes
-        case hashAlgorithmOID = "hash_algorithm_oid"
-        case signAlgo = "sign_algo"
+        case hashAlgorithmOID
+        case signAlgo
         case signAlgoParams = "sign_algo_params"
-        case operationMode = "operation_mode"
+        case operationMode
         case validityPeriod = "validity_period"
         case responseURI = "response_uri"
         case clientData = "client_data"

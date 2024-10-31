@@ -15,19 +15,17 @@
  */
 import Foundation
 
-struct SignHashValidator: ValidatorProtocol {
-
-    typealias Input = SignHashRequest
-
-    static func validate(_ input: SignHashRequest) throws {
-
-        guard !input.credentialID.isEmpty else {
-            throw SignHashError.missingCredentialID
-        }
-
-
-        guard !input.hashes.isEmpty else {
-            throw SignHashError.missingHashes
-        }
-    }
+struct DocumentDigest: Codable, Sendable {
+    let label: String
+    let hash: String
 }
+
+struct AuthorizationDetailsItem: Codable, Sendable {
+    let documentDigests: [DocumentDigest]
+    let credentialID: String
+    let hashAlgorithmOID: String
+    let locations: [String]
+    let type: String
+}
+
+typealias AuthorizationDetails = [AuthorizationDetailsItem]

@@ -15,11 +15,10 @@
  */
 import Foundation
 
-final actor CalculateHashClient {
+final actor ObtainSignedDocClient {
 
-    static func makeRequest(for request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CalculateHashResponse {
-
-        let endpoint = "/signatures/calculate_hash"
+    static func makeRequest(for request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> ObtainSignedDocResponse {
+        let endpoint = "/signatures/obtain_signed_doc"
         let baseUrl = oauth2BaseUrl + endpoint
 
         guard let url = URL(string: baseUrl) else {
@@ -33,18 +32,17 @@ final actor CalculateHashClient {
 
         let jsonData = try JSONEncoder().encode(request)
         urlRequest.httpBody = jsonData
-
+ 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
-        
+
         guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
             throw ClientError.invalidResponse
         }
 
         do {
-            return try JSONDecoder().decode(CalculateHashResponse.self, from: data)
+            return try JSONDecoder().decode(ObtainSignedDocResponse.self, from: data)
         } catch {
-            throw CalculateHashError.decodingFailed
+            throw ObtainSignedDocError.decodingFailed
         }
     }
 }
-

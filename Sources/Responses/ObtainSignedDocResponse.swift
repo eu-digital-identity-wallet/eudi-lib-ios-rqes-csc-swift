@@ -15,19 +15,7 @@
  */
 import Foundation
 
-struct SignHashValidator: ValidatorProtocol {
-
-    typealias Input = SignHashRequest
-
-    static func validate(_ input: SignHashRequest) throws {
-
-        guard !input.credentialID.isEmpty else {
-            throw SignHashError.missingCredentialID
-        }
-
-
-        guard !input.hashes.isEmpty else {
-            throw SignHashError.missingHashes
-        }
-    }
+public struct ObtainSignedDocResponse: Codable, Sendable {
+    public let documentWithSignature: [String]
+    public let signatureObject: [String]
 }

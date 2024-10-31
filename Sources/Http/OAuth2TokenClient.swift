@@ -18,7 +18,13 @@ import Foundation
 final actor OAuth2TokenClient {
     static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> OAuth2TokenResponse {
         let endpoint = "/oauth2/token"
-        let baseUrl = oauth2BaseUrl + endpoint
+        var baseUrl = oauth2BaseUrl + endpoint
+
+        if let authorizationDetails = request.authorizationDetails, !authorizationDetails.isEmpty {
+            var components = URLComponents(string: baseUrl)
+            components?.queryItems = [URLQueryItem(name: "authorization_details", value: authorizationDetails)]
+            baseUrl = components?.url?.absoluteString ?? baseUrl
+        }
         
         guard let url = URL(string: baseUrl) else {
             throw ClientError.invalidRequestURL

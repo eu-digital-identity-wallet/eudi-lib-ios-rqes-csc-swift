@@ -15,19 +15,9 @@
  */
 import Foundation
 
-struct SignHashValidator: ValidatorProtocol {
-
-    typealias Input = SignHashRequest
-
-    static func validate(_ input: SignHashRequest) throws {
-
-        guard !input.credentialID.isEmpty else {
-            throw SignHashError.missingCredentialID
-        }
-
-
-        guard !input.hashes.isEmpty else {
-            throw SignHashError.missingHashes
-        }
+final actor ObtainSignedDocService: ObtainSignedDocServiceType {
+    func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> ObtainSignedDocResponse {
+        try ObtainSignedDocValidator.validate(request)
+        return try await ObtainSignedDocClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
     }
 }

@@ -25,18 +25,6 @@ struct SignDocValidator: ValidatorProtocol  {
             throw SignDocError.missingCredentialIDAndSignatureQualifier
         }
 
-        if input.documentDigests == nil && input.documents == nil {
-            throw SignDocError.missingDocumentDigestsAndDocuments
-        }
-
-        if let documentDigests = input.documentDigests {
-            for digest in documentDigests {
-                if digest.hashes.isEmpty {
-                    throw SignDocError.emptyHashes
-                }
-            }
-        }
-
         if let documents = input.documents {
             for document in documents {
                 if document.document.isEmpty {

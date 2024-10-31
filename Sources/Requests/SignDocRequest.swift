@@ -20,7 +20,7 @@ public struct SignDocRequest: Codable, Sendable {
     public let credentialID: String?
     public let signatureQualifier: String?
     public let SAD: String
-    public let documentDigests: [DocumentDigest]?
+    
     public let documents: [Document]?
 
     public let operationMode: String?
@@ -33,7 +33,6 @@ public struct SignDocRequest: Codable, Sendable {
         case credentialID = "credential_id"
         case signatureQualifier = "signature_qualifier"
         case SAD = "SAD"
-        case documentDigests = "document_digests"
         case documents = "documents"
         case operationMode = "operation_mode"
         case validityPeriod = "validity_period"
@@ -42,11 +41,10 @@ public struct SignDocRequest: Codable, Sendable {
         case returnValidationInfo = "return_validation_info"
     }
 
-    public init(
+     init(
         credentialID: String? = nil,
         signatureQualifier: String? = nil,
         SAD: String,
-        documentDigests: [DocumentDigest]? = nil,
         documents: [Document]? = nil,
         operationMode: String? = nil,
         validityPeriod: Int? = nil,
@@ -57,7 +55,6 @@ public struct SignDocRequest: Codable, Sendable {
         self.credentialID = credentialID
         self.signatureQualifier = signatureQualifier
         self.SAD = SAD
-        self.documentDigests = documentDigests
         self.documents = documents
         self.operationMode = operationMode
         self.validityPeriod = validityPeriod
@@ -67,32 +64,6 @@ public struct SignDocRequest: Codable, Sendable {
     }
 }
 
-public struct DocumentDigest: Codable, Sendable {
-    public let hashes: [String]
-    public let hashAlgorithmOID: String
-    public let signatureFormat: String
-    public let conformanceLevel: String?
-    public let signAlgo: String
-    public let signAlgoParams: String?
-
-    enum CodingKeys: String, CodingKey {
-        case hashes = "hashes"
-        case hashAlgorithmOID = "hash_algorithm_oid"
-        case signatureFormat = "signature_format"
-        case conformanceLevel = "conformance_level"
-        case signAlgo = "sign_algo"
-        case signAlgoParams = "sign_algo_params"
-    }
-
-    public init(hashes: [String], hashAlgorithmOID: String, signatureFormat: String, conformanceLevel: String? = nil, signAlgo: String, signAlgoParams: String? = nil) {
-        self.hashes = hashes
-        self.hashAlgorithmOID = hashAlgorithmOID
-        self.signatureFormat = signatureFormat
-        self.conformanceLevel = conformanceLevel
-        self.signAlgo = signAlgo
-        self.signAlgoParams = signAlgoParams
-    }
-}
 
 
 public struct Document: Codable, Sendable {

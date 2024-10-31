@@ -15,19 +15,13 @@
  */
 import Foundation
 
-struct SignHashValidator: ValidatorProtocol {
-
-    typealias Input = SignHashRequest
-
-    static func validate(_ input: SignHashRequest) throws {
-
-        guard !input.credentialID.isEmpty else {
-            throw SignHashError.missingCredentialID
-        }
-
-
-        guard !input.hashes.isEmpty else {
-            throw SignHashError.missingHashes
-        }
-    }
+public enum ObtainSignedDocError: Error {
+    case missingDocuments
+    case invalidDocument
+    case missingEndEntityCertificate
+    case missingCertificateChain
+    case missingHashAlgorithmID
+    case missingDate
+    case missingSignatures
+    case decodingFailed
 }

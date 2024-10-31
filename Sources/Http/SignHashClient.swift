@@ -15,9 +15,9 @@
  */
 import Foundation
 
-final actor SignHashClient{
+final actor SignHashClient {
     
-    static func makeRequest(for request: SignHashRequest, accessToken: String, oauth2BaseUrl:String) async throws -> SignHashResponse {
+    static func makeRequest(for request: SignHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignHashResponse {
         
         let endpoint = "/csc/v2/signatures/signHash"
         let baseUrl = oauth2BaseUrl + endpoint
@@ -28,15 +28,15 @@ final actor SignHashClient{
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-
         urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let jsonData = try JSONEncoder().encode(request)
+
         urlRequest.httpBody = jsonData
-
+        
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
-
+        
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw ClientError.invalidResponse
         }
@@ -46,3 +46,4 @@ final actor SignHashClient{
         return signHashResponse
     }
 }
+

@@ -40,36 +40,6 @@ struct CSCCredentialsPushedAuthorizeValidator: ValidatorProtocol  {
             throw CSCCredentialsPushedAuthorizeError.invalidCodeChallengeMethod
         }
 
-        if let authorizationDetails = input.authorizationDetails {
-            try validateAuthorizationDetails(authorizationDetails)
-        }
     }
 
-    static func validateAuthorizationDetails(_ details: AuthorizationDetails) throws {
-        guard details.type == "credential" else {
-            throw CSCCredentialsPushedAuthorizeError.invalidAuthorizationType
-        }
-
-        guard !details.credentialID.isEmpty else {
-            throw CSCCredentialsPushedAuthorizeError.missingCredentialID
-        }
-
-        guard !details.documentDigests.isEmpty else {
-            throw CSCCredentialsPushedAuthorizeError.missingDocumentDigests
-        }
-
-        for digest in details.documentDigests {
-            try validateDocumentDigest(digest)
-        }
-
-        guard !details.hashAlgorithmOID.isEmpty else {
-            throw CSCCredentialsPushedAuthorizeError.missingHashAlgorithmOID
-        }
-    }
-
-    private static func validateDocumentDigest(_ digest: PushedAuthorizedDocumentDigest) throws {
-        guard !digest.hash.isEmpty else {
-            throw CSCCredentialsPushedAuthorizeError.missingHash
-        }
-    }
 }

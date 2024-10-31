@@ -22,11 +22,9 @@ public class RQES {
     private let credentialsListService: CSCCredentialsListServiceType
     private let credentialsInfoService: CSCCredentialsInfoServiceType
     private let signHashService: SignHashServiceType
-    private let signDocService: SignDocServiceType
-    private let credentialsAuthorizeService: CSCCredentialsAuthorizeServiceType
-    private let pushedAuthorizeService: CSCCredentialsPushedAuthorizeServiceType
     private let loginService: LoginServiceType
     private let calculateHashService: CalculateHashServiceType
+    private let obtainSignedDocService: ObtainSignedDocServiceType
     private var baseProviderUrl: String
 
     public init() async {
@@ -36,11 +34,9 @@ public class RQES {
         self.credentialsListService = await ServiceLocator.shared.resolve() ?? CSCCredentialsListService()
         self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CSCCredentialsInfoService()
         self.signHashService = await ServiceLocator.shared.resolve() ?? SignHashService()
-        self.signDocService = await ServiceLocator.shared.resolve() ?? SignDocService()
-        self.credentialsAuthorizeService = await ServiceLocator.shared.resolve() ?? CSCCredentialsAuthorizeService()
-        self.pushedAuthorizeService = await ServiceLocator.shared.resolve() ?? CSCCredentialsPushedAuthorizeService()
         self.loginService = await ServiceLocator.shared.resolve() ?? LoginService()
         self.calculateHashService = await ServiceLocator.shared.resolve() ?? CalculateHashService()
+        self.obtainSignedDocService = await ServiceLocator.shared.resolve() ?? ObtainSignedDocService()
         self.baseProviderUrl = "https://walletcentric.signer.eudiw.dev"
     }
 
@@ -70,23 +66,15 @@ public class RQES {
         return try await signHashService.signHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func signDoc(request: SignDocRequest, accessToken: String) async throws -> SignDocResponse {
-        return try await signDocService.signDoc(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
-    }
-
-    public func authorizeCredentials(request: CSCCredentialsAuthorizeRequest, accessToken: String) async throws -> CSCCredentialsAuthorizeResponse {
-        return try await credentialsAuthorizeService.authorize(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
-    }
-
-    public func pushedAuthorize(request: CSCCredentialsPushedAuthorizeRequest, accessToken: String) async throws -> CSCCredentialsPushedAuthorizeResponse {
-        return try await pushedAuthorizeService.pushedAuthorize(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
-    }
-
     public func login(request: LoginRequest) async throws -> LoginResponse {
         return try await loginService.login(request: request, oauth2BaseUrl: self.baseProviderUrl)
     }
 
     public func calculateHash(request: CalculateHashRequest, accessToken: String) async throws -> CalculateHashResponse {
         return try await calculateHashService.calculateHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
+    }
+
+    public func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String) async throws -> ObtainSignedDocResponse {
+        return try await obtainSignedDocService.obtainSignedDoc(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 }

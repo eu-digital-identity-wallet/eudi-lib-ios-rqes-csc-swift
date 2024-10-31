@@ -23,6 +23,7 @@ public struct OAuth2TokenRequest: Codable, Sendable {
     public let code: String
     public let state: String
     public let auth: BasicAuth?
+    public let authorizationDetails: String?
 
     public struct BasicAuth: Codable, Sendable {
         public let username: String
@@ -42,6 +43,7 @@ public struct OAuth2TokenRequest: Codable, Sendable {
         case code
         case state
         case auth
+        case authorizationDetails = "authorization_details"
     }
 
     public init(
@@ -51,7 +53,8 @@ public struct OAuth2TokenRequest: Codable, Sendable {
         codeVerifier: String,
         code: String,
         state: String,
-        auth: BasicAuth? = nil
+        auth: BasicAuth? = nil,
+        authorizationDetails: String? = nil
     ) {
         self.clientId = clientId
         self.redirectUri = redirectUri
@@ -60,6 +63,7 @@ public struct OAuth2TokenRequest: Codable, Sendable {
         self.code = code
         self.state = state
         self.auth = auth
+        self.authorizationDetails = authorizationDetails
     }
     
     public func toFormBody() -> Data {

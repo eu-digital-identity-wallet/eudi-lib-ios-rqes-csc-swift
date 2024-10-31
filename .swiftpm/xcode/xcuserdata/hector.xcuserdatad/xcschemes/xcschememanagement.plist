@@ -27,6 +27,16 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>RQES_LIBRARY</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>RQES_LIBRARYTests</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 	</dict>
 </dict>
 </plist>

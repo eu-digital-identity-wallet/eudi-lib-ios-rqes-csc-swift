@@ -31,13 +31,12 @@ final actor OAuth2AuthorizeClient: NSObject, URLSessionDelegate {
         
         do {
             let (data, response) = try await session.data(for: urlRequest)
-            
+
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw ClientError.invalidResponse
             }
             
             guard let finalURL = httpResponse.url else {
-                print("No URL found in the response.")
                 throw ClientError.invalidResponse
             }
             
@@ -72,7 +71,6 @@ final actor OAuth2AuthorizeClient: NSObject, URLSessionDelegate {
         if let completeUrl = components?.url {
             urlRequest.url = completeUrl
         } else {
-            print("Failed to create complete URL with query items.")
             throw OAuth2AuthorizeError.invalidAuthorizationDetails
         }
         
@@ -81,7 +79,6 @@ final actor OAuth2AuthorizeClient: NSObject, URLSessionDelegate {
     
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        print("Intercepted redirect to \(request.url?.absoluteString ?? "unknown URL")")
 
         completionHandler(nil)
     }

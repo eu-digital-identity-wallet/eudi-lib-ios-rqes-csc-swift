@@ -16,8 +16,8 @@
 import Foundation
 
 struct JSONUtils {
-
-    static func prettyPrintResponseAsJSON<T: Codable>(_ response: T, message:String = "Pretty Printed JSON Response:") {
+    
+    public static func prettyPrintResponseAsJSON<T: Codable>(_ response: T, message:String = "Pretty Printed JSON Response:") {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         do {
@@ -28,6 +28,19 @@ struct JSONUtils {
             }
         } catch {
             print("Failed to encode response to JSON: \(error)")
+        }
+    }
+    
+    public static func stringify<T: Encodable>(_ object: T) -> String? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .withoutEscapingSlashes
+        
+        do {
+            let jsonData = try encoder.encode(object)
+            return String(data: jsonData, encoding: .utf8)
+        } catch {
+            print("Error encoding object to JSON: \(error)")
+            return nil
         }
     }
 }
