@@ -15,17 +15,30 @@
  */
 import Foundation
 
-struct DocumentDigest: Codable, Sendable {
-    let label: String
-    let hash: String
+public struct DocumentDigest: Codable, Sendable {
+    public let label: String
+    public let hash: String
+  
+    public init(label: String, hash: String) {
+        self.label = label
+        self.hash = hash
+    }
 }
 
-struct AuthorizationDetailsItem: Codable, Sendable {
-    let documentDigests: [DocumentDigest]
-    let credentialID: String
-    let hashAlgorithmOID: String
-    let locations: [String]
-    let type: String
+public struct AuthorizationDetailsItem: Codable, Sendable {
+    public let documentDigests: [DocumentDigest]
+    public let credentialID: String
+    public let hashAlgorithmOID: String
+    public let locations: [String]
+    public let type: String
+  
+    public init(documentDigests: [DocumentDigest], credentialID: String, hashAlgorithmOID: String, locations: [String], type: String) {
+        self.documentDigests = documentDigests
+        self.credentialID = credentialID
+        self.hashAlgorithmOID = hashAlgorithmOID
+        self.locations = locations
+        self.type = type
+    }
 }
 
-typealias AuthorizationDetails = [AuthorizationDetailsItem]
+public typealias AuthorizationDetails = [AuthorizationDetailsItem]
