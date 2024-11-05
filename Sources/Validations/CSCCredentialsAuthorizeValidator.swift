@@ -40,7 +40,7 @@ struct CSCCredentialsAuthorizeValidator: ValidatorProtocol {
             throw CSCCredentialsAuthorizeError.missingHashes
         }
 
-        guard let hashAlgorithmOID = input.hashAlgorithmOID, !hashAlgorithmOID.isEmpty else {
+        guard let hashAlgorithmOID = input.hashAlgorithmOID, !hashAlgorithmOID.rawValue.isEmpty else {
             throw CSCCredentialsAuthorizeError.missingHashAlgorithmOID
         }
 

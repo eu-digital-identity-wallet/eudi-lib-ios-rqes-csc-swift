@@ -37,7 +37,7 @@ struct CalculateHashValidator {
             throw CalculateHashError.missingCertificateChain
         }
 
-        guard !request.hashAlgorithmOID.isEmpty else {
+        guard !request.hashAlgorithmOID.rawValue.isEmpty else {
             throw CalculateHashError.missingHashAlgorithmID
         }
     }

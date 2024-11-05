@@ -17,7 +17,7 @@ import Foundation
 
 public struct CSCCredentialsInfoResponse: Codable, Sendable {
     public let description: String?
-    public let signatureQualifier: String?
+    public let signatureQualifier: SignatureQualifier?
     public let key: KeyInfo
     public let cert: CertificateInfo?
     public let auth: AuthInfo?
@@ -58,7 +58,7 @@ public struct CSCCredentialsInfoResponse: Codable, Sendable {
 
     public init(
         description: String? = nil,
-        signatureQualifier: String? = nil,
+        signatureQualifier: SignatureQualifier? = nil,
         key: KeyInfo,
         cert: CertificateInfo? = nil,
         auth: AuthInfo? = nil,

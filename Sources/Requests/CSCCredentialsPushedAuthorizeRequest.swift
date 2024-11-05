@@ -20,7 +20,7 @@ public struct CSCCredentialsPushedAuthorizeRequest: Codable, Sendable {
     public let clientId: String
     public let responseType: String
     public let redirectUri: String
-    public let scope: String
+    public let scope: Scope
     public let codeChallenge: String
     public let codeChallengeMethod: String
     public let authorizationDetails: String?
@@ -41,7 +41,7 @@ public struct CSCCredentialsPushedAuthorizeRequest: Codable, Sendable {
         clientId: String,
         responseType: String = "code",
         redirectUri: String,
-        scope: String = "service",
+        scope: Scope = Scope.SERVICE,
         codeChallenge: String,
         codeChallengeMethod: String = "S256",
         authorizationDetails: String? = nil,

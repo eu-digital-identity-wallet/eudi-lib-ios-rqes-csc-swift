@@ -43,7 +43,7 @@ struct OAuth2AuthorizeValidator: ValidatorProtocol  {
     }
 
     private static func validateConditionalFields(for request: OAuth2AuthorizeRequest) throws {
-        if request.scope == "credential" {
+        if request.scope == Scope.CREDENTIAL {
             guard let credentialID = request.credentialID, !credentialID.isEmpty else {
                 throw OAuth2AuthorizeError.missingCredentialID
             }

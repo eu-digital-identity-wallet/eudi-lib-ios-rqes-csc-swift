@@ -28,11 +28,11 @@ public struct DocumentDigest: Codable, Sendable {
 public struct AuthorizationDetailsItem: Codable, Sendable {
     public let documentDigests: [DocumentDigest]
     public let credentialID: String
-    public let hashAlgorithmOID: String
+    public let hashAlgorithmOID: HashAlgorithmOID
     public let locations: [String]
     public let type: String
   
-    public init(documentDigests: [DocumentDigest], credentialID: String, hashAlgorithmOID: String, locations: [String], type: String) {
+    public init(documentDigests: [DocumentDigest], credentialID: String, hashAlgorithmOID: HashAlgorithmOID, locations: [String], type: String) {
         self.documentDigests = documentDigests
         self.credentialID = credentialID
         self.hashAlgorithmOID = hashAlgorithmOID

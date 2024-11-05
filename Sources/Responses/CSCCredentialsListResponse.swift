@@ -23,7 +23,7 @@ public struct CSCCredentialsListResponse: Codable, Sendable {
     public struct CredentialInfo: Codable, Sendable {
         public let credentialID: String
         public let description: String?
-        public let signatureQualifier: String?
+        public let signatureQualifier: SignatureQualifier?
         public let key: KeyInfo
         public let cert: CertInfo
         public let auth: AuthInfo?

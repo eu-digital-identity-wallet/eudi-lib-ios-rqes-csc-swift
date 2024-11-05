@@ -20,8 +20,8 @@ public struct SignHashRequest: Codable, Sendable {
     public let credentialID: String
     public let SAD: String?
     public let hashes: [String]
-    public let hashAlgorithmOID: String
-    public let signAlgo: String
+    public let hashAlgorithmOID: HashAlgorithmOID
+    public let signAlgo: SigningAlgorithmOID
 
     public let signAlgoParams: String?
     public let operationMode: String?
@@ -46,8 +46,8 @@ public struct SignHashRequest: Codable, Sendable {
         credentialID: String,
         SAD: String? = nil,
         hashes: [String],
-        hashAlgorithmOID: String,
-        signAlgo: String,
+        hashAlgorithmOID: HashAlgorithmOID,
+        signAlgo: SigningAlgorithmOID,
         signAlgoParams: String? = nil,
         operationMode: String? = nil,
         validityPeriod: Int? = nil,

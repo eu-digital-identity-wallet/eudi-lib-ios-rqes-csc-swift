@@ -39,11 +39,5 @@ struct SignDocValidator: ValidatorProtocol  {
             }
         }
 
-        if let returnValidationInfo = input.returnValidationInfo, returnValidationInfo {
-            guard let document = input.documents?.first else { return }
-            if document.signatureFormat != "P" {
-                throw SignDocError.invalidReturnValidationInfo
-            }
-        }
     }
 }

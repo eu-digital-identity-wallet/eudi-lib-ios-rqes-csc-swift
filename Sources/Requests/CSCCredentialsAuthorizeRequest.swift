@@ -20,7 +20,7 @@ public struct CSCCredentialsAuthorizeRequest: Codable, Sendable {
     public let credentialID: String
     public let numSignatures: Int
     public let hashes: [String]?
-    public let hashAlgorithmOID: String?
+    public let hashAlgorithmOID: HashAlgorithmOID?
     public let authData: [AuthData]?
 
     public let description: String?
@@ -40,7 +40,7 @@ public struct CSCCredentialsAuthorizeRequest: Codable, Sendable {
         credentialID: String,
         numSignatures: Int,
         hashes: [String]? = nil,
-        hashAlgorithmOID: String? = nil,
+        hashAlgorithmOID: HashAlgorithmOID? = nil,
         authData: [AuthData]? = nil,
         description: String? = nil,
         clientData: String? = nil

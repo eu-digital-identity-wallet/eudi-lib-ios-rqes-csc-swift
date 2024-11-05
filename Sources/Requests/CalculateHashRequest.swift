@@ -19,7 +19,7 @@ public struct CalculateHashRequest: Codable, Sendable {
     public let documents: [Document]
     public let endEntityCertificate: String
     public let certificateChain: [String]
-    public let hashAlgorithmOID: String
+    public let hashAlgorithmOID: HashAlgorithmOID
     
     enum CodingKeys: String, CodingKey {
         case documents
@@ -30,9 +30,9 @@ public struct CalculateHashRequest: Codable, Sendable {
     
     public struct Document: Codable, Sendable {
         public let document: String
-        public let signatureFormat: String
-        public let conformanceLevel: String
-        public let signedEnvelopeProperty: String
+        public let signatureFormat: SignatureFormat
+        public let conformanceLevel: ConformanceLevel
+        public let signedEnvelopeProperty: SignedEnvelopeProperty
         public let container: String
 
         enum CodingKeys: String, CodingKey {
@@ -45,9 +45,9 @@ public struct CalculateHashRequest: Codable, Sendable {
         
         public init(
             document: String,
-            signatureFormat: String,
-            conformanceLevel: String,
-            signedEnvelopeProperty: String,
+            signatureFormat: SignatureFormat,
+            conformanceLevel: ConformanceLevel,
+            signedEnvelopeProperty: SignedEnvelopeProperty,
             container: String
         ) {
             self.document = document
@@ -62,7 +62,7 @@ public struct CalculateHashRequest: Codable, Sendable {
         documents: [Document],
         endEntityCertificate: String,
         certificateChain: [String],
-        hashAlgorithmOID: String
+        hashAlgorithmOID: HashAlgorithmOID
     ) {
         self.documents = documents
         self.endEntityCertificate = endEntityCertificate

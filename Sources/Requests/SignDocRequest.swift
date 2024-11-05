@@ -18,7 +18,7 @@ import Foundation
 public struct SignDocRequest: Codable, Sendable {
 
     public let credentialID: String?
-    public let signatureQualifier: String?
+    public let signatureQualifier: SignatureQualifier?
     public let SAD: String
     
     public let documents: [Document]?
@@ -43,7 +43,7 @@ public struct SignDocRequest: Codable, Sendable {
 
      init(
         credentialID: String? = nil,
-        signatureQualifier: String? = nil,
+        signatureQualifier: SignatureQualifier? = nil,
         SAD: String,
         documents: [Document]? = nil,
         operationMode: String? = nil,
@@ -68,11 +68,11 @@ public struct SignDocRequest: Codable, Sendable {
 
 public struct Document: Codable, Sendable {
     public let document: String
-    public let signatureFormat: String
-    public let conformanceLevel: String?
-    public let signAlgo: String
+    public let signatureFormat: SignatureFormat
+    public let conformanceLevel: ConformanceLevel?
+    public let signAlgo: SigningAlgorithmOID
     public let signAlgoParams: String?
-    public let signedEnvelopeProperty: String?
+    public let signedEnvelopeProperty: SignedEnvelopeProperty?
 
     enum CodingKeys: String, CodingKey {
         case document = "document"
@@ -83,7 +83,7 @@ public struct Document: Codable, Sendable {
         case signedEnvelopeProperty = "signed_envelope_property"
     }
 
-    public init(document: String, signatureFormat: String, conformanceLevel: String? = nil, signAlgo: String, signAlgoParams: String? = nil, signedEnvelopeProperty: String? = nil) {
+    public init(document: String, signatureFormat: SignatureFormat, conformanceLevel: ConformanceLevel? = nil, signAlgo: SigningAlgorithmOID, signAlgoParams: String? = nil, signedEnvelopeProperty: SignedEnvelopeProperty? = nil) {
         self.document = document
         self.signatureFormat = signatureFormat
         self.conformanceLevel = conformanceLevel

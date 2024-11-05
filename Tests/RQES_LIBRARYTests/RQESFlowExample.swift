@@ -52,7 +52,7 @@ final class RQESFlowExample: XCTestCase {
                 responseType: "code",
                 clientId: "wallet-client",
                 redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
-                scope: "service",
+                scope: Scope.SERVICE, // predefined value or a custom string like "service",
                 codeChallenge: "V4n5D1_bu7BPMXWsTulFVkC4ASFmeS7lHXSqIf-vUwI",
                 codeChallengeMethod: "S256",
                 state: "erv8utb5uie",
@@ -116,17 +116,17 @@ final class RQESFlowExample: XCTestCase {
                 documents: [
                     CalculateHashRequest.Document(
                         document: pdfDocument!,
-                        signatureFormat: "P",
-                        conformanceLevel: "Ades-B-B",
-                        signedEnvelopeProperty: "ENVELOPED",
+                        signatureFormat: SignatureFormat.P, //predefined value or custom string like "P"
+                        conformanceLevel: ConformanceLevel.ADES_B_B, //predefined value or custom string like "Ades-B-B",
+                        signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,  //predefined value or custom string like "ENVELOPED",
                         container: "No"
                     )
                 ],
                 endEntityCertificate: (credentialInfoResponse.cert?.certificates?[0])!,
                 certificateChain: [(credentialInfoResponse.cert?.certificates?[1])!],
-                hashAlgorithmOID: "2.16.840.1.101.3.4.2.1"
+                hashAlgorithmOID: HashAlgorithmOID.SHA256 //predefined value or custom string like "2.16.840.1.101.3.4.2.1"
             )
-            
+
             let calculateHashResponse = try await rqes.calculateHash(request: calculateHashRequest, accessToken: tokenResponse.accessToken)
             JSONUtils.prettyPrintResponseAsJSON(calculateHashResponse, message: "Calculate Hash Response:")
 
@@ -140,7 +140,7 @@ final class RQESFlowExample: XCTestCase {
                         )
                     ],
                     credentialID: credentialListResponse.credentialIDs[0],
-                    hashAlgorithmOID: "2.16.840.1.101.3.4.2.1",
+                    hashAlgorithmOID: HashAlgorithmOID.SHA256, //predefined value or custom string like "2.16.840.1.101.3.4.2.1"
                     locations: [],
                     type: "credential"
                 )
@@ -152,7 +152,7 @@ final class RQESFlowExample: XCTestCase {
                 responseType: "code",
                 clientId: "wallet-client",
                 redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
-                scope: "credential",
+                scope: Scope.CREDENTIAL, // predefined value or a custom string like "credential",
                 codeChallenge: "V4n5D1_bu7BPMXWsTulFVkC4ASFmeS7lHXSqIf-vUwI",
                 codeChallengeMethod: "S256",
                 state: "erv8utb5uie",
@@ -192,8 +192,8 @@ final class RQESFlowExample: XCTestCase {
             let signHashRequest =  SignHashRequest(
                 credentialID: credentialListResponse.credentialIDs[0],
                 hashes: [calculateHashResponse.hashes[0]],
-                hashAlgorithmOID: "2.16.840.1.101.3.4.2.1",
-                signAlgo: "1.2.840.113549.1.1.1",
+                hashAlgorithmOID: HashAlgorithmOID.SHA256, // predefined value or custom string like "2.16.840.1.101.3.4.2.1"
+                signAlgo: SigningAlgorithmOID.RSA, //predefined value or custom string like "1.2.840.113549.1.1.1",
                 operationMode: "S"
             )
             
@@ -205,15 +205,15 @@ final class RQESFlowExample: XCTestCase {
                 documents: [
                     ObtainSignedDocRequest.Document(
                         document: pdfDocument!,
-                        signatureFormat: "P",
-                        conformanceLevel: "Ades-B-B",
-                        signedEnvelopeProperty: "ENVELOPED",
+                        signatureFormat: SignatureFormat.P, //predefined value or custom string like "P"
+                        conformanceLevel: ConformanceLevel.ADES_B_B, //predefined value or custom string like "Ades-B-B",
+                        signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,  //predefined value or custom string like "ENVELOPED",
                         container: "No"
                     )
                 ],
                 endEntityCertificate: credentialInfoResponse.cert?.certificates?.first ?? "",
                 certificateChain: credentialInfoResponse.cert?.certificates?.dropFirst().map { $0 } ?? [],
-                hashAlgorithmOID: "2.16.840.1.101.3.4.2.1",
+                hashAlgorithmOID: HashAlgorithmOID.SHA256, //predefined value or custom string like "2.16.840.1.101.3.4.2.1"
                 date: calculateHashResponse.signatureDate,
                 signatures: signHashResponse.signatures ?? []
             )

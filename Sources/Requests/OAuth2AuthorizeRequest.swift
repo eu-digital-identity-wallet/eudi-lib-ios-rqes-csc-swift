@@ -19,15 +19,15 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
     public let responseType: String
     public let clientId: String
     public let redirectUri: String
-    public let scope: String
+    public let scope: Scope
     public let codeChallenge: String
     public let codeChallengeMethod: String
     public let state: String?
     public let credentialID: String?
-    public let signatureQualifier: String?
+    public let signatureQualifier: SignatureQualifier?
     public let numSignatures: Int?
     public let hashes: String?
-    public let hashAlgorithmOID: String?
+    public let hashAlgorithmOID: HashAlgorithmOID?
     public let authorizationDetails: String?
     public let requestUri: String?
     public let cookie: String
@@ -54,15 +54,15 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
         responseType: String,
         clientId: String,
         redirectUri: String,
-        scope: String,
+        scope: Scope,
         codeChallenge: String,
         codeChallengeMethod: String,
         state: String? = nil,
         credentialID: String? = nil,
-        signatureQualifier: String? = nil,
+        signatureQualifier: SignatureQualifier? = nil,
         numSignatures: Int? = nil,
         hashes: String? = nil,
-        hashAlgorithmOID: String? = nil,
+        hashAlgorithmOID: HashAlgorithmOID? = nil,
         authorizationDetails: String? = nil,
         requestUri: String? = nil,
         cookie:String
@@ -89,7 +89,7 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
             URLQueryItem(name: "response_type", value: responseType),
             URLQueryItem(name: "client_id", value: clientId),
             URLQueryItem(name: "redirect_uri", value: redirectUri),
-            URLQueryItem(name: "scope", value: scope),
+            URLQueryItem(name: "scope", value: scope.rawValue),
             URLQueryItem(name: "code_challenge", value: codeChallenge),
             URLQueryItem(name: "code_challenge_method", value: codeChallengeMethod),
             URLQueryItem(name: "cookie", value: cookie)
@@ -97,10 +97,10 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
         
         if let state = state { items.append(URLQueryItem(name: "state", value: state)) }
         if let credentialID = credentialID { items.append(URLQueryItem(name: "credential_id", value: credentialID)) }
-        if let signatureQualifier = signatureQualifier { items.append(URLQueryItem(name: "signature_qualifier", value: signatureQualifier)) }
+        if let signatureQualifier = signatureQualifier { items.append(URLQueryItem(name: "signature_qualifier", value: signatureQualifier.rawValue)) }
         if let numSignatures = numSignatures { items.append(URLQueryItem(name: "num_signatures", value: "\(numSignatures)")) }
         if let hashes = hashes { items.append(URLQueryItem(name: "hashes", value: hashes)) }
-        if let hashAlgorithmOID = hashAlgorithmOID { items.append(URLQueryItem(name: "hash_algorithm_oid", value: hashAlgorithmOID)) }
+        if let hashAlgorithmOID = hashAlgorithmOID { items.append(URLQueryItem(name: "hash_algorithm_oid", value: hashAlgorithmOID.rawValue)) }
         if let authorizationDetails = authorizationDetails { items.append(URLQueryItem(name: "authorization_details", value: authorizationDetails)) }
         if let requestUri = requestUri { items.append(URLQueryItem(name: "request_uri", value: requestUri)) }
         

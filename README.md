@@ -10,7 +10,7 @@ the [EUDI Wallet Reference Implementation project description](https://github.co
 * [Overview](#overview)
 * [Disclaimer](#disclaimer)
 * [Use cases supported](#use-cases-supported)
-   1. [Getting Started (UPDATED 01/11/2024)](#getting-started-updated-01112024)
+   1. [Getting Started (UPDATED 05/11/2024)](#getting-started-updated-05112024)
 * [Configuration options](#configuration-options)
 * [Other features](#other-features)
 * [Features not supported](#features-not-supported)
@@ -218,7 +218,7 @@ The released software is an initial development release version:
 
 # Use cases supported
 
-## Getting Started (UPDATED 01/11/2024)
+## Getting Started (UPDATED 05/11/2024)
 
 To begin using this library, you'll need to initialize the main service object RQES(), which allows access to all the functionality required for interacting with the remote signing services. This service should be instantiated at the start of your application lifecycle and will store essential configuration details like OAuth2 provider links and other metadata retrieved from the info service.
 
@@ -252,7 +252,7 @@ let authorizeRequest = OAuth2AuthorizeRequest(
     responseType: "code",
     clientId: "wallet-client",
     redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
-    scope: "service",
+    scope: Scope.SERVICE, // predefined value or a custom string like "service",
     codeChallenge: "V4n5D1_bu7BPMXWsTulFVkC4ASFmeS7lHXSqIf-vUwI",
     codeChallengeMethod: "S256",
     state: "erv8utb5uie",
@@ -316,15 +316,15 @@ let calculateHashRequest = CalculateHashRequest(
     documents: [
         CalculateHashRequest.Document(
             document: pdfDocument!,
-            signatureFormat: "P",
-            conformanceLevel: "Ades-B-B",
-            signedEnvelopeProperty: "ENVELOPED",
+            signatureFormat: SignatureFormat.P, //predefined value or custom string like "P"
+            conformanceLevel: ConformanceLevel.ADES_B_B, //predefined value or custom string like "Ades-B-B",
+            signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,  //predefined value or custom string like "ENVELOPED",
             container: "No"
         )
     ],
     endEntityCertificate: (credentialInfoResponse.cert?.certificates?[0])!,
     certificateChain: [(credentialInfoResponse.cert?.certificates?[1])!],
-    hashAlgorithmOID: "2.16.840.1.101.3.4.2.1"
+    hashAlgorithmOID: HashAlgorithmOID.SHA256 //predefined value or custom string like "2.16.840.1.101.3.4.2.1"
 )
 
 let calculateHashResponse = try await rqes.calculateHash(request: calculateHashRequest, accessToken: tokenResponse.accessToken)
@@ -340,7 +340,7 @@ let authorizationDetails = AuthorizationDetails([
             )
         ],
         credentialID: credentialListResponse.credentialIDs[0],
-        hashAlgorithmOID: "2.16.840.1.101.3.4.2.1",
+        hashAlgorithmOID: HashAlgorithmOID.SHA256, //predefined value or custom string like "2.16.840.1.101.3.4.2.1"
         locations: [],
         type: "credential"
     )
@@ -352,7 +352,7 @@ let authorizeCredentialRequest = OAuth2AuthorizeRequest(
     responseType: "code",
     clientId: "wallet-client",
     redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
-    scope: "credential",
+    scope: Scope.CREDENTIAL, // predefined value or a custom string like "credential",
     codeChallenge: "V4n5D1_bu7BPMXWsTulFVkC4ASFmeS7lHXSqIf-vUwI",
     codeChallengeMethod: "S256",
     state: "erv8utb5uie",
@@ -392,8 +392,8 @@ JSONUtils.prettyPrintResponseAsJSON(tokenCredentialResponse, message: "Token Cre
 let signHashRequest =  SignHashRequest(
     credentialID: credentialListResponse.credentialIDs[0],
     hashes: [calculateHashResponse.hashes[0]],
-    hashAlgorithmOID: "2.16.840.1.101.3.4.2.1",
-    signAlgo: "1.2.840.113549.1.1.1",
+    hashAlgorithmOID: HashAlgorithmOID.SHA256, // predefined value or custom string like "2.16.840.1.101.3.4.2.1"
+    signAlgo: SigningAlgorithmOID.RSA, //predefined value or custom string like "1.2.840.113549.1.1.1",
     operationMode: "S"
 )
 
@@ -405,15 +405,15 @@ let obtainSignedDocRequest = ObtainSignedDocRequest(
     documents: [
         ObtainSignedDocRequest.Document(
             document: pdfDocument!,
-            signatureFormat: "P",
-            conformanceLevel: "Ades-B-B",
-            signedEnvelopeProperty: "ENVELOPED",
+            signatureFormat: SignatureFormat.P, //predefined value or custom string like "P"
+            conformanceLevel: ConformanceLevel.ADES_B_B, //predefined value or custom string like "Ades-B-B",
+            signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,  //predefined value or custom string like "ENVELOPED",
             container: "No"
         )
     ],
     endEntityCertificate: credentialInfoResponse.cert?.certificates?.first ?? "",
     certificateChain: credentialInfoResponse.cert?.certificates?.dropFirst().map { $0 } ?? [],
-    hashAlgorithmOID: "2.16.840.1.101.3.4.2.1",
+    hashAlgorithmOID: HashAlgorithmOID.SHA256, //predefined value or custom string like "2.16.840.1.101.3.4.2.1"
     date: calculateHashResponse.signatureDate,
     signatures: signHashResponse.signatures ?? []
 )
@@ -426,6 +426,7 @@ let base64String = obtainSignedDocResponse.documentWithSignature[0]
 
 // Save the decoded data to the user's documents folder
 FileUtils.decodeAndSaveBase64Document(base64String: base64String, fileNameWithExtension: "signed.pdf")
+            
 
 
 ```
