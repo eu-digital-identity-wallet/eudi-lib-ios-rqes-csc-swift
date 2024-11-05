@@ -37,6 +37,20 @@ public struct ObtainSignedDocRequest: Codable, Sendable {
             case signedEnvelopeProperty = "signed_envelope_property"
             case container
         }
+      
+        public init(
+          document: String,
+          signatureFormat: String,
+          conformanceLevel: String,
+          signedEnvelopeProperty: String,
+          container: String
+        ) {
+          self.document = document
+          self.signatureFormat = signatureFormat
+          self.conformanceLevel = conformanceLevel
+          self.signedEnvelopeProperty = signedEnvelopeProperty
+          self.container = container
+        }
     }
 
     public init(
