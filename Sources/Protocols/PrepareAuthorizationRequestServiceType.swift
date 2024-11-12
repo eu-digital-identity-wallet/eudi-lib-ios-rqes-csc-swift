@@ -15,6 +15,7 @@
  */
 import Foundation
 
-public protocol OAuth2TokenServiceType {
-    func getToken(request: OAuth2TokenDto, cscClientConfig: CSCClientConfig) async throws -> OAuth2TokenResponse
+public protocol PrepareAuthorizationRequestServiceType {
+    func prepareServiceRequest(walletState: String, cscClientConfig: CSCClientConfig) async throws -> AuthorizationPrepareResponse
+    func prepareCredentialRequest(walletState: String, cscClientConfig: CSCClientConfig, authorizationDetails: String) async throws -> AuthorizationPrepareResponse
 }

@@ -25,9 +25,11 @@ public class RQES {
     private let loginService: LoginServiceType
     private let calculateHashService: CalculateHashServiceType
     private let obtainSignedDocService: ObtainSignedDocServiceType
+    private let prepareAuthorizationRequestService: PrepareAuthorizationRequestServiceType 
     private var baseProviderUrl: String
-
-    public init() async {
+    private let cscClientConfig: CSCClientConfig
+    
+    public init(cscClientConfig: CSCClientConfig ) async {
         self.infoService = await ServiceLocator.shared.resolve() ?? InfoService()
         self.oauth2AuthorizeService = await ServiceLocator.shared.resolve() ?? OAuth2AuthorizeService()
         self.oauth2TokenService = await ServiceLocator.shared.resolve() ?? OAuth2TokenService()
@@ -37,7 +39,9 @@ public class RQES {
         self.loginService = await ServiceLocator.shared.resolve() ?? LoginService()
         self.calculateHashService = await ServiceLocator.shared.resolve() ?? CalculateHashService()
         self.obtainSignedDocService = await ServiceLocator.shared.resolve() ?? ObtainSignedDocService()
-        self.baseProviderUrl = "https://walletcentric.signer.eudiw.dev"
+        self.prepareAuthorizationRequestService = await ServiceLocator.shared.resolve() ?? PrepareAuthorizationRequestService()
+        self.baseProviderUrl = cscClientConfig.scaBaseURL
+        self.cscClientConfig = cscClientConfig
     }
 
     public func getInfo(request: InfoServiceRequest? = nil) async throws -> InfoServiceResponse {
@@ -50,8 +54,8 @@ public class RQES {
         return try await oauth2AuthorizeService.authorize(request: request, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func getOAuth2Token(request: OAuth2TokenRequest) async throws -> OAuth2TokenResponse {
-        return try await oauth2TokenService.getToken(request: request, oauth2BaseUrl: self.baseProviderUrl)
+    public func getOAuth2Token(request: OAuth2TokenDto) async throws -> OAuth2TokenResponse {
+        return try await oauth2TokenService.getToken(request: request, cscClientConfig: self.cscClientConfig)
     }
 
     public func getCredentialsList(request: CSCCredentialsListRequest, accessToken: String) async throws -> CSCCredentialsListResponse {
@@ -76,5 +80,13 @@ public class RQES {
 
     public func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String) async throws -> ObtainSignedDocResponse {
         return try await obtainSignedDocService.obtainSignedDoc(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
+    }
+    
+    public func prepareServiceAuthorizationRequest(walletState: String) async throws -> AuthorizationPrepareResponse {
+        return try await prepareAuthorizationRequestService.prepareServiceRequest(walletState: walletState, cscClientConfig: self.cscClientConfig )
+    }
+    
+    public func prepareCredentialAuthorizationRequest(walletState: String, authorizationDetails: String) async throws -> AuthorizationPrepareResponse {
+        return try await prepareAuthorizationRequestService.prepareCredentialRequest(walletState: walletState, cscClientConfig: self.cscClientConfig, authorizationDetails: authorizationDetails )
     }
 }

@@ -15,6 +15,19 @@
  */
 import Foundation
 
-public protocol OAuth2TokenServiceType {
-    func getToken(request: OAuth2TokenDto, cscClientConfig: CSCClientConfig) async throws -> OAuth2TokenResponse
+public struct OAuth2TokenDto: Codable, Sendable {
+    public let code: String
+    public let state: String
+    public let authorizationDetails: String?
+    
+    public init(
+        code: String,
+        state: String,
+        authorizationDetails: String? = nil
+    ) {
+        self.code = code
+        self.state = state
+        self.authorizationDetails = authorizationDetails
+    }
+
 }

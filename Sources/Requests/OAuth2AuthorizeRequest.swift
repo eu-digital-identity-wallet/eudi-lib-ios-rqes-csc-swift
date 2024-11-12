@@ -30,7 +30,6 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
     public let hashAlgorithmOID: HashAlgorithmOID?
     public let authorizationDetails: String?
     public let requestUri: String?
-    public let cookie: String
 
     enum CodingKeys: String, CodingKey {
         case responseType = "response_type"
@@ -47,7 +46,6 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
         case hashAlgorithmOID = "hash_algorithm_oid"
         case authorizationDetails = "authorization_details"
         case requestUri = "request_uri"
-        case cookie
     }
 
     public init(
@@ -64,8 +62,7 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
         hashes: String? = nil,
         hashAlgorithmOID: HashAlgorithmOID? = nil,
         authorizationDetails: String? = nil,
-        requestUri: String? = nil,
-        cookie:String
+        requestUri: String? = nil
     ) {
         self.responseType = responseType
         self.clientId = clientId
@@ -81,7 +78,6 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
         self.hashAlgorithmOID = hashAlgorithmOID
         self.authorizationDetails = authorizationDetails
         self.requestUri = requestUri
-        self.cookie = cookie
     }
 
     public func toQueryItems() -> [URLQueryItem] {
@@ -91,8 +87,7 @@ public struct OAuth2AuthorizeRequest: Codable, Sendable {
             URLQueryItem(name: "redirect_uri", value: redirectUri),
             URLQueryItem(name: "scope", value: scope.rawValue),
             URLQueryItem(name: "code_challenge", value: codeChallenge),
-            URLQueryItem(name: "code_challenge_method", value: codeChallengeMethod),
-            URLQueryItem(name: "cookie", value: cookie)
+            URLQueryItem(name: "code_challenge_method", value: codeChallengeMethod)
         ]
         
         if let state = state { items.append(URLQueryItem(name: "state", value: state)) }

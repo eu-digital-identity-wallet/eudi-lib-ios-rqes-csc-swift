@@ -57,12 +57,7 @@ final actor OAuth2AuthorizeClient: NSObject, URLSessionDelegate {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "GET"
         urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        
-        if !request.cookie.isEmpty {
-            urlRequest.setValue(request.cookie, forHTTPHeaderField: "Cookie")
-        } else {
-            print("No cookie to set in headers.")
-        }
+
         
         let queryItems = request.toQueryItems()
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)

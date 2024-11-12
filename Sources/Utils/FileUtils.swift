@@ -66,8 +66,7 @@ public struct FileUtils {
     }
     
     public static func decodeAndSaveBase64Document(base64String: String, fileNameWithExtension: String) -> URL? {
-        // Decode the Base64 string to Data
-        guard let decodedData = decodeBase64ToData(base64String: base64String) else {
+           guard let decodedData = decodeBase64ToData(base64String: base64String) else {
             print("Error: Failed to decode Base64 string.")
             return nil
         }

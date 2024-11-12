@@ -15,7 +15,7 @@
  */
 import Foundation
 
-struct JSONUtils {
+public struct JSONUtils {
     
     public static func prettyPrintResponseAsJSON<T: Codable>(_ response: T, message:String = "Pretty Printed JSON Response:") {
         let encoder = JSONEncoder()

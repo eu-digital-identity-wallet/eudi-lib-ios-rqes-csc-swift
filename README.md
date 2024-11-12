@@ -10,7 +10,7 @@ the [EUDI Wallet Reference Implementation project description](https://github.co
 * [Overview](#overview)
 * [Disclaimer](#disclaimer)
 * [Use cases supported](#use-cases-supported)
-   1. [Getting Started (UPDATED 05/11/2024)](#getting-started-updated-05112024)
+   1. [Getting Started (UPDATED 12/11/2024)](#getting-started-updated-12112024)
 * [Configuration options](#configuration-options)
 * [Other features](#other-features)
 * [Features not supported](#features-not-supported)
@@ -218,7 +218,7 @@ The released software is an initial development release version:
 
 # Use cases supported
 
-## Getting Started (UPDATED 05/11/2024)
+## Getting Started (UPDATED 12/11/2024)
 
 To begin using this library, you'll need to initialize the main service object RQES(), which allows access to all the functionality required for interacting with the remote signing services. This service should be instantiated at the start of your application lifecycle and will store essential configuration details like OAuth2 provider links and other metadata retrieved from the info service.
 
@@ -230,63 +230,50 @@ To observe the full functionality of the RQES library, including calculating doc
 #### EXAMPLE
 
 ``` swift
+import Foundation
+import RQES_LIBRARY
+
+
+class RQESHandler {
+
+public static func start() async throws {
+
 // STEP 1: Initialize an instance of RQES to access library services
-// This initializes the RQES object for invoking various service methods
-let rqes = await RQES()
+let cscClientConfig = CSCClientConfig(
+    OAuth2Client: CSCClientConfig.OAuth2Client(
+        clientId: "wallet-client",
+        clientSecret: "somesecret2"
+    ),
+    authFlowRedirectionURI: "https://oauthdebugger.com/debug",
+    scaBaseURL: "https://walletcentric.signer.eudiw.dev"
+)
+let rqes = await RQES(cscClientConfig: cscClientConfig)
 
 // STEP 2: Retrieve service information using the InfoService
-let request = InfoServiceRequest(lang: "en-US")
-let response = try await rqes.getInfo(request: request)
-JSONUtils.prettyPrintResponseAsJSON(response, message: "InfoService Response:")
+let infoRequest = InfoServiceRequest(lang: "en-US")
+let infoResponse = try await rqes.getInfo(request: infoRequest)
+JSONUtils.prettyPrintResponseAsJSON(infoResponse, message: "InfoService Response:")
 
-// STEP 3: Create a login request with test credentials
-let loginRequest = LoginRequest(username: "8PfCAQzTmON+FHDvH4GW/g+JUtg5eVTgtqMKZFdB/+c=;FirstName;TesterUser",
-                                password: "5adUg@35Lk_Wrm3")
 
-// STEP 4: Perform the login operation and capture the response
-let loginResponse = try await rqes.login(request: loginRequest)
-JSONUtils.prettyPrintResponseAsJSON(loginResponse, message: "Login Response:")
+// STEP 3: Generate Wallet State and Prepare Authorization Request
+let walletState = UUID().uuidString
+let response = try await rqes.prepareServiceAuthorizationRequest(walletState: walletState)
 
-// STEP 5: Set up an authorization request using OAuth2AuthorizeRequest with required parameters
-let authorizeRequest = OAuth2AuthorizeRequest(
-    responseType: "code",
-    clientId: "wallet-client",
-    redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
-    scope: Scope.SERVICE, // predefined value or a custom string like "service",
-    codeChallenge: "V4n5D1_bu7BPMXWsTulFVkC4ASFmeS7lHXSqIf-vUwI",
-    codeChallengeMethod: "S256",
-    state: "erv8utb5uie",
-    credentialID: nil,
-    signatureQualifier: nil,
-    numSignatures: nil,
-    hashes: nil,
-    hashAlgorithmOID: nil,
-    authorizationDetails: nil,
-    requestUri: nil,
-    cookie: loginResponse.cookie!
+print("Use the following URL to authenticate: \n\(response.authorizationCodeURL)")
+
+print("Enter the service authorization code:")
+let serviceAuthorizationCode = readLine()!
+
+
+// STEP 4: Request an OAuth2 Token using the authorization code
+let tokenRequest = OAuth2TokenDto(
+    code: serviceAuthorizationCode,
+    state: walletState
 )
-
-let authorizeResponse = try await rqes.getAuthorizeUrl(request: authorizeRequest)
-JSONUtils.prettyPrintResponseAsJSON(authorizeResponse, message: "Authorize Response:")
-
-// STEP 6: Request an OAuth2 Token using the authorization code
-let tokenRequest = OAuth2TokenRequest(
-    clientId: "wallet-client-tester",
-    redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
-    grantType: "authorization_code",
-    codeVerifier: "z34oHaauNSc13ScLRDmbQrJ5bIR9IDzRCWZTRRAPtlV",
-    code: authorizeResponse.code,
-    state:"erv8utb5uie",
-    auth: OAuth2TokenRequest.BasicAuth(
-        username: "wallet-client",
-        password: "somesecret2"
-    )
-)
-
 let tokenResponse = try await rqes.getOAuth2Token(request: tokenRequest)
 JSONUtils.prettyPrintResponseAsJSON(tokenResponse, message: "Token Response:")
 
-// STEP 7: Request the list of credentials using the access token
+// STEP 5: Request the list of credentials using the access token
 let credentialListRequest = CSCCredentialsListRequest(
     credentialInfo: true,
     certificates: "chain",
@@ -296,7 +283,8 @@ let credentialListRequest = CSCCredentialsListRequest(
 let credentialListResponse = try await rqes.getCredentialsList(request: credentialListRequest, accessToken: tokenResponse.accessToken)
 JSONUtils.prettyPrintResponseAsJSON(credentialListResponse, message: "Credential List Response:")
 
-// STEP 8: Request the list of credentials using the access token
+
+// STEP 6: Request the list of credentials using the access token
 let credentialInfoRequest = CSCCredentialsInfoRequest(
     credentialID: credentialListResponse.credentialIDs[0],
     credentialInfo: true,
@@ -311,7 +299,7 @@ JSONUtils.prettyPrintResponseAsJSON(credentialInfoResponse, message: "Credential
 // encodes it in Base64 format, and assigns it to the pdfDocument variable for further processing.
 let pdfDocument = FileUtils.getBase64EncodedDocument(fileNameWithExtension: "sample 1.pdf")
 
-// STEP 9: Request the list of credentials using the access token
+// STEP 7: Prepare and execute a request to calculate the hash for the specified document
 let calculateHashRequest = CalculateHashRequest(
     documents: [
         CalculateHashRequest.Document(
@@ -330,7 +318,8 @@ let calculateHashRequest = CalculateHashRequest(
 let calculateHashResponse = try await rqes.calculateHash(request: calculateHashRequest, accessToken: tokenResponse.accessToken)
 JSONUtils.prettyPrintResponseAsJSON(calculateHashResponse, message: "Calculate Hash Response:")
 
-// STEP 10: Set up an credential authorization request using OAuth2AuthorizeRequest with required parameters
+
+// STEP 8: Set up an credential authorization request using OAuth2AuthorizeRequest with required parameters
 let authorizationDetails = AuthorizationDetails([
     AuthorizationDetailsItem(
         documentDigests: [
@@ -346,49 +335,26 @@ let authorizationDetails = AuthorizationDetails([
     )
 ])
 
-let details = JSONUtils.stringify(authorizationDetails)
+let details = JSONUtils.stringify(authorizationDetails)!
+let credentialResponse = try await rqes.prepareCredentialAuthorizationRequest(walletState: walletState, authorizationDetails: details)
 
-let authorizeCredentialRequest = OAuth2AuthorizeRequest(
-    responseType: "code",
-    clientId: "wallet-client",
-    redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
-    scope: Scope.CREDENTIAL, // predefined value or a custom string like "credential",
-    codeChallenge: "V4n5D1_bu7BPMXWsTulFVkC4ASFmeS7lHXSqIf-vUwI",
-    codeChallengeMethod: "S256",
-    state: "erv8utb5uie",
-    credentialID: credentialListResponse.credentialIDs[0],
-    signatureQualifier: nil,
-    numSignatures: nil,
-    hashes: nil,
-    hashAlgorithmOID: nil,
-    authorizationDetails:details!,
-    requestUri: nil,
-    cookie: loginResponse.cookie!
+print("Use the following URL to authenticate: \n\(credentialResponse.authorizationCodeURL)")
+
+print("Enter the service authorization code:")
+let credentialAuthorizationCode = readLine()!
+
+
+// STEP 9: Request OAuth2 token for credential authorization
+let tokenCredentialRequest = OAuth2TokenDto(
+    code: credentialAuthorizationCode,
+    state: walletState,
+    authorizationDetails: details
 )
-
-let authorizeCredentialResponse = try await rqes.getAuthorizeUrl(request: authorizeCredentialRequest)
-JSONUtils.prettyPrintResponseAsJSON(authorizeCredentialResponse, message: "Authorize Credential Response:")
-
-
-// STEP 11: Request OAuth2 token for credential authorization
-let tokenCredentialRequest = OAuth2TokenRequest(
-    clientId: "wallet-client-tester",
-    redirectUri: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
-    grantType: "authorization_code",
-    codeVerifier: "z34oHaauNSc13ScLRDmbQrJ5bIR9IDzRCWZTRRAPtlV",
-    code: authorizeCredentialResponse.code,
-    state:"erv8utb5uie",
-    auth: OAuth2TokenRequest.BasicAuth(
-        username: "wallet-client",
-        password: "somesecret2"
-    ),
-    authorizationDetails: details!
-)
-
 let tokenCredentialResponse = try await rqes.getOAuth2Token(request: tokenCredentialRequest)
-JSONUtils.prettyPrintResponseAsJSON(tokenCredentialResponse, message: "Token Credential Response:")
+JSONUtils.prettyPrintResponseAsJSON(tokenCredentialResponse, message: "Token Response:")
 
-// STEP 12: Sign the calculated hash with the credential
+
+// STEP 10: Sign the calculated hash with the credential
 let signHashRequest =  SignHashRequest(
     credentialID: credentialListResponse.credentialIDs[0],
     hashes: [calculateHashResponse.hashes[0]],
@@ -400,7 +366,7 @@ let signHashRequest =  SignHashRequest(
 let signHashResponse = try await rqes.signHash(request: signHashRequest, accessToken: tokenCredentialResponse.accessToken)
 JSONUtils.prettyPrintResponseAsJSON(signHashResponse, message: "Sign Hash Response:")
 
-// STEP 13: Obtain the signed document
+// STEP 11: Obtain the signed document
 let obtainSignedDocRequest = ObtainSignedDocRequest(
     documents: [
         ObtainSignedDocRequest.Document(
@@ -426,7 +392,17 @@ let base64String = obtainSignedDocResponse.documentWithSignature[0]
 
 // Save the decoded data to the user's documents folder
 FileUtils.decodeAndSaveBase64Document(base64String: base64String, fileNameWithExtension: "signed.pdf")
-            
+
+
+}
+
+}
+
+do {
+try await RQESHandler.start()
+} catch {
+print("An error occurred: \(error)")
+}
 
 
 ```
