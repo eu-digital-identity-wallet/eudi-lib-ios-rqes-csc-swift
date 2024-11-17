@@ -17,13 +17,13 @@ import Foundation
 
 final actor SignHashClient {
     
-    static func makeRequest(for request: SignHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignHashResponse {
+    static func makeRequest(for request: SignHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<SignHashResponse, ClientError> {
         
         let endpoint = "/csc/v2/signatures/signHash"
         let baseUrl = oauth2BaseUrl + endpoint
 
         guard let url = URL(string: baseUrl) else {
-            throw ClientError.invalidRequestURL
+            return .failure(ClientError.invalidRequestURL)
         }
 
         var urlRequest = URLRequest(url: url)
@@ -31,19 +31,28 @@ final actor SignHashClient {
         urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let jsonData = try JSONEncoder().encode(request)
-
-        urlRequest.httpBody = jsonData
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+        } catch {
+            return .failure(ClientError.encodingFailed)
+        }
         
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw ClientError.invalidResponse
+        guard let httpResponse = response as? HTTPURLResponse else {
+            return .failure(ClientError.invalidResponse)
         }
 
-        let signHashResponse = try JSONDecoder().decode(SignHashResponse.self, from: data)
-        
-        return signHashResponse
+        if httpResponse.statusCode == 200 {
+            do {
+                let signHashResponse = try JSONDecoder().decode(SignHashResponse.self, from: data)
+                return .success(signHashResponse)
+            } catch {
+                return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
+            }
+        } else {
+            return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
+        }
     }
 }
-

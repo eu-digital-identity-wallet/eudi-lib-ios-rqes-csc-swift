@@ -29,7 +29,6 @@ final actor LoginClient {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
 
-        // Add `try` for `toFormData()` which now throws
         let (formData, boundary) = try request.toFormData()
         urlRequest.setValue(
             "multipart/form-data; boundary=\(boundary)",
@@ -43,14 +42,13 @@ final actor LoginClient {
             throw LoginError.invalidResponse
         }
 
-        // Handle `Set-Cookie` header safely
         let cookie = httpResponse.value(forHTTPHeaderField: "Set-Cookie")
 
         do {
             var loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
             loginResponse = LoginResponse(
                 message: loginResponse.message,
-                cookie: cookie // `cookie` can be nil, so this is safe
+                cookie: cookie
             )
             return loginResponse
         } catch {

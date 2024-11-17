@@ -17,12 +17,12 @@ import Foundation
 
 final actor ObtainSignedDocClient {
 
-    static func makeRequest(for request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> ObtainSignedDocResponse {
+    static func makeRequest(for request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<ObtainSignedDocResponse, ClientError> {
         let endpoint = "/signatures/obtain_signed_doc"
         let baseUrl = oauth2BaseUrl + endpoint
 
         guard let url = URL(string: baseUrl) else {
-            throw ClientError.invalidRequestURL
+            return .failure(ClientError.invalidRequestURL)
         }
 
         var urlRequest = URLRequest(url: url)
@@ -30,19 +30,28 @@ final actor ObtainSignedDocClient {
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
-        let jsonData = try JSONEncoder().encode(request)
-        urlRequest.httpBody = jsonData
- 
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
-
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            throw ClientError.invalidResponse
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+        } catch {
+            return .failure(ClientError.encodingFailed)
         }
 
-        do {
-            return try JSONDecoder().decode(ObtainSignedDocResponse.self, from: data)
-        } catch {
-            throw ObtainSignedDocError.decodingFailed
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            return .failure(ClientError.invalidResponse)
+        }
+
+        if (200...299).contains(httpResponse.statusCode) {
+            do {
+                let decodedResponse = try JSONDecoder().decode(ObtainSignedDocResponse.self, from: data)
+                return .success(decodedResponse)
+            } catch {
+                return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
+            }
+        } else {
+            return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
         }
     }
 }

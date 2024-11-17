@@ -19,6 +19,7 @@ final actor CSCCredentialsListService: CSCCredentialsListServiceType {
     
     init() {}
     func getCredentialsList(request: CSCCredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CSCCredentialsListResponse {
-        return try await CSCCredentialsListClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
+        let result = try await CSCCredentialsListClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
+        return try result.get()
     }
 }

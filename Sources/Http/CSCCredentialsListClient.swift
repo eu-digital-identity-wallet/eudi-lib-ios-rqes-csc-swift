@@ -17,13 +17,13 @@ import Foundation
 
 final actor CSCCredentialsListClient {
 
-    static func makeRequest(for request: CSCCredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CSCCredentialsListResponse {
+    static func makeRequest(for request: CSCCredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CSCCredentialsListResponse, ClientError> {
         
         let endpoint = "/csc/v2/credentials/list"
         let baseUrl = oauth2BaseUrl + endpoint
 
         guard let url = URL(string: baseUrl) else {
-            throw ClientError.invalidRequestURL
+            return .failure(ClientError.invalidRequestURL)
         }
 
         var urlRequest = URLRequest(url: url)
@@ -31,19 +31,28 @@ final actor CSCCredentialsListClient {
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
-        let jsonData = try JSONEncoder().encode(request)
-        urlRequest.httpBody = jsonData
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+        } catch {
+            return .failure(ClientError.encodingFailed)
+        }
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            throw ClientError.invalidResponse
+        guard let httpResponse = response as? HTTPURLResponse else {
+            return .failure(ClientError.invalidResponse)
         }
 
-        do {
-            return try JSONDecoder().decode(CSCCredentialsListResponse.self, from: data)
-        } catch {
-            throw CSCCredentialsListError.decodingFailed
+        if (200...299).contains(httpResponse.statusCode) {
+            do {
+                let decodedResponse = try JSONDecoder().decode(CSCCredentialsListResponse.self, from: data)
+                return .success(decodedResponse)
+            } catch {
+                return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
+            }
+        } else {
+            return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
         }
     }
 }

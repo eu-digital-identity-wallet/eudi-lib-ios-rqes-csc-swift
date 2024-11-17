@@ -22,7 +22,7 @@ final actor CalculateHashService: CalculateHashServiceType {
     func calculateHash(request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CalculateHashResponse {
         
         try CalculateHashValidator.validate(request:request)
-
-        return try await CalculateHashClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
+        let result = try await CalculateHashClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
+        return try result.get()
     }
 }

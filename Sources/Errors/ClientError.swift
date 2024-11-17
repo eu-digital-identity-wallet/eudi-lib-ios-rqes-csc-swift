@@ -15,16 +15,26 @@
  */
 import Foundation
 
-public enum ClientError: LocalizedError {
+public enum ClientError: Error, LocalizedError {
     case invalidRequestURL
     case invalidResponse
+    case encodingFailed
+    case clientError(data: Data, statusCode: Int)
     
     public var errorDescription: String? {
         switch self {
         case .invalidRequestURL:
             return "The request URL is invalid."
         case .invalidResponse:
-            return "The server responded with an invalid response."
+            return "The response was invalid."
+        case .encodingFailed:
+            return "The encoding failed."
+        case .clientError(let data, let statusCode):
+            if let jsonString = String(data: data, encoding: .utf8) {
+                return "Server Response (Status Code: \(statusCode)): \(jsonString)"
+            } else {
+                return "Server Response (Status Code: \(statusCode)): Unable to decode error data."
+            }
         }
     }
 }

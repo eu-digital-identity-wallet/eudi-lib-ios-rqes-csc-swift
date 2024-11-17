@@ -16,7 +16,8 @@
 import Foundation
 
 final actor OAuth2TokenClient {
-    static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> OAuth2TokenResponse {
+    
+    static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> Result<OAuth2TokenResponse, ClientError> {
         let endpoint = "/oauth2/token"
         var baseUrl = oauth2BaseUrl + endpoint
 
@@ -46,14 +47,19 @@ final actor OAuth2TokenClient {
         
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw ClientError.invalidResponse
         }
         
-        do {
-            return try JSONDecoder().decode(OAuth2TokenResponse.self, from: data)
-        } catch {
-            throw OAuth2TokenError.decodingFailed
+        if (200...299).contains(httpResponse.statusCode) {
+            do {
+                let tokenResponse = try JSONDecoder().decode(OAuth2TokenResponse.self, from: data)
+                return .success(tokenResponse)
+            } catch {
+                return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
+            }
+        } else {
+            return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
         }
     }
 }

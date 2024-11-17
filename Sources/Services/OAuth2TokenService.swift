@@ -43,6 +43,6 @@ final actor OAuth2TokenService: OAuth2TokenServiceType {
         
         try await PKCEState.shared.reset()
         
-        return result
+        return try result.get()
     }
 }

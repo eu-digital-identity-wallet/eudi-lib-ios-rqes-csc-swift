@@ -21,7 +21,8 @@ final actor CSCCredentialsInfoService: CSCCredentialsInfoServiceType {
     func getCredentialsInfo(request: CSCCredentialsInfoRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CSCCredentialsInfoResponse {
 
         try CSCCredentialsInfoValidator.validate(request)
+        let result = try await CSCCredentialsInfoClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
 
-        return try await CSCCredentialsInfoClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
+        return try result.get()
     }
 }
