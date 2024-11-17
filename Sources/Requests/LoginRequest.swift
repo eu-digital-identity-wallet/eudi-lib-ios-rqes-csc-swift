@@ -24,22 +24,29 @@ public struct LoginRequest: Codable, Sendable {
         self.password = password
     }
 
-    public func toFormData() -> (data: Data, boundary: String) {
+    public func toFormData() throws -> (data: Data, boundary: String) {
         let boundary = UUID().uuidString
         var formData = Data()
-        
+
         let boundaryPrefix = "--\(boundary)\r\n"
         
-        formData.append(boundaryPrefix.data(using: .utf8)!)
-        formData.append("Content-Disposition: form-data; name=\"username\"\r\n\r\n".data(using: .utf8)!)
-        formData.append("\(username)\r\n".data(using: .utf8)!)
-        
-        formData.append(boundaryPrefix.data(using: .utf8)!)
-        formData.append("Content-Disposition: form-data; name=\"password\"\r\n\r\n".data(using: .utf8)!)
-        formData.append("\(password)\r\n".data(using: .utf8)!)
-        
-        formData.append("--\(boundary)--\r\n".data(using: .utf8)!)
-        
+        guard let boundaryData = boundaryPrefix.data(using: .utf8),
+              let usernameData = "Content-Disposition: form-data; name=\"username\"\r\n\r\n".data(using: .utf8),
+              let usernameValueData = "\(username)\r\n".data(using: .utf8),
+              let passwordData = "Content-Disposition: form-data; name=\"password\"\r\n\r\n".data(using: .utf8),
+              let passwordValueData = "\(password)\r\n".data(using: .utf8),
+              let endBoundaryData = "--\(boundary)--\r\n".data(using: .utf8) else {
+            throw NSError(domain: "FormDataError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode form data as UTF-8"])
+        }
+
+        formData.append(boundaryData)
+        formData.append(usernameData)
+        formData.append(usernameValueData)
+        formData.append(boundaryData)
+        formData.append(passwordData)
+        formData.append(passwordValueData)
+        formData.append(endBoundaryData)
+
         return (formData, boundary)
     }
 }

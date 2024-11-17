@@ -29,7 +29,8 @@ final actor LoginClient {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
 
-        let (formData, boundary) = request.toFormData()
+        // Add `try` for `toFormData()` which now throws
+        let (formData, boundary) = try request.toFormData()
         urlRequest.setValue(
             "multipart/form-data; boundary=\(boundary)",
             forHTTPHeaderField: "Content-Type")
@@ -38,18 +39,18 @@ final actor LoginClient {
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode)
-        else {
+              (200...299).contains(httpResponse.statusCode) else {
             throw LoginError.invalidResponse
         }
 
+        // Handle `Set-Cookie` header safely
         let cookie = httpResponse.value(forHTTPHeaderField: "Set-Cookie")
 
         do {
             var loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
             loginResponse = LoginResponse(
                 message: loginResponse.message,
-                cookie: cookie 
+                cookie: cookie // `cookie` can be nil, so this is safe
             )
             return loginResponse
         } catch {
