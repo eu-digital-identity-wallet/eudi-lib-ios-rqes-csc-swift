@@ -22,7 +22,6 @@ public class RQES {
     private let credentialsListService: CSCCredentialsListServiceType
     private let credentialsInfoService: CSCCredentialsInfoServiceType
     private let signHashService: SignHashServiceType
-    private let loginService: LoginServiceType
     private let calculateHashService: CalculateHashServiceType
     private let obtainSignedDocService: ObtainSignedDocServiceType
     private let prepareAuthorizationRequestService: PrepareAuthorizationRequestServiceType 
@@ -36,7 +35,6 @@ public class RQES {
         self.credentialsListService = await ServiceLocator.shared.resolve() ?? CSCCredentialsListService()
         self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CSCCredentialsInfoService()
         self.signHashService = await ServiceLocator.shared.resolve() ?? SignHashService()
-        self.loginService = await ServiceLocator.shared.resolve() ?? LoginService()
         self.calculateHashService = await ServiceLocator.shared.resolve() ?? CalculateHashService()
         self.obtainSignedDocService = await ServiceLocator.shared.resolve() ?? ObtainSignedDocService()
         self.prepareAuthorizationRequestService = await ServiceLocator.shared.resolve() ?? PrepareAuthorizationRequestService()
@@ -68,10 +66,6 @@ public class RQES {
 
     public func signHash(request: SignHashRequest, accessToken: String) async throws -> SignHashResponse {
         return try await signHashService.signHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
-    }
-
-    public func login(request: LoginRequest) async throws -> LoginResponse {
-        return try await loginService.login(request: request, oauth2BaseUrl: self.baseProviderUrl)
     }
 
     public func calculateHash(request: CalculateHashRequest, accessToken: String) async throws -> CalculateHashResponse {
