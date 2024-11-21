@@ -15,17 +15,17 @@
  */
 import Foundation
 
-struct CSCCredentialsInfoValidator: ValidatorProtocol  {
-    typealias Input = CSCCredentialsInfoRequest
-    static func validate(_ input: CSCCredentialsInfoRequest) throws {
+struct CredentialsInfoValidator: ValidatorProtocol  {
+    typealias Input = CredentialsInfoRequest
+    static func validate(_ input: CredentialsInfoRequest) throws {
         guard !input.credentialID.isEmpty else {
-            throw CSCCredentialsInfoError.missingCredentialID
+            throw CredentialsInfoError.missingCredentialID
         }
 
         if let certificates = input.certificates {
             let validCertificates = ["none", "single", "chain"]
             guard validCertificates.contains(certificates) else {
-                throw CSCCredentialsInfoError.invalidCertificates
+                throw CredentialsInfoError.invalidCertificates
             }
         }
     }

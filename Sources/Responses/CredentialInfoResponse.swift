@@ -15,7 +15,7 @@
  */
 import Foundation
 
-public struct CSCCredentialsInfoResponse: Codable, Sendable {
+public struct CredentialInfo: Codable, Sendable {
     public let description: String?
     public let signatureQualifier: SignatureQualifier?
     public let key: KeyInfo

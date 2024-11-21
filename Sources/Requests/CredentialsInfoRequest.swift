@@ -15,9 +15,8 @@
  */
 import Foundation
 
-public struct CSCCredentialsInfoRequest: Codable, Sendable {
+public struct CredentialsInfoRequest: Codable, Sendable {
     public let credentialID: String
-    public let credentialInfo: Bool?
     public let certificates: String?
     public let certInfo: Bool?
     public let authInfo: Bool?
@@ -26,7 +25,6 @@ public struct CSCCredentialsInfoRequest: Codable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case credentialID = "credentialID"
-        case credentialInfo = "credentialInfo"
         case certificates
         case certInfo = "certInfo"
         case authInfo = "auth_info"
@@ -36,15 +34,13 @@ public struct CSCCredentialsInfoRequest: Codable, Sendable {
 
     public init(
         credentialID: String,
-        credentialInfo: Bool?  = nil,
-        certificates: String? = nil,
-        certInfo: Bool? = nil,
-        authInfo: Bool? = nil,
+        certificates: String? = "chain",
+        certInfo: Bool? = true,
+        authInfo: Bool? = true,
         lang: String? = nil,
         clientData: String? = nil
     ) {
         self.credentialID = credentialID
-        self.credentialInfo = credentialInfo
         self.certificates = certificates
         self.certInfo = certInfo
         self.authInfo = authInfo

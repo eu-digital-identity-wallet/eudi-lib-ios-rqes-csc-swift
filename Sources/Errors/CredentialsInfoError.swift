@@ -15,7 +15,7 @@
  */
 import Foundation
 
-public enum CSCCredentialsInfoError: LocalizedError {
+public enum CredentialsInfoError: LocalizedError {
     
     case invalidAuthorizationHeader
     case missingCredentialID

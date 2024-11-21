@@ -15,9 +15,9 @@
  */
 import Foundation
 
-final actor CSCCredentialsInfoClient {
+final actor CredentialsInfoClient {
 
-    static func makeRequest(for request: CSCCredentialsInfoRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CSCCredentialsInfoResponse, ClientError> {
+    static func makeRequest(for request: CredentialsInfoRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CredentialInfo, ClientError> {
 
         let endpoint = "/csc/v2/credentials/info"
         let baseUrl = oauth2BaseUrl + endpoint
@@ -46,7 +46,7 @@ final actor CSCCredentialsInfoClient {
 
         if (200...299).contains(httpResponse.statusCode) {
             do {
-                let decodedResponse = try JSONDecoder().decode(CSCCredentialsInfoResponse.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(CredentialInfo.self, from: data)
                 return .success(decodedResponse)
             } catch {
                 return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))

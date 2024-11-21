@@ -15,6 +15,14 @@
  */
 import Foundation
 
-public protocol CSCCredentialsInfoServiceType {
-    func getCredentialsInfo(request: CSCCredentialsInfoRequest, accessToken: String, oauth2BaseUrl:String) async throws -> CSCCredentialsInfoResponse
+final actor CredentialsInfoService: CredentialsInfoServiceType {
+    init() { }
+    
+    func getCredentialsInfo(request: CredentialsInfoRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CredentialInfo {
+
+        try CredentialsInfoValidator.validate(request)
+        let result = try await CredentialsInfoClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
+
+        return try result.get()
+    }
 }

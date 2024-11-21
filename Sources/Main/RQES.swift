@@ -20,7 +20,7 @@ public class RQES {
     private let oauth2AuthorizeService: OAuth2AuthorizeServiceType
     private let oauth2TokenService: OAuth2TokenServiceType
     private let credentialsListService: CredentialsListServiceType
-    private let credentialsInfoService: CSCCredentialsInfoServiceType
+    private let credentialsInfoService: CredentialsInfoServiceType
     private let signHashService: SignHashServiceType
     private let calculateHashService: CalculateHashServiceType
     private let obtainSignedDocService: ObtainSignedDocServiceType
@@ -33,7 +33,7 @@ public class RQES {
         self.oauth2AuthorizeService = await ServiceLocator.shared.resolve() ?? OAuth2AuthorizeService()
         self.oauth2TokenService = await ServiceLocator.shared.resolve() ?? OAuth2TokenService()
         self.credentialsListService = await ServiceLocator.shared.resolve() ?? CredentialsListService()
-        self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CSCCredentialsInfoService()
+        self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CredentialsInfoService()
         self.signHashService = await ServiceLocator.shared.resolve() ?? SignHashService()
         self.calculateHashService = await ServiceLocator.shared.resolve() ?? CalculateHashService()
         self.obtainSignedDocService = await ServiceLocator.shared.resolve() ?? ObtainSignedDocService()
@@ -60,7 +60,7 @@ public class RQES {
         return try await credentialsListService.getCredentialsList(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func getCredentialsInfo(request: CSCCredentialsInfoRequest, accessToken: String) async throws -> CSCCredentialsInfoResponse {
+    public func getCredentialInfo(request: CredentialsInfoRequest, accessToken: String) async throws -> CredentialInfo {
         return try await credentialsInfoService.getCredentialsInfo(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
