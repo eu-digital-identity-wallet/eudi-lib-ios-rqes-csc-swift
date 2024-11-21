@@ -68,7 +68,7 @@ public class RQES {
         return try await signHashService.signHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func calculateHash(request: CalculateHashRequest, accessToken: String) async throws -> CalculateHashResponse {
+    public func calculateDocumentHashes(request: CalculateHashRequest, accessToken: String) async throws -> DocumentDigests {
         return try await calculateHashService.calculateHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 

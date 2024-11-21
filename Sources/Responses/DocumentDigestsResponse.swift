@@ -15,7 +15,7 @@
  */
 import Foundation
 
-public struct CalculateHashResponse: Codable, Sendable {
+public struct DocumentDigests: Codable, Sendable {
     public let hashes: [String]
     public let signatureDate: Int
     

@@ -17,7 +17,7 @@ import Foundation
 
 final actor CalculateHashClient {
 
-    static func makeRequest(for request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CalculateHashResponse, ClientError> {
+    static func makeRequest(for request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<DocumentDigests, ClientError> {
 
         let endpoint = "/signatures/calculate_hash"
         let baseUrl = oauth2BaseUrl + endpoint
@@ -46,7 +46,7 @@ final actor CalculateHashClient {
 
         if (200...299).contains(httpResponse.statusCode) {
             do {
-                let decodedResponse = try JSONDecoder().decode(CalculateHashResponse.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(DocumentDigests.self, from: data)
                 return .success(decodedResponse)
             } catch {
                 return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
