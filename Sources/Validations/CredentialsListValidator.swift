@@ -15,6 +15,12 @@
  */
 import Foundation
 
-public protocol CSCCredentialsListServiceType {
-    func getCredentialsList(request: CSCCredentialsListRequest, accessToken: String, oauth2BaseUrl:String) async throws -> CSCCredentialsListResponse
+struct CredentialsListValidator: ValidatorProtocol {
+    typealias Input = String
+
+    static func validate(_ input: String) throws {
+        guard !input.isEmpty else {
+            throw CredentialsListError.invalidClientID
+        }
+    }
 }

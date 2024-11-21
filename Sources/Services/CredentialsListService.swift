@@ -15,22 +15,11 @@
  */
 import Foundation
 
-public enum CSCCredentialsListError: LocalizedError {
-    case invalidClientID
-    case invalidResponse
-    case noData
-    case decodingFailed
-
-    public var errorDescription: String? {
-        switch self {
-        case .invalidClientID:
-            return "The client ID provided is invalid."
-        case .invalidResponse:
-            return "The server returned an invalid response."
-        case .noData:
-            return "No data was received from the server."
-        case .decodingFailed:
-            return "Failed to decode the response."
-        }
+final actor CredentialsListService: CredentialsListServiceType {
+    
+    init() {}
+    func getCredentialsList(request: CredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CredentialsListResponse {
+        let result = try await CredentialsListClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
+        return try result.get()
     }
 }

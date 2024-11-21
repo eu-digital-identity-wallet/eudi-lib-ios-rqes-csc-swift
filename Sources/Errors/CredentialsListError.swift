@@ -15,12 +15,22 @@
  */
 import Foundation
 
-struct CSCCredentialsListValidator: ValidatorProtocol {
-    typealias Input = String
+public enum CredentialsListError: LocalizedError {
+    case invalidClientID
+    case invalidResponse
+    case noData
+    case decodingFailed
 
-    static func validate(_ input: String) throws {
-        guard !input.isEmpty else {
-            throw CSCCredentialsListError.invalidClientID
+    public var errorDescription: String? {
+        switch self {
+        case .invalidClientID:
+            return "The client ID provided is invalid."
+        case .invalidResponse:
+            return "The server returned an invalid response."
+        case .noData:
+            return "No data was received from the server."
+        case .decodingFailed:
+            return "Failed to decode the response."
         }
     }
 }

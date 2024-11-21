@@ -15,7 +15,7 @@
  */
 import Foundation
 
-public struct CSCCredentialsListRequest: Codable, Sendable {
+public struct CredentialsListRequest: Codable, Sendable {
     public let userID: String?
     public let credentialInfo: Bool?
     public let certificates: String?

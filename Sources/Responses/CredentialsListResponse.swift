@@ -15,7 +15,7 @@
  */
 import Foundation
 
-public struct CSCCredentialsListResponse: Codable, Sendable {
+public struct CredentialsListResponse: Codable, Sendable {
     public let credentialIDs: [String]
     public let credentialInfos: [CredentialInfo]?
     public let onlyValid:Bool?

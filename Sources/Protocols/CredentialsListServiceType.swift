@@ -15,11 +15,6 @@
  */
 import Foundation
 
-final actor CSCCredentialsListService: CSCCredentialsListServiceType {
-    
-    init() {}
-    func getCredentialsList(request: CSCCredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CSCCredentialsListResponse {
-        let result = try await CSCCredentialsListClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
-        return try result.get()
-    }
+public protocol CredentialsListServiceType {
+    func getCredentialsList(request: CredentialsListRequest, accessToken: String, oauth2BaseUrl:String) async throws -> CredentialsListResponse
 }

@@ -15,9 +15,9 @@
  */
 import Foundation
 
-final actor CSCCredentialsListClient {
+final actor CredentialsListClient {
 
-    static func makeRequest(for request: CSCCredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CSCCredentialsListResponse, ClientError> {
+    static func makeRequest(for request: CredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CredentialsListResponse, ClientError> {
         
         let endpoint = "/csc/v2/credentials/list"
         let baseUrl = oauth2BaseUrl + endpoint
@@ -46,7 +46,7 @@ final actor CSCCredentialsListClient {
 
         if (200...299).contains(httpResponse.statusCode) {
             do {
-                let decodedResponse = try JSONDecoder().decode(CSCCredentialsListResponse.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(CredentialsListResponse.self, from: data)
                 return .success(decodedResponse)
             } catch {
                 return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
