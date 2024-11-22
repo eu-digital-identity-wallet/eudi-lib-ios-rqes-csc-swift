@@ -15,19 +15,18 @@
  */
 import Foundation
 
-public struct OAuth2TokenDto: Codable, Sendable {
-    public let code: String
-    public let state: String
-    public let authorizationDetails: String?
+public struct AccessTokenResponse: Codable, Sendable {
+    public let accessToken: String
+    public let tokenType: String
+    public let expiresIn: Int
+    public let refreshToken: String?
+    public let scope: String?
     
-    public init(
-        code: String,
-        state: String,
-        authorizationDetails: String? = nil
-    ) {
-        self.code = code
-        self.state = state
-        self.authorizationDetails = authorizationDetails
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case tokenType = "token_type"
+        case expiresIn = "expires_in"
+        case refreshToken = "refresh_token"
+        case scope
     }
-
 }

@@ -52,7 +52,7 @@ public class RQES {
         return try await oauth2AuthorizeService.authorize(request: request, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func getOAuth2Token(request: OAuth2TokenDto) async throws -> OAuth2TokenResponse {
+    public func requestAccessTokenAuthFlow(request: AccessTokenRequest) async throws -> AccessTokenResponse {
         return try await oauth2TokenService.getToken(request: request, cscClientConfig: self.cscClientConfig)
     }
 

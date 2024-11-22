@@ -17,7 +17,7 @@ import Foundation
 
 final actor OAuth2TokenClient {
     
-    static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> Result<OAuth2TokenResponse, ClientError> {
+    static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> Result<AccessTokenResponse, ClientError> {
         let endpoint = "/oauth2/token"
         var baseUrl = oauth2BaseUrl + endpoint
 
@@ -53,7 +53,7 @@ final actor OAuth2TokenClient {
         
         if (200...299).contains(httpResponse.statusCode) {
             do {
-                let tokenResponse = try JSONDecoder().decode(OAuth2TokenResponse.self, from: data)
+                let tokenResponse = try JSONDecoder().decode(AccessTokenResponse.self, from: data)
                 return .success(tokenResponse)
             } catch {
                 return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
