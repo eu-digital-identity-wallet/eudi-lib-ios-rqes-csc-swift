@@ -15,7 +15,7 @@
  */
 import Foundation
 
-public struct ObtainSignedDocResponse: Codable, Sendable {
+public struct SignedDocuments: Codable, Sendable {
     public let documentWithSignature: [String]
     public let signatureObject: [String]
 }

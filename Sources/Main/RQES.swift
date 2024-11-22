@@ -72,7 +72,7 @@ public class RQES {
         return try await calculateHashService.calculateHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String) async throws -> ObtainSignedDocResponse {
+    public func getSignedDocuments(request: ObtainSignedDocRequest, accessToken: String) async throws -> SignedDocuments {
         return try await obtainSignedDocService.obtainSignedDoc(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
     

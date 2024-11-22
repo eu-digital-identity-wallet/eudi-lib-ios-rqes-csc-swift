@@ -17,7 +17,7 @@ import Foundation
 
 final actor ObtainSignedDocClient {
 
-    static func makeRequest(for request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<ObtainSignedDocResponse, ClientError> {
+    static func makeRequest(for request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<SignedDocuments, ClientError> {
         let endpoint = "/signatures/obtain_signed_doc"
         let baseUrl = oauth2BaseUrl + endpoint
 
@@ -45,7 +45,7 @@ final actor ObtainSignedDocClient {
 
         if (200...299).contains(httpResponse.statusCode) {
             do {
-                let decodedResponse = try JSONDecoder().decode(ObtainSignedDocResponse.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(SignedDocuments.self, from: data)
                 return .success(decodedResponse)
             } catch {
                 return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
