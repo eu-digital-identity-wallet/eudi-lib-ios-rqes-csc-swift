@@ -27,8 +27,6 @@ final actor InfoService: InfoServiceType {
             throw InfoServiceError.invalidLanguage
         }
 
-        try InfoServiceValidator.validate(lang)
-
         return try await InfoClient.makeRequest(for: req)
     }
 

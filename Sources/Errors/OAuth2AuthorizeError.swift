@@ -25,7 +25,6 @@ public enum OAuth2AuthorizeError: LocalizedError {
     case missingHashesForMultipleSignatures
     case invalidAuthorizationDetails
     case invalidResponse
-    case decodingFailed
 
     public var errorDescription: String? {
         switch self {
@@ -47,8 +46,6 @@ public enum OAuth2AuthorizeError: LocalizedError {
             return "Authorization details cannot be empty."
         case .invalidResponse:
             return "Invalid response from the server."
-        case .decodingFailed:
-            return "Failed to decode the response from the server."
         }
     }
 }
