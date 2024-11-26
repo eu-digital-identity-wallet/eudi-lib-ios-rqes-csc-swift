@@ -18,17 +18,18 @@ import Foundation
 final actor OAuth2TokenClient {
     
     static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> Result<AccessTokenResponse, ClientError> {
-        let endpoint = "/oauth2/token"
-        var baseUrl = oauth2BaseUrl + endpoint
+        let urlResult = oauth2BaseUrl.appendingEndpoint("/oauth2/token")
 
-        if let authorizationDetails = request.authorizationDetails, !authorizationDetails.isEmpty {
-            var components = URLComponents(string: baseUrl)
-            components?.queryItems = [URLQueryItem(name: "authorization_details", value: authorizationDetails)]
-            baseUrl = components?.url?.absoluteString ?? baseUrl
+        guard case let .success(baseUrl) = urlResult else {
+            return .failure(.invalidRequestURL)
         }
+
+        var url = baseUrl
         
-        guard let url = URL(string: baseUrl) else {
-            throw ClientError.invalidRequestURL
+        if let authorizationDetails = request.authorizationDetails, !authorizationDetails.isEmpty {
+            var components = URLComponents(url: baseUrl, resolvingAgainstBaseURL: false)
+            components?.queryItems = [URLQueryItem(name: "authorization_details", value: authorizationDetails)]
+            url = components?.url ?? baseUrl
         }
 
         var urlRequest = URLRequest(url: url)
@@ -50,16 +51,7 @@ final actor OAuth2TokenClient {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ClientError.invalidResponse
         }
+        return handleResponse(data, response, ofType: AccessTokenResponse.self)
         
-        if (200...299).contains(httpResponse.statusCode) {
-            do {
-                let tokenResponse = try JSONDecoder().decode(AccessTokenResponse.self, from: data)
-                return .success(tokenResponse)
-            } catch {
-                return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
-            }
-        } else {
-            return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
-        }
     }
 }

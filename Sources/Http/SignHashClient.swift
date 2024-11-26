@@ -18,13 +18,7 @@ import Foundation
 final actor SignHashClient {
     
     static func makeRequest(for request: SignHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<SignHashResponse, ClientError> {
-        
-        let endpoint = "/csc/v2/signatures/signHash"
-        let baseUrl = oauth2BaseUrl + endpoint
-
-        guard let url = URL(string: baseUrl) else {
-            return .failure(ClientError.invalidRequestURL)
-        }
+        let url = try oauth2BaseUrl.appendingEndpoint("/csc/v2/signatures/signHash").get()
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
@@ -43,16 +37,6 @@ final actor SignHashClient {
         guard let httpResponse = response as? HTTPURLResponse else {
             return .failure(ClientError.invalidResponse)
         }
-
-        if httpResponse.statusCode == 200 {
-            do {
-                let signHashResponse = try JSONDecoder().decode(SignHashResponse.self, from: data)
-                return .success(signHashResponse)
-            } catch {
-                return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
-            }
-        } else {
-            return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
-        }
+        return handleResponse(data, response, ofType: SignHashResponse.self)
     }
 }

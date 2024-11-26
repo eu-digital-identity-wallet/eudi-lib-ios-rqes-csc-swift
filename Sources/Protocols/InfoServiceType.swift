@@ -16,5 +16,5 @@
 import Foundation
 
 public protocol InfoServiceType {
-    func getInfo(request: InfoServiceRequest?) async throws -> InfoServiceResponse
+    func getInfo(request: InfoServiceRequest?, oauth2BaseUrl: String) async throws -> InfoServiceResponse
 }

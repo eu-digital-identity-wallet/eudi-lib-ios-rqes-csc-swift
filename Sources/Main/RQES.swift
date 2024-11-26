@@ -17,7 +17,6 @@ import Foundation
 
 public class RQES {
     private let infoService: InfoServiceType
-    private let oauth2AuthorizeService: OAuth2AuthorizeServiceType
     private let oauth2TokenService: OAuth2TokenServiceType
     private let credentialsListService: CredentialsListServiceType
     private let credentialsInfoService: CredentialsInfoServiceType
@@ -30,7 +29,6 @@ public class RQES {
     
     public init(cscClientConfig: CSCClientConfig ) async {
         self.infoService = await ServiceLocator.shared.resolve() ?? InfoService()
-        self.oauth2AuthorizeService = await ServiceLocator.shared.resolve() ?? OAuth2AuthorizeService()
         self.oauth2TokenService = await ServiceLocator.shared.resolve() ?? OAuth2TokenService()
         self.credentialsListService = await ServiceLocator.shared.resolve() ?? CredentialsListService()
         self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CredentialsInfoService()
@@ -43,13 +41,9 @@ public class RQES {
     }
 
     public func getInfo(request: InfoServiceRequest? = nil) async throws -> InfoServiceResponse {
-        let response = try await infoService.getInfo(request: request)
+        let response = try await infoService.getInfo(request: request, oauth2BaseUrl: self.baseProviderUrl)
         self.baseProviderUrl = response.oauth2
         return response
-    }
-
-    public func getAuthorizeUrl(request: OAuth2AuthorizeRequest) async throws -> OAuth2AuthorizeResponse {
-        return try await oauth2AuthorizeService.authorize(request: request, oauth2BaseUrl: self.baseProviderUrl)
     }
 
     public func requestAccessTokenAuthFlow(request: AccessTokenRequest) async throws -> AccessTokenResponse {

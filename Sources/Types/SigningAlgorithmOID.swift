@@ -38,8 +38,14 @@ public struct SigningAlgorithmOID: RawRepresentable, Codable, Sendable, Expressi
     }
 
     public static let RSA = SigningAlgorithmOID(rawValue: "1.2.840.113549.1.1.1")
-    public static let DSA = SigningAlgorithmOID(rawValue: "1.2.840.10040.4.1")
+    public static let SHA256WithRSA = SigningAlgorithmOID(rawValue: "1.2.840.113549.1.1.11")
+    public static let SHA384WithRSA = SigningAlgorithmOID(rawValue: "1.2.840.113549.1.1.12")
+    public static let SHA512WithRSA = SigningAlgorithmOID(rawValue: "1.2.840.113549.1.1.13")
     public static let ECDSA = SigningAlgorithmOID(rawValue: "1.2.840.10045.2.1")
+    public static let SHA256WithECDSA = SigningAlgorithmOID(rawValue: "1.2.840.10045.4.3.2")
+    public static let SHA384WithECDSA = SigningAlgorithmOID(rawValue: "1.2.840.10045.4.3.3")
+    public static let SHA512WithECDSA = SigningAlgorithmOID(rawValue: "1.2.840.10045.4.3.4")
+    public static let DSA = SigningAlgorithmOID(rawValue: "1.2.840.10040.4.1")
     public static let X25519 = SigningAlgorithmOID(rawValue: "1.3.101.110")
     public static let X448 = SigningAlgorithmOID(rawValue: "1.3.101.111")
 }

@@ -19,7 +19,7 @@ public enum ClientError: LocalizedError {
     case invalidRequestURL
     case invalidResponse
     case encodingFailed
-    case clientError(data: Data, statusCode: Int)
+    case clientError(message: String, statusCode: Int)
     
     public var errorDescription: String? {
         switch self {
@@ -29,12 +29,8 @@ public enum ClientError: LocalizedError {
             return "The response was invalid."
         case .encodingFailed:
             return "The encoding failed."
-        case .clientError(let data, let statusCode):
-            if let jsonString = String(data: data, encoding: .utf8) {
-                return "Server Response (Status Code: \(statusCode)): \(jsonString)"
-            } else {
-                return "Server Response (Status Code: \(statusCode)): Unable to decode error data."
-            }
+        case .clientError(let message, let statusCode):
+            return "Server Response (Status Code: \(statusCode)): \(message)"
         }
     }
 }

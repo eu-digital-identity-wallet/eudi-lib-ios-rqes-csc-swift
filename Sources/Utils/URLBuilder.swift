@@ -15,14 +15,12 @@
  */
 import Foundation
 
-public struct OAuth2AuthorizeResponse: Codable, Sendable {
-    public let url: String
-    public let code: String
-    public let state: String
-    
-    public init(url: String, code: String, state: String) {
-        self.url = url
-        self.code = code
-        self.state = state
+extension String {
+    func appendingEndpoint(_ endpoint: String) -> Result<URL, ClientError> {
+        let urlString = self + endpoint
+        guard let url = URL(string: urlString) else {
+            return .failure(.invalidRequestURL)
+        }
+        return .success(url)
     }
 }

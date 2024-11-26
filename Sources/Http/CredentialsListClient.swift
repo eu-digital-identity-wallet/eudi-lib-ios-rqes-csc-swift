@@ -18,14 +18,8 @@ import Foundation
 final actor CredentialsListClient {
 
     static func makeRequest(for request: CredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CredentialsListResponse, ClientError> {
+        let url = try oauth2BaseUrl.appendingEndpoint("/csc/v2/credentials/list").get()
         
-        let endpoint = "/csc/v2/credentials/list"
-        let baseUrl = oauth2BaseUrl + endpoint
-
-        guard let url = URL(string: baseUrl) else {
-            return .failure(ClientError.invalidRequestURL)
-        }
-
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -44,15 +38,6 @@ final actor CredentialsListClient {
             return .failure(ClientError.invalidResponse)
         }
 
-        if (200...299).contains(httpResponse.statusCode) {
-            do {
-                let decodedResponse = try JSONDecoder().decode(CredentialsListResponse.self, from: data)
-                return .success(decodedResponse)
-            } catch {
-                return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
-            }
-        } else {
-            return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
-        }
+        return handleResponse(data, response, ofType: CredentialsListResponse.self)
     }
 }

@@ -18,13 +18,7 @@ import Foundation
 final actor CalculateHashClient {
 
     static func makeRequest(for request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<DocumentDigests, ClientError> {
-
-        let endpoint = "/signatures/calculate_hash"
-        let baseUrl = oauth2BaseUrl + endpoint
-
-        guard let url = URL(string: baseUrl) else {
-            return .failure(ClientError.invalidRequestURL)
-        }
+        let url = try oauth2BaseUrl.appendingEndpoint("/signatures/calculate_hash").get()
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
@@ -43,16 +37,7 @@ final actor CalculateHashClient {
         guard let httpResponse = response as? HTTPURLResponse else {
             return .failure(ClientError.invalidResponse)
         }
-
-        if (200...299).contains(httpResponse.statusCode) {
-            do {
-                let decodedResponse = try JSONDecoder().decode(DocumentDigests.self, from: data)
-                return .success(decodedResponse)
-            } catch {
-                return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
-            }
-        } else {
-            return .failure(ClientError.clientError(data: data, statusCode: httpResponse.statusCode))
-        }
+        
+        return handleResponse(data, response, ofType: DocumentDigests.self)
     }
 }
