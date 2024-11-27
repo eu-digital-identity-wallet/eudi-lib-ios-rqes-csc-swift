@@ -15,10 +15,19 @@
  */
 import Foundation
 
-final actor ObtainSignedDocService: ObtainSignedDocServiceType {
-    func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignedDocuments {
-        try ObtainSignedDocValidator.validate(request)
-        let result = try await ObtainSignedDocClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
-        return try result.get()
+public struct AccessTokenRequest: Codable, Sendable {
+    public let code: String
+    public let state: String
+    public let authorizationDetails: String?
+    
+    public init(
+        code: String,
+        state: String,
+        authorizationDetails: String? = nil
+    ) {
+        self.code = code
+        self.state = state
+        self.authorizationDetails = authorizationDetails
     }
+
 }

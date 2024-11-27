@@ -15,10 +15,18 @@
  */
 import Foundation
 
-final actor ObtainSignedDocService: ObtainSignedDocServiceType {
-    func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignedDocuments {
-        try ObtainSignedDocValidator.validate(request)
-        let result = try await ObtainSignedDocClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
-        return try result.get()
+struct CredentialsInfoValidator: ValidatorProtocol  {
+    typealias Input = CredentialsInfoRequest
+    static func validate(_ input: CredentialsInfoRequest) throws {
+        guard !input.credentialID.isEmpty else {
+            throw CredentialsInfoError.missingCredentialID
+        }
+
+        if let certificates = input.certificates {
+            let validCertificates = ["none", "single", "chain"]
+            guard validCertificates.contains(certificates) else {
+                throw CredentialsInfoError.invalidCertificates
+            }
+        }
     }
 }

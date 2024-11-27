@@ -15,11 +15,11 @@
  */
 import Foundation
 
-final actor ObtainSignedDocClient {
+final actor CredentialsInfoClient {
 
-    static func makeRequest(for request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<SignedDocuments, ClientError> {
-        let url = try oauth2BaseUrl.appendingEndpoint("/signatures/obtain_signed_doc").get()
-
+    static func makeRequest(for request: CredentialsInfoRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CredentialInfo, ClientError> {
+        let url = try oauth2BaseUrl.appendingEndpoint("/csc/v2/credentials/info").get()
+        
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -33,10 +33,10 @@ final actor ObtainSignedDocClient {
         }
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
-
+        
         guard let httpResponse = response as? HTTPURLResponse else {
             return .failure(ClientError.invalidResponse)
         }
-        return handleResponse(data, response, ofType: SignedDocuments.self)
+        return handleResponse(data, response, ofType: CredentialInfo.self)
     }
 }

@@ -22,7 +22,9 @@ final actor PrepareAuthorizationRequestService: PrepareAuthorizationRequestServi
    
         let codeChallenge = try await PKCEState.shared.initializeAndGetCodeChallenge()
      
-        var components = URLComponents(string: cscClientConfig.scaBaseURL + "/oauth2/authorize")!
+        guard var components = URLComponents(string: cscClientConfig.scaBaseURL + "/oauth2/authorize") else {
+            throw ClientError.invalidRequestURL
+        }
         
         components.queryItems = [
             URLQueryItem(name: "response_type", value: "code"),
@@ -34,7 +36,9 @@ final actor PrepareAuthorizationRequestService: PrepareAuthorizationRequestServi
             URLQueryItem(name: "state", value: walletState),
         ]
         
-        let authorizationCodeURL = components.url!.absoluteString
+        guard let authorizationCodeURL = components.url?.absoluteString else {
+            throw ClientError.invalidRequestURL
+        }
         
         return AuthorizationPrepareResponse(authorizationCodeURL: authorizationCodeURL)
     }
@@ -43,7 +47,9 @@ final actor PrepareAuthorizationRequestService: PrepareAuthorizationRequestServi
        
         let codeChallenge = try await PKCEState.shared.initializeAndGetCodeChallenge()
    
-        var components = URLComponents(string: cscClientConfig.scaBaseURL + "/oauth2/authorize")!
+        guard var components = URLComponents(string: cscClientConfig.scaBaseURL + "/oauth2/authorize") else {
+            throw ClientError.invalidRequestURL
+        }
         
         components.queryItems = [
             URLQueryItem(name: "response_type", value: "code"),
@@ -56,7 +62,9 @@ final actor PrepareAuthorizationRequestService: PrepareAuthorizationRequestServi
             URLQueryItem(name: "authorization_details", value: authorizationDetails)
         ]
         
-        let authorizationCodeURL = components.url!.absoluteString
+        guard let authorizationCodeURL = components.url?.absoluteString else {
+            throw ClientError.invalidRequestURL
+        }
         
         return AuthorizationPrepareResponse(authorizationCodeURL: authorizationCodeURL)
     }

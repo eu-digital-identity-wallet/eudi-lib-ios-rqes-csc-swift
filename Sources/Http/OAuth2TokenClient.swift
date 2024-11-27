@@ -16,18 +16,20 @@
 import Foundation
 
 final actor OAuth2TokenClient {
-    static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> OAuth2TokenResponse {
-        let endpoint = "/oauth2/token"
-        var baseUrl = oauth2BaseUrl + endpoint
+    
+    static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> Result<AccessTokenResponse, ClientError> {
+        let urlResult = oauth2BaseUrl.appendingEndpoint("/oauth2/token")
 
-        if let authorizationDetails = request.authorizationDetails, !authorizationDetails.isEmpty {
-            var components = URLComponents(string: baseUrl)
-            components?.queryItems = [URLQueryItem(name: "authorization_details", value: authorizationDetails)]
-            baseUrl = components?.url?.absoluteString ?? baseUrl
+        guard case let .success(baseUrl) = urlResult else {
+            return .failure(.invalidRequestURL)
         }
+
+        var url = baseUrl
         
-        guard let url = URL(string: baseUrl) else {
-            throw ClientError.invalidRequestURL
+        if let authorizationDetails = request.authorizationDetails, !authorizationDetails.isEmpty {
+            var components = URLComponents(url: baseUrl, resolvingAgainstBaseURL: false)
+            components?.queryItems = [URLQueryItem(name: "authorization_details", value: authorizationDetails)]
+            url = components?.url ?? baseUrl
         }
 
         var urlRequest = URLRequest(url: url)
@@ -46,14 +48,10 @@ final actor OAuth2TokenClient {
         
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw ClientError.invalidResponse
         }
+        return handleResponse(data, response, ofType: AccessTokenResponse.self)
         
-        do {
-            return try JSONDecoder().decode(OAuth2TokenResponse.self, from: data)
-        } catch {
-            throw OAuth2TokenError.decodingFailed
-        }
     }
 }

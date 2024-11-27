@@ -17,34 +17,27 @@ import Foundation
 
 final actor CalculateHashClient {
 
-    static func makeRequest(for request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CalculateHashResponse {
-
-        let endpoint = "/signatures/calculate_hash"
-        let baseUrl = oauth2BaseUrl + endpoint
-
-        guard let url = URL(string: baseUrl) else {
-            throw ClientError.invalidRequestURL
-        }
+    static func makeRequest(for request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<DocumentDigests, ClientError> {
+        let url = try oauth2BaseUrl.appendingEndpoint("/signatures/calculate_hash").get()
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
-        let jsonData = try JSONEncoder().encode(request)
-        urlRequest.httpBody = jsonData
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            urlRequest.httpBody = jsonData
+        } catch {
+            return .failure(ClientError.encodingFailed)
+        }
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            throw ClientError.invalidResponse
+        guard let httpResponse = response as? HTTPURLResponse else {
+            return .failure(ClientError.invalidResponse)
         }
-
-        do {
-            return try JSONDecoder().decode(CalculateHashResponse.self, from: data)
-        } catch {
-            throw CalculateHashError.decodingFailed
-        }
+        
+        return handleResponse(data, response, ofType: DocumentDigests.self)
     }
 }
-

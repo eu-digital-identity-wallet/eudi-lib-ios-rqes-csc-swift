@@ -15,10 +15,17 @@
  */
 import Foundation
 
-final actor ObtainSignedDocService: ObtainSignedDocServiceType {
-    func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignedDocuments {
-        try ObtainSignedDocValidator.validate(request)
-        let result = try await ObtainSignedDocClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
-        return try result.get()
+public struct DocumentDigests: Codable, Sendable {
+    public let hashes: [String]
+    public let signatureDate: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case hashes
+        case signatureDate = "signature_date"
+    }
+    
+    public init(hashes: [String], signatureDate: Int) {
+        self.hashes = hashes
+        self.signatureDate = signatureDate
     }
 }
