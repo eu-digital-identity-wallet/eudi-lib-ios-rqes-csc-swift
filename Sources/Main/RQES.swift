@@ -17,12 +17,10 @@ import Foundation
 
 public class RQES {
     private let infoService: InfoServiceType
-    private let oauth2AuthorizeService: OAuth2AuthorizeServiceType
     private let oauth2TokenService: OAuth2TokenServiceType
-    private let credentialsListService: CSCCredentialsListServiceType
-    private let credentialsInfoService: CSCCredentialsInfoServiceType
+    private let credentialsListService: CredentialsListServiceType
+    private let credentialsInfoService: CredentialsInfoServiceType
     private let signHashService: SignHashServiceType
-    private let loginService: LoginServiceType
     private let calculateHashService: CalculateHashServiceType
     private let obtainSignedDocService: ObtainSignedDocServiceType
     private let prepareAuthorizationRequestService: PrepareAuthorizationRequestServiceType 
@@ -31,12 +29,10 @@ public class RQES {
     
     public init(cscClientConfig: CSCClientConfig ) async {
         self.infoService = await ServiceLocator.shared.resolve() ?? InfoService()
-        self.oauth2AuthorizeService = await ServiceLocator.shared.resolve() ?? OAuth2AuthorizeService()
         self.oauth2TokenService = await ServiceLocator.shared.resolve() ?? OAuth2TokenService()
-        self.credentialsListService = await ServiceLocator.shared.resolve() ?? CSCCredentialsListService()
-        self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CSCCredentialsInfoService()
+        self.credentialsListService = await ServiceLocator.shared.resolve() ?? CredentialsListService()
+        self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CredentialsInfoService()
         self.signHashService = await ServiceLocator.shared.resolve() ?? SignHashService()
-        self.loginService = await ServiceLocator.shared.resolve() ?? LoginService()
         self.calculateHashService = await ServiceLocator.shared.resolve() ?? CalculateHashService()
         self.obtainSignedDocService = await ServiceLocator.shared.resolve() ?? ObtainSignedDocService()
         self.prepareAuthorizationRequestService = await ServiceLocator.shared.resolve() ?? PrepareAuthorizationRequestService()
@@ -45,24 +41,20 @@ public class RQES {
     }
 
     public func getInfo(request: InfoServiceRequest? = nil) async throws -> InfoServiceResponse {
-        let response = try await infoService.getInfo(request: request)
+        let response = try await infoService.getInfo(request: request, oauth2BaseUrl: self.baseProviderUrl)
         self.baseProviderUrl = response.oauth2
         return response
     }
 
-    public func getAuthorizeUrl(request: OAuth2AuthorizeRequest) async throws -> OAuth2AuthorizeResponse {
-        return try await oauth2AuthorizeService.authorize(request: request, oauth2BaseUrl: self.baseProviderUrl)
-    }
-
-    public func getOAuth2Token(request: OAuth2TokenDto) async throws -> OAuth2TokenResponse {
+    public func requestAccessTokenAuthFlow(request: AccessTokenRequest) async throws -> AccessTokenResponse {
         return try await oauth2TokenService.getToken(request: request, cscClientConfig: self.cscClientConfig)
     }
 
-    public func getCredentialsList(request: CSCCredentialsListRequest, accessToken: String) async throws -> CSCCredentialsListResponse {
+    public func listCredentials(request: CredentialsListRequest, accessToken: String) async throws -> CredentialsListResponse {
         return try await credentialsListService.getCredentialsList(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func getCredentialsInfo(request: CSCCredentialsInfoRequest, accessToken: String) async throws -> CSCCredentialsInfoResponse {
+    public func getCredentialInfo(request: CredentialsInfoRequest, accessToken: String) async throws -> CredentialInfo {
         return try await credentialsInfoService.getCredentialsInfo(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
@@ -70,15 +62,11 @@ public class RQES {
         return try await signHashService.signHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func login(request: LoginRequest) async throws -> LoginResponse {
-        return try await loginService.login(request: request, oauth2BaseUrl: self.baseProviderUrl)
-    }
-
-    public func calculateHash(request: CalculateHashRequest, accessToken: String) async throws -> CalculateHashResponse {
+    public func calculateDocumentHashes(request: CalculateHashRequest, accessToken: String) async throws -> DocumentDigests {
         return try await calculateHashService.calculateHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String) async throws -> ObtainSignedDocResponse {
+    public func getSignedDocuments(request: ObtainSignedDocRequest, accessToken: String) async throws -> SignedDocuments {
         return try await obtainSignedDocService.obtainSignedDoc(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
     

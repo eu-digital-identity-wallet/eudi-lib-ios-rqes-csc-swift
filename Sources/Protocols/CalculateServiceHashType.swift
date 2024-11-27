@@ -16,5 +16,5 @@
 import Foundation
 
 public protocol CalculateHashServiceType {
-    func calculateHash(request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CalculateHashResponse
+    func calculateHash(request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> DocumentDigests
 }

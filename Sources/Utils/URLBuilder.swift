@@ -15,10 +15,12 @@
  */
 import Foundation
 
-final actor ObtainSignedDocService: ObtainSignedDocServiceType {
-    func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignedDocuments {
-        try ObtainSignedDocValidator.validate(request)
-        let result = try await ObtainSignedDocClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
-        return try result.get()
+extension String {
+    func appendingEndpoint(_ endpoint: String) -> Result<URL, ClientError> {
+        let urlString = self + endpoint
+        guard let url = URL(string: urlString) else {
+            return .failure(.invalidRequestURL)
+        }
+        return .success(url)
     }
 }

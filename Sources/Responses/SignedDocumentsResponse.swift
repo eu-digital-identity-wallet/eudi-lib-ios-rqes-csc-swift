@@ -15,10 +15,7 @@
  */
 import Foundation
 
-final actor ObtainSignedDocService: ObtainSignedDocServiceType {
-    func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignedDocuments {
-        try ObtainSignedDocValidator.validate(request)
-        let result = try await ObtainSignedDocClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
-        return try result.get()
-    }
+public struct SignedDocuments: Codable, Sendable {
+    public let documentWithSignature: [String]
+    public let signatureObject: [String]
 }

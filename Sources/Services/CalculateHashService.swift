@@ -19,10 +19,10 @@ import Foundation
 final actor CalculateHashService: CalculateHashServiceType {
     init() { }
 
-    func calculateHash(request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CalculateHashResponse {
+    func calculateHash(request: CalculateHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> DocumentDigests {
         
         try CalculateHashValidator.validate(request:request)
-
-        return try await CalculateHashClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
+        let result = try await CalculateHashClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
+        return try result.get()
     }
 }

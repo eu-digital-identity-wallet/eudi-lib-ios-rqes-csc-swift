@@ -15,10 +15,11 @@
  */
 import Foundation
 
-final actor ObtainSignedDocService: ObtainSignedDocServiceType {
-    func obtainSignedDoc(request: ObtainSignedDocRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignedDocuments {
-        try ObtainSignedDocValidator.validate(request)
-        let result = try await ObtainSignedDocClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl: oauth2BaseUrl)
+final actor CredentialsListService: CredentialsListServiceType {
+    
+    init() {}
+    func getCredentialsList(request: CredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CredentialsListResponse {
+        let result = try await CredentialsListClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
         return try result.get()
     }
 }

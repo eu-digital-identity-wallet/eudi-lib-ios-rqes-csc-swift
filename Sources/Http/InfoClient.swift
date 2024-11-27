@@ -16,26 +16,18 @@
 import Foundation
 
 final actor InfoClient{
-    static func makeRequest(for request: InfoServiceRequest) async throws -> InfoServiceResponse {
-        let baseUrl = "https://walletcentric.signer.eudiw.dev/csc/v2/info"
-        
-        guard let url = URL(string: baseUrl) else {
-            throw ClientError.invalidRequestURL
-        }
+    static func makeRequest(for request: InfoServiceRequest,oauth2BaseUrl: String) async throws -> Result<InfoServiceResponse, ClientError> {
+        let url = try oauth2BaseUrl.appendingEndpoint("/csc/v2/info").get()
 
         let urlRequest = try createUrlRequest(with: url, request: request)
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
  
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw ClientError.invalidResponse
         }
-
-        do {
-            return try JSONDecoder().decode(InfoServiceResponse.self, from: data)
-        } catch {
-            throw InfoServiceError.decodingFailed
-        }
+        return handleResponse(data, response, ofType: InfoServiceResponse.self)
+        
     }
     
 
