@@ -14,28 +14,53 @@
  * limitations under the License.
  */
 
-// swift-tools-version: 6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version:6.0
 import PackageDescription
 
 let package = Package(
-    name: "RQES_LIBRARY",
-    platforms: [.iOS(.v14), .macOS(.v12)],
-    products: [
-        .library(
-            name: "RQES_LIBRARY",
-            targets: ["RQES_LIBRARY"]),
-    ],
-    targets: [
-        .target(
-            name: "RQES_LIBRARY",
-            resources: [
-                .copy("Documents")
-            ]
-        ),
-        .testTarget(
-            name: "RQES_LIBRARYTests",
-            dependencies: ["RQES_LIBRARY"]
-        ),
-    ]
+  name: "eudi-lib-ios-rqes-csc-swift",
+  platforms: [
+    .iOS(.v16)
+  ],
+  products: [
+    .library(
+      name: "RQES_LIBRARY",
+      targets: ["RQES_LIBRARY"]
+    )
+  ],
+  dependencies: [
+    // Only your remote PoDoFo package
+    .package(
+      url: "https://github.com/niscy-eudiw/eudi-podofo-lib-ios.git",
+      from: "1.0.3"
+    ),
+  ],
+  targets: [
+
+    .target(
+      name: "RQES_LIBRARY",
+      dependencies: [
+        .product(name: "PoDoFo", package: "eudi-podofo-lib-ios")
+      ],
+      path: "Sources",
+      resources: [
+        // bundles your Documents folder if you still need it
+        .copy("Documents")
+      ],
+      linkerSettings: [
+        // link the system BZip2 library
+        .linkedLibrary("bz2")
+      ]
+    ),
+
+    // 3) Your tests, bundling sample.pdf into the test bundle
+    .testTarget(
+      name: "RQES_LIBRARYTests",
+      dependencies: ["RQES_LIBRARY"],
+      path: "Tests/RQES_LIBRARYTests",
+      resources: [
+        .copy("sample.pdf")
+      ]
+    )
+  ]
 )

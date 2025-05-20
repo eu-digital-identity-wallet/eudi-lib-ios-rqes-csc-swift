@@ -37,12 +37,8 @@ public struct ConformanceLevel: RawRepresentable, Codable, Sendable, Expressible
         return rawValue
     }
 
-    public static let ADES_B_B = ConformanceLevel(rawValue: "Ades-B-B")
-    public static let ADES_B_T = ConformanceLevel(rawValue: "Ades-B-T")
-    public static let ADES_B_LT = ConformanceLevel(rawValue: "Ades-B-LT")
-    public static let ADES_B_LTA = ConformanceLevel(rawValue: "Ades-B-LTA")
-    public static let ADES_B = ConformanceLevel(rawValue: "Ades-B")
-    public static let ADES_T = ConformanceLevel(rawValue: "Ades-T")
-    public static let ADES_LT = ConformanceLevel(rawValue: "Ades-LT")
-    public static let ADES_LTA = ConformanceLevel(rawValue: "Ades-LTA")
+    public static let ADES_B_B = ConformanceLevel(rawValue: "ADES_B_B")
+    public static let ADES_B_T = ConformanceLevel(rawValue: "ADES_B_T")
+    public static let ADES_B_LT = ConformanceLevel(rawValue: "ADES_B_LT")
+    public static let ADES_B_LTA = ConformanceLevel(rawValue: "ADES_B_LTA")
 }

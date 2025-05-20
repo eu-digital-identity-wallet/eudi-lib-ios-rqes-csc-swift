@@ -21,4 +21,5 @@ public enum CalculateHashError: Error {
     case missingEndEntityCertificate
     case missingCertificateChain
     case missingHashAlgorithmID
+    case HashCalculationError(documentPath: String)
 }

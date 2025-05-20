@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import Foundation
+import PoDoFo
 
 public class RQES {
     private let infoService: InfoServiceType
@@ -21,11 +22,10 @@ public class RQES {
     private let credentialsListService: CredentialsListServiceType
     private let credentialsInfoService: CredentialsInfoServiceType
     private let signHashService: SignHashServiceType
-    private let calculateHashService: CalculateHashServiceType
-    private let obtainSignedDocService: ObtainSignedDocServiceType
     private let prepareAuthorizationRequestService: PrepareAuthorizationRequestServiceType 
     private var baseProviderUrl: String
     private let cscClientConfig: CSCClientConfig
+    private let podofoManager: PodofoManager
     
     public init(cscClientConfig: CSCClientConfig ) async {
         self.infoService = await ServiceLocator.shared.resolve() ?? InfoService()
@@ -33,11 +33,10 @@ public class RQES {
         self.credentialsListService = await ServiceLocator.shared.resolve() ?? CredentialsListService()
         self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CredentialsInfoService()
         self.signHashService = await ServiceLocator.shared.resolve() ?? SignHashService()
-        self.calculateHashService = await ServiceLocator.shared.resolve() ?? CalculateHashService()
-        self.obtainSignedDocService = await ServiceLocator.shared.resolve() ?? ObtainSignedDocService()
         self.prepareAuthorizationRequestService = await ServiceLocator.shared.resolve() ?? PrepareAuthorizationRequestService()
         self.baseProviderUrl = cscClientConfig.scaBaseURL
         self.cscClientConfig = cscClientConfig
+        self.podofoManager = PodofoManager()
     }
 
     public func getInfo(request: InfoServiceRequest? = nil) async throws -> InfoServiceResponse {
@@ -62,12 +61,12 @@ public class RQES {
         return try await signHashService.signHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
     }
 
-    public func calculateDocumentHashes(request: CalculateHashRequest, accessToken: String) async throws -> DocumentDigests {
-        return try await calculateHashService.calculateHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
+    public func calculateDocumentHashes(request: CalculateHashRequest) async throws -> DocumentDigests {
+        return try await podofoManager.calculateDocumentHashes(request: request)
     }
 
-    public func getSignedDocuments(request: ObtainSignedDocRequest, accessToken: String) async throws -> SignedDocuments {
-        return try await obtainSignedDocService.obtainSignedDoc(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
+    public func createSignedDocuments(signatures: [String]) async throws {
+       return try await  podofoManager.createSignedDocuments(signatures: signatures)
     }
     
     public func prepareServiceAuthorizationRequest(walletState: String) async throws -> AuthorizationPrepareResponse {
