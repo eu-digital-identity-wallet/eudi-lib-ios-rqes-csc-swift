@@ -48,8 +48,8 @@ In R5, the calculation is fully **offline** and operates on **file paths** inste
 let calculateHashRequest = CalculateHashRequest(
     documents: [
         CalculateHashRequest.Document(
-            document_inputPath: inputURL.path,
-            document_outputPath: outputURL.path,
+            documentInputPath: inputURL.path,
+            documentOutputPath: outputURL.path,
             signatureFormat: SignatureFormat.P,
             conformanceLevel: ConformanceLevel.ADES_B_B,
             signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,
@@ -98,7 +98,7 @@ let signedDocuments = try await rqes.getSignedDocuments(request: obtainSignedDoc
 
 #### ✅ Now (R5)
 
-The signed document is created **locally** by embedding the provided `signatures` into the original document. The method directly writes the result to the declared `document_outputPath`. The method `getSignedDocuments` has been renamed to `createSignedDocuments`.
+The signed document is created **locally** by embedding the provided `signatures` into the original document. The method directly writes the result to the declared `documentOutputPath`. The method `getSignedDocuments` has been renamed to `createSignedDocuments`.
 
 **New Example:**
 ```swift
@@ -107,7 +107,7 @@ let signatures = signHashResponse.signatures
 try await rqes.createSignedDocuments(signatures: signatures!)
 ```
 
-This embeds each `signature` into the respective input PDF (using `document_inputPath`) and creates the final signed document at `document_outputPath`.
+This embeds each `signature` into the respective input PDF (using `documentInputPath`) and creates the final signed document at `documentOutputPath`.
 
 ---
 
@@ -121,4 +121,4 @@ This embeds each `signature` into the respective input PDF (using `document_inpu
 | Access Token Required              | ✅ Yes                                            | ❌ No                                        |
 | Hash Calculation                   | Remote API                                       | Local Processing                             |
 | Signature Embedding & PDF Creation | Remote API                                       | Local Processing                             |
-| Output Format                      | Base64-encoded Signed PDF                        | Written to `document_outputPath`             |
+| Output Format                      | Base64-encoded Signed PDF                        | Written to `documentOutputPath`             |

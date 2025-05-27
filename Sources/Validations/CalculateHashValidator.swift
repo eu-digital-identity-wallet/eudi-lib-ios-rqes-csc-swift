@@ -24,7 +24,7 @@ struct CalculateHashValidator {
         }
 
         for document in request.documents {
-            guard !document.document_inputPath.isEmpty else {
+            guard !document.documentInputPath.isEmpty else {
                 throw CalculateHashError.invalidDocument
             }
         }

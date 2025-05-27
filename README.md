@@ -304,8 +304,8 @@ class RQESHandler {
         let calculateHashRequest = CalculateHashRequest(
             documents: [
                 CalculateHashRequest.Document(
-                    document_inputPath: inputURL.path,
-                    document_outputPath: outputURL.path,
+                    documentInputPath: inputURL.path,
+                    documentOutputPath: outputURL.path,
                     signatureFormat: SignatureFormat.P,
                     conformanceLevel: ConformanceLevel.ADES_B_B,
                     signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,
@@ -371,7 +371,7 @@ class RQESHandler {
         // STEP 11 (R5): Obtain the signed document
         let signatures = signHashResponse.signatures
         
-        try await rqes.createSignedDocuments(signatures: signatures!) //Signed PDF created in document_outputPath
+        try await rqes.createSignedDocuments(signatures: signatures!) //Signed PDF created in documentOutputPath
 
         
         

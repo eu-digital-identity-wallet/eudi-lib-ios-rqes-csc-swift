@@ -31,8 +31,8 @@ public actor PodofoManager {
                 let podofoWrapper = try PodofoWrapper(
                     conformanceLevel: doc.conformanceLevel.rawValue,
                     hashAlgorithm:    request.hashAlgorithmOID.rawValue,
-                    inputPath:        doc.document_inputPath,
-                    outputPath:       doc.document_outputPath,
+                    inputPath:        doc.documentInputPath,
+                    outputPath:       doc.documentOutputPath,
                     certificate:      request.endEntityCertificate,
                     chainCertificates: request.certificateChain
                 )
@@ -43,10 +43,10 @@ public actor PodofoManager {
                     hashes.append(hash)
                     podofoSessions.append(session)
                 } else {
-                    throw CalculateHashError.HashCalculationError(documentPath: doc.document_inputPath)
+                    throw CalculateHashError.hashCalculationError(documentPath: doc.documentInputPath)
                 }
             } catch {
-                print("Failed to calculate hash for \(doc.document_inputPath): \(error)")
+                print("Failed to calculate hash for \(doc.documentInputPath): \(error)")
             }
         }
         
