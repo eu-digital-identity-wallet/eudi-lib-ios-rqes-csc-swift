@@ -29,10 +29,9 @@ let package = Package(
     )
   ],
   dependencies: [
-    // Only your remote PoDoFo package
     .package(
       url: "https://github.com/niscy-eudiw/eudi-podofo-lib-ios.git",
-      from: "1.0.3"
+      from: "1.0.5"
     ),
   ],
   targets: [
