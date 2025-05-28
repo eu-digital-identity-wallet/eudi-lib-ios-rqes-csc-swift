@@ -1,0 +1,15 @@
+{
+  "originHash" : "a7f27e964350b5de50a8c6bcc1d6544fa9802bc9f413ac0c3a2e7a3dd40abeba",
+  "pins" : [
+    {
+      "identity" : "eudi-podofo-lib-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/niscy-eudiw/eudi-podofo-lib-ios.git",
+      "state" : {
+        "revision" : "a26f399925e0b37704f0413e74c274ad93b119d6",
+        "version" : "1.0.4"
+      }
+    }
+  ],
+  "version" : 3
+}

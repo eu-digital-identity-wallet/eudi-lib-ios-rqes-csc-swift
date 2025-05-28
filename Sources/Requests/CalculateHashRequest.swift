@@ -29,14 +29,16 @@ public struct CalculateHashRequest: Codable, Sendable {
     }
     
     public struct Document: Codable, Sendable {
-        public let document: String
+        public let documentInputPath: String
+        public let documentOutputPath: String
         public let signatureFormat: SignatureFormat
         public let conformanceLevel: ConformanceLevel
         public let signedEnvelopeProperty: SignedEnvelopeProperty
         public let container: String
 
         enum CodingKeys: String, CodingKey {
-            case document
+            case documentInputPath
+            case documentOutputPath
             case signatureFormat = "signature_format"
             case conformanceLevel = "conformance_level"
             case signedEnvelopeProperty = "signed_envelope_property"
@@ -44,13 +46,15 @@ public struct CalculateHashRequest: Codable, Sendable {
         }
         
         public init(
-            document: String,
+            documentInputPath: String,
+            documentOutputPath: String,
             signatureFormat: SignatureFormat,
             conformanceLevel: ConformanceLevel,
             signedEnvelopeProperty: SignedEnvelopeProperty,
             container: String
         ) {
-            self.document = document
+            self.documentInputPath = documentInputPath
+            self.documentOutputPath = documentOutputPath
             self.signatureFormat = signatureFormat
             self.conformanceLevel = conformanceLevel
             self.signedEnvelopeProperty = signedEnvelopeProperty

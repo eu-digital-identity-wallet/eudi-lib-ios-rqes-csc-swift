@@ -17,6 +17,7 @@ the [EUDI Wallet Reference Implementation project description](https://github.co
 * [How to contribute](#how-to-contribute)
 * [License](#license)
 
+See [CHANGELOG.md](./CHANGELOG.md) for the latest updates.
 
 ## Overview
 
@@ -299,23 +300,24 @@ class RQESHandler {
         // encodes it in Base64 format, and assigns it to the pdfDocument variable for further processing.
         let pdfDocument = FileUtils.getBase64EncodedDocument(fileNameWithExtension: "sample 1.pdf")
         
-        // STEP 7: Prepare and execute a request to calculate the hash for the specified document
+        // STEP 7 (R5): Prepare and execute a request to calculate the hash for the specified document
         let calculateHashRequest = CalculateHashRequest(
             documents: [
                 CalculateHashRequest.Document(
-                    document: pdfDocument!,
+                    documentInputPath: inputURL.path,
+                    documentOutputPath: outputURL.path,
                     signatureFormat: SignatureFormat.P,
                     conformanceLevel: ConformanceLevel.ADES_B_B,
                     signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,
                     container: "No"
                 )
             ],
-            endEntityCertificate: (credentialInfoResponse.cert?.certificates?[0])!,
-            certificateChain: [(credentialInfoResponse.cert?.certificates?[1])!],
+            endEntityCertificate: self.endEntityCertificate,
+            certificateChain: self.certificateChain,
             hashAlgorithmOID: HashAlgorithmOID.SHA256
         )
                 
-        let documentDigests = try await rqes.calculateDocumentHashes(request: calculateHashRequest, accessToken: accessTokenResponse.accessToken)
+        let documentDigests = try await rqes.calculateDocumentHashes(request: calculateHashRequest)
         JSONUtils.prettyPrintResponseAsJSON(documentDigests, message: "Calculate Document Hash Response:")
 
         // STEP 8: Set up an credential authorization request using OAuth2AuthorizeRequest with required parameters
@@ -366,32 +368,11 @@ class RQESHandler {
         JSONUtils.prettyPrintResponseAsJSON(signHashResponse, message: "Sign Hash Response:")
         
         
-        // STEP 11: Obtain the signed document
-        let obtainSignedDocRequest = ObtainSignedDocRequest(
-            documents: [
-                ObtainSignedDocRequest.Document(
-                    document: pdfDocument!,
-                    signatureFormat: SignatureFormat.P,
-                    conformanceLevel: ConformanceLevel.ADES_B_B,
-                    signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,
-                    container: "No"
-                )
-            ],
-            endEntityCertificate: credentialInfoResponse.cert?.certificates?.first ?? "",
-            certificateChain: credentialInfoResponse.cert?.certificates?.dropFirst().map { $0 } ?? [],
-            hashAlgorithmOID: HashAlgorithmOID.SHA256,
-            date: documentDigests.signatureDate,
-            signatures: signHashResponse.signatures ?? []
-        )
+        // STEP 11 (R5): Obtain the signed document
+        let signatures = signHashResponse.signatures
         
-        let signedDocuments = try await rqes.getSignedDocuments(request: obtainSignedDocRequest, accessToken: accessCredentialTokenResponse.accessToken)
-        JSONUtils.prettyPrintResponseAsJSON(signedDocuments, message: "signed Documents Response:")
-        
-        
-        let base64String = signedDocuments.documentWithSignature[0]
-        
-        // Save the decoded data to the user's documents folder
-        FileUtils.decodeAndSaveBase64Document(base64String: base64String, fileNameWithExtension: "signed.pdf")
+        try await rqes.createSignedDocuments(signatures: signatures!) //Signed PDF created in documentOutputPath
+
         
         
     }
