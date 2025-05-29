@@ -17,15 +17,12 @@ import Foundation
 
 public struct DocumentDigests: Codable, Sendable {
     public let hashes: [String]
-    public let signatureDate: Int
     
     enum CodingKeys: String, CodingKey {
         case hashes
-        case signatureDate = "signature_date"
     }
     
-    public init(hashes: [String], signatureDate: Int) {
+    public init(hashes: [String]) {
         self.hashes = hashes
-        self.signatureDate = signatureDate
     }
 }
