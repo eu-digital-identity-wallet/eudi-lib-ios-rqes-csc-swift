@@ -22,11 +22,18 @@ public actor PodofoManager {
     
     public init() {}
     
-    public func calculateDocumentHashes(request: CalculateHashRequest) async throws -> DocumentDigests {
+    public func calculateDocumentHashes(request: CalculateHashRequest, tsaUrl: String) async throws -> DocumentDigests {
         podofoSessions.removeAll()
         var hashes: [String] = []
         var c = 1
+        
+        try validateTsaUrlRequirement(
+            for: request.documents,
+            tsaUrl: tsaUrl
+        )
+        
         for doc in request.documents {
+            
             do {
                 let podofoWrapper = try PodofoWrapper(
                     conformanceLevel: doc.conformanceLevel.rawValue,
@@ -55,8 +62,8 @@ public actor PodofoManager {
         )
         return documentDigest
     }
-    
-    public func createSignedDocuments(signatures: [String]) async throws {
+
+    public func createSignedDocuments(signatures: [String], tsaUrl: String) async throws {
         defer { podofoSessions.removeAll() }
         
         guard signatures.count == podofoSessions.count else {
@@ -71,6 +78,16 @@ public actor PodofoManager {
             let signedHash     = signatures[i]
             sessionWrapper.session.printState()
             sessionWrapper.session.finalizeSigning(withSignedHash: signedHash)
+        }
+    }
+    
+    private func validateTsaUrlRequirement(for docs: [CalculateHashRequest.Document], tsaUrl: String
+    ) throws {
+        for doc in docs {
+            // only ADES_B_B (Pades-b-t) is allowed to have an empty TSA URL
+            if doc.conformanceLevel != .ADES_B_B && tsaUrl.isEmpty {
+                throw CalculateHashError.missingTsaURL(conformanceLevel: doc.conformanceLevel.rawValue )
+            }
         }
     }
 }

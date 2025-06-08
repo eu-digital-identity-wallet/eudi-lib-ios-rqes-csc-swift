@@ -62,11 +62,11 @@ public class RQES {
     }
 
     public func calculateDocumentHashes(request: CalculateHashRequest) async throws -> DocumentDigests {
-        return try await podofoManager.calculateDocumentHashes(request: request)
+        return try await podofoManager.calculateDocumentHashes(request: request, tsaUrl: cscClientConfig.tsaUrl)
     }
 
     public func createSignedDocuments(signatures: [String]) async throws {
-       return try await  podofoManager.createSignedDocuments(signatures: signatures)
+        return try await podofoManager.createSignedDocuments(signatures: signatures, tsaUrl: cscClientConfig.tsaUrl)
     }
     
     public func prepareServiceAuthorizationRequest(walletState: String) async throws -> AuthorizationPrepareResponse {

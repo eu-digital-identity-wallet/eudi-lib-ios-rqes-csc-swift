@@ -19,12 +19,13 @@ public struct CSCClientConfig: Codable, Sendable {
     public let OAuth2Client: OAuth2Client
     public let authFlowRedirectionURI: String
     public let scaBaseURL: String
-    
+    public let tsaUrl: String
   
-    public init(OAuth2Client: OAuth2Client, authFlowRedirectionURI: String, scaBaseURL: String) {
+    public init(OAuth2Client: OAuth2Client, authFlowRedirectionURI: String, scaBaseURL: String, tsaUrl: String? = nil) {
         self.OAuth2Client = OAuth2Client
         self.authFlowRedirectionURI = authFlowRedirectionURI
         self.scaBaseURL = scaBaseURL
+        self.tsaUrl = tsaUrl ?? ""
     }
     
     public struct OAuth2Client: Codable, Sendable {
