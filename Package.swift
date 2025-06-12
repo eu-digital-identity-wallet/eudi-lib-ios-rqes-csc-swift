@@ -28,31 +28,24 @@ let package = Package(
       targets: ["RQES_LIBRARY"]
     )
   ],
-  dependencies: [
-    .package(
-      url: "https://github.com/niscy-eudiw/eudi-podofo-lib-ios.git",
-      from: "1.0.5"
-    ),
-  ],
   targets: [
-
+    .binaryTarget(
+      name: "PoDoFo",
+      path: "Frameworks/PoDoFo.xcframework"
+    ),
     .target(
       name: "RQES_LIBRARY",
       dependencies: [
-        .product(name: "PoDoFo", package: "eudi-podofo-lib-ios")
+        "PoDoFo"
       ],
       path: "Sources",
       resources: [
-        // bundles your Documents folder if you still need it
         .copy("Documents")
       ],
       linkerSettings: [
-        // link the system BZip2 library
-        .linkedLibrary("bz2")
+        .linkedLibrary("bz2") // PoDoFo needs bz2
       ]
     ),
-
-    // 3) Your tests, bundling sample.pdf into the test bundle
     .testTarget(
       name: "RQES_LIBRARYTests",
       dependencies: ["RQES_LIBRARY"],
