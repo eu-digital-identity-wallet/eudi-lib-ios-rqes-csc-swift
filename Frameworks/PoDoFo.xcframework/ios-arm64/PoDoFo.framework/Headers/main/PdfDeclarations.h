@@ -858,6 +858,9 @@ enum class PdfSignatureType : uint8_t
     Unknown = 0,
     PAdES_B = 1,
     Pkcs7 = 2,
+    PAdES_B_T = 3,
+    PAdES_B_LT = 4,
+    PAdES_B_LTA = 5,
 };
 
 enum class PdfSignatureEncryption : uint8_t

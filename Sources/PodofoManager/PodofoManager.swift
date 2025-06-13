@@ -72,19 +72,26 @@ public actor PodofoManager {
                 countSignatures: signatures.count
             )
         }
+        
+        let tsService = TimestampService()
 
         for i in 0..<podofoSessions.count {
             let sessionWrapper = podofoSessions[i]
             let signedHash     = signatures[i]
             sessionWrapper.session.printState()
-            sessionWrapper.session.finalizeSigning(withSignedHash: signedHash)
+            let tsRequest = TimestampRequest(
+                signedHash: signedHash,
+                tsaUrl: tsaUrl
+            )
+            let tsResponse = try await tsService.requestTimestamp(request: tsRequest)
+
+            sessionWrapper.session.finalizeSigning(withSignedHash: signedHash, tsr: tsResponse.base64Tsr)
         }
     }
     
     private func validateTsaUrlRequirement(for docs: [CalculateHashRequest.Document], tsaUrl: String
     ) throws {
         for doc in docs {
-            // only ADES_B_B (Pades-b-t) is allowed to have an empty TSA URL
             if doc.conformanceLevel != .ADES_B_B && tsaUrl.isEmpty {
                 throw CalculateHashError.missingTsaURL(conformanceLevel: doc.conformanceLevel.rawValue )
             }

@@ -12,7 +12,7 @@
 
 extern "C"
 {
-    // OpenSSL forward 
+    // OpenSSL forward
     struct evp_pkey_st;
 }
 
@@ -96,6 +96,10 @@ namespace PoDoFo
          */
         void AddAttribute(const std::string_view& nid, const bufferview& attr, PdfSignatureAttributeFlags flags = PdfSignatureAttributeFlags::None);
 
+        /** Embed a timestamp token (RFC 3161) as unsigned CMS attribute */
+        void SetTimestampToken(const bufferview& tsr);
+
+
         /**
          * Reserve some size in the final signature. It is used in dry-runs to enlarge the signature buffer
          * \remarks the total reserved size is reset on Reset()
@@ -123,6 +127,7 @@ namespace PoDoFo
         // Temporary buffer variables
         // NOTE: Don't clear it in Reset() override
         charbuff m_encryptedHash;
+        bufferview m_timestampToken;  // Optional RFC 3161 timestamp (DER)
     };
 }
 
