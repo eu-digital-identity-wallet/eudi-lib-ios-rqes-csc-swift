@@ -37,6 +37,14 @@ final class TimestampUtilsTests: XCTestCase {
         }
     }
     
+    func testBuildTSQWithEmptyHash() {
+        let emptyHash = ""
+
+        XCTAssertThrowsError(try TimestampUtils.buildTSQ(from: emptyHash)) { error in
+            XCTAssertEqual(error as? TimestampUtilsError, .emptyHash)
+        }
+    }
+    
     func testBuildTSQWithDifferentInputs() throws {
         let testCases = [
             "U29tZVRlc3REYXRh", // "SomeTestData" in base64

@@ -19,11 +19,16 @@ import CryptoKit
 
 public enum TimestampUtilsError: Error {
     case invalidBase64Hash
+    case emptyHash
 }
 
 public struct TimestampUtils {
 
     public static func buildTSQ(from signedHash: String) throws -> Data {
+
+        guard !signedHash.isEmpty else {
+            throw TimestampUtilsError.emptyHash
+        }
 
         guard let raw = Data(base64Encoded: signedHash) else {
             throw TimestampUtilsError.invalidBase64Hash
