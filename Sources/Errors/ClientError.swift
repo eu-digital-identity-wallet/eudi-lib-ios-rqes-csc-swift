@@ -15,7 +15,7 @@
  */
 import Foundation
 
-public enum ClientError: LocalizedError {
+public enum ClientError: LocalizedError, Equatable {
     case invalidRequestURL
     case invalidResponse
     case encodingFailed

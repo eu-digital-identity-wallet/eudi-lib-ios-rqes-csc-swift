@@ -34,34 +34,25 @@ final class TimestampServiceTests: XCTestCase {
     // MARK: - Success Tests
     
     func testRequestTimestampWithValidRequest() async throws {
-        // Given
         let request = createValidTimestampRequest()
-        
-        // When
+
         let response = try await timestampService.requestTimestamp(request: request)
-        
-        // Then
+
         XCTAssertNotNil(response, "Response should not be nil")
         XCTAssertFalse(response.base64Tsr.isEmpty, "Base64 TSR should not be empty")
         XCTAssertTrue(response.base64Tsr.count > 0, "Base64 TSR should have content")
-        
-        // Verify the response is valid base64
+
         let decodedData = Data(base64Encoded: response.base64Tsr)
         XCTAssertNotNil(decodedData, "Base64 TSR should be valid and decodable")
     }
     
     func testRequestTimestampWithDifferentValidHashes() async throws {
-        let testCases = [
-            "SGVsbG8gV29ybGQ=", // "Hello World" in base64
-            "U29tZVRlc3REYXRh", // "SomeTestData" in base64
-            "VGVzdFN0cmluZw==", // "TestString" in base64
-            "MTIzNDU2Nzg5MA=="  // "1234567890" in base64
-        ]
+        let testCases = TimestampTestConstants.Hashes.testCases
         
         for testCase in testCases {
             let request = TimestampRequest(
                 signedHash: testCase,
-                tsaUrl: TestConstants.tsaUrl
+                tsaUrl: TimestampTestConstants.URLs.tsaUrl
             )
             
             let response = try await timestampService.requestTimestamp(request: request)
@@ -75,17 +66,15 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithLargeHash() async throws {
-        // Given
-        let largeHash = String(repeating: "A", count: 1000).data(using: .utf8)!.base64EncodedString()
+
+        let largeHash = String(repeating: "A", count: TimestampTestConstants.Data.largeDataSize).data(using: .utf8)!.base64EncodedString()
         let request = TimestampRequest(
             signedHash: largeHash,
-            tsaUrl: TestConstants.tsaUrl
+            tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
-        
-        // When
+
         let response = try await timestampService.requestTimestamp(request: request)
-        
-        // Then
+
         XCTAssertNotNil(response, "Response should not be nil for large hash")
         XCTAssertFalse(response.base64Tsr.isEmpty, "Base64 TSR should not be empty for large hash")
         
@@ -96,13 +85,12 @@ final class TimestampServiceTests: XCTestCase {
     // MARK: - Error Tests
     
     func testRequestTimestampWithInvalidBase64Hash() async {
-        // Given
+
         let request = TimestampRequest(
-            signedHash: "InvalidBase64!@#",
-            tsaUrl: TestConstants.tsaUrl
+            signedHash: TimestampTestConstants.Hashes.invalidSignedHash,
+            tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
-        
-        // When & Then
+
         do {
             _ = try await timestampService.requestTimestamp(request: request)
             XCTFail("Should throw error for invalid base64 hash")
@@ -112,13 +100,12 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithEmptyHash() async {
-        // Given
+
         let request = TimestampRequest(
             signedHash: "",
-            tsaUrl: TestConstants.tsaUrl
+            tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
-        
-        // When & Then
+
         do {
             _ = try await timestampService.requestTimestamp(request: request)
             XCTFail("Should throw error for empty hash")
@@ -128,13 +115,12 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithInvalidTsaUrl() async {
-        // Given
+
         let request = TimestampRequest(
-            signedHash: TestConstants.validSignedHash,
-            tsaUrl: "invalid-url"
+            signedHash: TimestampTestConstants.Hashes.validSignedHash,
+            tsaUrl: TimestampTestConstants.URLs.invalidTsaUrl
         )
-        
-        // When & Then
+
         do {
             _ = try await timestampService.requestTimestamp(request: request)
             XCTFail("Should throw error for invalid TSA URL")
@@ -144,13 +130,12 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithEmptyTsaUrl() async {
-        // Given
+
         let request = TimestampRequest(
-            signedHash: TestConstants.validSignedHash,
+            signedHash: TimestampTestConstants.Hashes.validSignedHash,
             tsaUrl: ""
         )
-        
-        // When & Then
+
         do {
             _ = try await timestampService.requestTimestamp(request: request)
             XCTFail("Should throw error for empty TSA URL")
@@ -160,13 +145,12 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithUnreachableTsaUrl() async {
-        // Given
+
         let request = TimestampRequest(
-            signedHash: TestConstants.validSignedHash,
-            tsaUrl: "https://unreachable-tsa-server.com/timestamp"
+            signedHash: TimestampTestConstants.Hashes.validSignedHash,
+            tsaUrl: TimestampTestConstants.URLs.unreachableTsaUrl
         )
-        
-        // When & Then
+
         do {
             _ = try await timestampService.requestTimestamp(request: request)
             XCTFail("Should throw error for unreachable TSA URL")
@@ -178,36 +162,29 @@ final class TimestampServiceTests: XCTestCase {
     // MARK: - Integration Tests
     
     func testTimestampServiceIntegrationWithTimestampUtils() async throws {
-        // Given
+
         let request = createValidTimestampRequest()
-        
-        // When
+
         let response = try await timestampService.requestTimestamp(request: request)
-        
-        // Then
+
         XCTAssertNotNil(response, "Response should not be nil")
-        
-        // Verify the response can be processed by TimestampUtils
+
         let decodedData = Data(base64Encoded: response.base64Tsr)
         XCTAssertNotNil(decodedData, "Response should be valid base64")
-        
-        // Verify the encoded TSR matches the original data
+
         let reEncoded = TimestampUtils.encodeTSRToBase64(decodedData!)
         XCTAssertEqual(reEncoded, response.base64Tsr, "Re-encoded TSR should match original")
     }
     
     func testTimestampServiceWithRealisticSignedHash() async throws {
-        // Given - Using a realistic signed hash from the PoDoFo integration test
-        let realisticSignedHash = "MEUCIQCpel09QAFtK/fPUvn+Nhx4VPH7Fm+vspv/UXluxXSKBAIge68SlU0JHVJCbKABh1GpNEiU2gD9sMVaWtLBv3Vb7kE="
+        let realisticSignedHash = TimestampTestConstants.Hashes.realisticSignedHash
         let request = TimestampRequest(
             signedHash: realisticSignedHash,
-            tsaUrl: TestConstants.tsaUrl
+            tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
-        
-        // When
+
         let response = try await timestampService.requestTimestamp(request: request)
-        
-        // Then
+
         XCTAssertNotNil(response, "Response should not be nil for realistic signed hash")
         XCTAssertFalse(response.base64Tsr.isEmpty, "Base64 TSR should not be empty")
         
@@ -219,21 +196,8 @@ final class TimestampServiceTests: XCTestCase {
     
     private func createValidTimestampRequest() -> TimestampRequest {
         return TimestampRequest(
-            signedHash: TestConstants.validSignedHash,
-            tsaUrl: TestConstants.tsaUrl
+            signedHash: TimestampTestConstants.Hashes.validSignedHash,
+            tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
     }
-}
-
-// MARK: - Test Constants
-
-private enum TestConstants {
-    static let validSignedHash = "SGVsbG8gV29ybGQ=" // "Hello World" in base64
-    static let invalidSignedHash = "InvalidBase64!@#"
-    static let tsaUrl = "https://freetsa.org/tsr" // Example TSA URL
-    static let testDataString = "Test data for timestamping"
-    static let largeDataByte: UInt8 = 0x42
-    static let largeDataSize = 1000
-    static let certificate = "MIIDHTCCAqOgAwIBAgIUVqjgtJqf4hUYJkqdYzi+0xwhwFYwCgYIKoZIzj0EAwMwXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMB4XDTIzMDkwMTE4MzQxN1oXDTMyMTEyNzE4MzQxNlowXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEFg5Shfsxp5R/UFIEKS3L27dwnFhnjSgUh2btKOQEnfb3doyeqMAvBtUMlClhsF3uefKinCw08NB31rwC+dtj6X/LE3n2C9jROIUN8PrnlLS5Qs4Rs4ZU5OIgztoaO8G9o4IBJDCCASAwEgYDVR0TAQH/BAgwBgEB/wIBADAfBgNVHSMEGDAWgBSzbLiRFxzXpBpmMYdC4YvAQMyVGzAWBgNVHSUBAf8EDDAKBggrgQICAAABBzBDBgNVHR8EPDA6MDigNqA0hjJodHRwczovL3ByZXByb2QucGtpLmV1ZGl3LmRldi9jcmwvcGlkX0NBX1VUXzAxLmNybDAdBgNVHQ4EFgQUs2y4kRcc16QaZjGHQuGLwEDMlRswDgYDVR0PAQH/BAQDAgEGMF0GA1UdEgRWMFSGUmh0dHBzOi8vZ2l0aHViLmNvbS9ldS1kaWdpdGFsLWlkZW50aXR5LXdhbGxldC9hcmNoaXRlY3R1cmUtYW5kLXJlZmVyZW5jZS1mcmFtZXdvcmswCgYIKoZIzj0EAwMDaAAwZQIwaXUA3j++xl/tdD76tXEWCikfM1CaRz4vzBC7NS0wCdItKiz6HZeV8EPtNCnsfKpNAjEAqrdeKDnr5Kwf8BA7tATehxNlOV4Hnc10XO1XULtigCwb49RpkqlS2Hul+DpqObUs"
-    static let chainCertificate = "MIIDHTCCAqOgAwIBAgIUVqjgtJqf4hUYJkqdYzi+0xwhwFYwCgYIKoZIzj0EAwMwXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMB4XDTIzMDkwMTE4MzQxN1oXDTMyMTEyNzE4MzQxNlowXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEFg5Shfsxp5R/UFIEKS3L27dwnFhnjSgUh2btKOQEnfb3doyeqMAvBtUMlClhsF3uefKinCw08NB31rwC+dtj6X/LE3n2C9jROIUN8PrnlLS5Qs4Rs4ZU5OIgztoaO8G9o4IBJDCCASAwEgYDVR0TAQH/BAgwBgEB/wIBADAfBgNVHSMEGDAWgBSzbLiRFxzXpBpmMYdC4YvAQMyVGzAWBgNVHSUBAf8EDDAKBggrgQICAAABBzBDBgNVHR8EPDA6MDigNqA0hjJodHRwczovL3ByZXByb2QucGtpLmV1ZGl3LmRldi9jcmwvcGlkX0NBX1VUXzAxLmNybDAdBgNVHQ4EFgQUs2y4kRcc16QaZjGHQuGLwEDMlRswDgYDVR0PAQH/BAQDAgEGMF0GA1UdEgRWMFSGUmh0dHBzOi8vZ2l0aHViLmNvbS9ldS1kaWdpdGFsLWlkZW50aXR5LXdhbGxldC9hcmNoaXRlY3R1cmUtYW5kLXJlZmVyZW5jZS1mcmFtZXdvcmswCgYIKoZIzj0EAwMDaAAwZQIwaXUA3j++xl/tdD76tXEWCikfM1CaRz4vzBC7NS0wCdItKiz6HZeV8EPtNCnsfKpNAjEAqrdeKDnr5Kwf8BA7tATehxNlOV4Hnc10XO1XULtigCwb49RpkqlS2Hul+DpqObUs"
 } 
