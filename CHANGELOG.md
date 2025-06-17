@@ -1,5 +1,61 @@
 # 📦 Changelog
 
+
+## [R5] - 2025-17-6 - Added Support for Pades B-T 
+
+### 🔄 Changed
+In **R5**, the `ConformanceLevel` enum has been extended to include support for **Pades B-T** signatures. This allows users to create PDF signatures that comply with the PAdES B-T standard, which includes a timestamp.
+
+In order to add support for Pades B-T, you must update the constructor of the `RQES` class to include a new `tsaUrl` parameter in the `CSCClientConfig`. This URL points to a trusted timestamp authority (TSA) service that will be used to obtain timestamps for signatures.
+
+Also, you must set the `conformanceLevel` to `.ADES_B_T` when creating the signature request.
+
+So, now both Pades B and Pades B-T signatures are supported.
+
+```Swift
+CalculateHashRequest.Document(
+    documentInputPath: inputURL.path,
+    documentOutputPath: outputURL.path,
+    signatureFormat: SignatureFormat.P,
+    conformanceLevel: ConformanceLevel.ADES_B_T,
+    signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,
+    container: "No"
+)
+```
+
+#### 🔁 Previous (R3)
+
+```Swift
+let cscClientConfig = CSCClientConfig(
+    OAuth2Client: CSCClientConfig.OAuth2Client(
+        clientId: "wallet-client",
+        clientSecret: "somesecret2"
+    ),
+    authFlowRedirectionURI: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
+    scaBaseURL: "https://walletcentric.signer.eudiw.dev"
+)
+self.rqes = await RQES(cscClientConfig: cscClientConfig)
+```
+
+#### ✅ Now (R5)
+
+```Swift
+let cscClientConfig = CSCClientConfig(
+    OAuth2Client: CSCClientConfig.OAuth2Client(
+        clientId: "wallet-client",
+        clientSecret: "somesecret2"
+    ),
+    authFlowRedirectionURI: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
+    scaBaseURL: "https://walletcentric.signer.eudiw.dev",
+    tsaUrl: "http://ts.cartaodecidadao.pt/tsa/server"
+)
+self.rqes = await RQES(cscClientConfig: cscClientConfig)
+```
+
+
+
+
+
 ## [R5] - 2025-21-5 - Refactoring Hash & PDF Signing Flow
 
 ### 🔄 Changed
