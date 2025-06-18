@@ -58,8 +58,9 @@ NS_ASSUME_NONNULL_BEGIN
  * This is the final step that creates the signed document at the output path.
  *
  * @param signedHash The signed hash returned from a signing service
+ * @param tsr The timestamp service response
  */
-- (void)finalizeSigningWithSignedHash:(NSString *)signedHash;
+- (void)finalizeSigningWithSignedHash:(NSString *)signedHash tsr:(NSString *)tsr;
 
 @end
 

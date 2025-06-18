@@ -15,11 +15,21 @@
  */
  import Foundation
 
-public enum CalculateHashError: Error {
+public enum CalculateHashError: LocalizedError {
     case missingDocuments
     case invalidDocument
     case missingEndEntityCertificate
     case missingCertificateChain
     case missingHashAlgorithmID
+    case missingTsaURL(conformanceLevel: String)
     case hashCalculationError(documentPath: String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .missingTsaURL(let conformanceLevel):
+            return "For conformance level “\(conformanceLevel)” you must provide a TSR_URL."
+        default:
+            return nil
+        }
+    }
 }

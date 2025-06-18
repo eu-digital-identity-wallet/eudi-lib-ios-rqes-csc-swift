@@ -15,12 +15,15 @@
  */
 import Foundation
 
-public enum ClientError: LocalizedError {
+public enum ClientError: LocalizedError, Equatable {
     case invalidRequestURL
     case invalidResponse
     case encodingFailed
     case clientError(message: String, statusCode: Int)
-    
+    case httpError(statusCode: Int)
+    case noData
+    case responseDecodingError
+
     public var errorDescription: String? {
         switch self {
         case .invalidRequestURL:
@@ -28,9 +31,15 @@ public enum ClientError: LocalizedError {
         case .invalidResponse:
             return "The response was invalid."
         case .encodingFailed:
-            return "The encoding failed."
+            return "Failed to encode the request."
         case .clientError(let message, let statusCode):
-            return "Server Response (Status Code: \(statusCode)): \(message)"
+            return "Server response (status code \(statusCode)): \(message)"
+        case .httpError(let statusCode):
+            return "HTTP error with status code \(statusCode)."
+        case .noData:
+            return "No data was returned by the server."
+        case .responseDecodingError:
+            return "Failed to decode the server response."
         }
     }
 }

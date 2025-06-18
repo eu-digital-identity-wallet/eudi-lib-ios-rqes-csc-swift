@@ -28,6 +28,9 @@ let package = Package(
       targets: ["RQES_LIBRARY"]
     )
   ],
+  dependencies: [
+      //.package(url: "https://github.com/apple/swift-asn1.git", .upToNextMajor(from: "1.0.0"))
+  ],
   targets: [
     .binaryTarget(
       name: "PoDoFo",
@@ -37,6 +40,7 @@ let package = Package(
       name: "RQES_LIBRARY",
       dependencies: [
         "PoDoFo"
+        //.product(name: "SwiftASN1", package: "swift-asn1"),
       ],
       path: "Sources",
       resources: [

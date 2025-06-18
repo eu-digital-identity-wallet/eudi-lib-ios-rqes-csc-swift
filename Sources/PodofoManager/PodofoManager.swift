@@ -22,11 +22,18 @@ public actor PodofoManager {
     
     public init() {}
     
-    public func calculateDocumentHashes(request: CalculateHashRequest) async throws -> DocumentDigests {
+    public func calculateDocumentHashes(request: CalculateHashRequest, tsaUrl: String) async throws -> DocumentDigests {
         podofoSessions.removeAll()
         var hashes: [String] = []
         var c = 1
+        
+        try validateTsaUrlRequirement(
+            for: request.documents,
+            tsaUrl: tsaUrl
+        )
+        
         for doc in request.documents {
+            
             do {
                 let podofoWrapper = try PodofoWrapper(
                     conformanceLevel: doc.conformanceLevel.rawValue,
@@ -55,8 +62,8 @@ public actor PodofoManager {
         )
         return documentDigest
     }
-    
-    public func createSignedDocuments(signatures: [String]) async throws {
+
+    public func createSignedDocuments(signatures: [String], tsaUrl: String) async throws {
         defer { podofoSessions.removeAll() }
         
         guard signatures.count == podofoSessions.count else {
@@ -65,12 +72,29 @@ public actor PodofoManager {
                 countSignatures: signatures.count
             )
         }
+        
+        let tsService = TimestampService()
 
         for i in 0..<podofoSessions.count {
             let sessionWrapper = podofoSessions[i]
             let signedHash     = signatures[i]
             sessionWrapper.session.printState()
-            sessionWrapper.session.finalizeSigning(withSignedHash: signedHash)
+            let tsRequest = TimestampRequest(
+                signedHash: signedHash,
+                tsaUrl: tsaUrl
+            )
+            let tsResponse = try await tsService.requestTimestamp(request: tsRequest)
+
+            sessionWrapper.session.finalizeSigning(withSignedHash: signedHash, tsr: tsResponse.base64Tsr)
+        }
+    }
+    
+    private func validateTsaUrlRequirement(for docs: [CalculateHashRequest.Document], tsaUrl: String
+    ) throws {
+        for doc in docs {
+            if doc.conformanceLevel != .ADES_B_B && tsaUrl.isEmpty {
+                throw CalculateHashError.missingTsaURL(conformanceLevel: doc.conformanceLevel.rawValue )
+            }
         }
     }
 }

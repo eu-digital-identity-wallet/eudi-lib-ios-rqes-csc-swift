@@ -82,8 +82,9 @@ namespace PoDoFo {
         ~PdfRemoteSignDocumentSession();
 
         std::string beginSigning();
-        void finishSigning(const std::string& signedHash);
+        void finishSigning(const std::string& signedHash, const std::string& base64Tsr);
         void printState() const;
+        void setTimestampToken(const std::string& responseTsrBase64);
 
     private:
         std::vector<unsigned char> ConvertBase64PEMtoDER(
@@ -95,8 +96,9 @@ namespace PoDoFo {
         std::vector<unsigned char> HexToBytes(const std::string& hex);
         std::string ToHexString(const charbuff& data);
         std::string UrlEncode(const std::string& value);
+        std::string DecodeBase64Tsr(const std::string& base64Tsr);
 
-        std::string                            _conformanceLevel;
+        std::string                                 _conformanceLevel;
         HashAlgorithm                               _hashAlgorithm;
         std::string                                 _documentInputPath;
         std::string                                 _documentOutputPath;
@@ -104,9 +106,11 @@ namespace PoDoFo {
         std::vector<std::string>                    _certificateChainBase64;
         std::optional<std::string>                  _rootCertificateBase64;
         std::optional<std::string>                  _label;
+        std::optional<std::string>                  _responseTsrBase64;
         std::vector<unsigned char>                  _endCertificateDer;
         std::vector<std::vector<unsigned char>>     _certificateChainDer;
         std::vector<unsigned char>                  _rootCertificateDer;
+        std::vector<unsigned char>                  _responseTsr;
 
         PdfMemDocument                              _doc;
         std::shared_ptr<FileStreamDevice>           _stream;
@@ -114,6 +118,7 @@ namespace PoDoFo {
         PdfSigningContext                           _ctx;
         PdfSigningResults                           _results;
         PdfSignerId                                 _signerId;
+        std::shared_ptr<PdfSignerCms>               _signer;
 
         static HashAlgorithm hashAlgorithmFromOid(const std::string& oid);
         static const char* hashAlgorithmToString(HashAlgorithm alg);
