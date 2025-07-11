@@ -20,7 +20,7 @@ import PackageDescription
 let package = Package(
   name: "eudi-lib-ios-rqes-csc-swift",
   platforms: [
-    .iOS(.v16)
+    .iOS(.v14)
   ],
   products: [
     .library(
@@ -29,18 +29,13 @@ let package = Package(
     )
   ],
   dependencies: [
-      //.package(url: "https://github.com/apple/swift-asn1.git", .upToNextMajor(from: "1.0.0"))
+    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", from: "0.1.1")
   ],
   targets: [
-    .binaryTarget(
-      name: "PoDoFo",
-      path: "Frameworks/PoDoFo.xcframework"
-    ),
     .target(
       name: "RQES_LIBRARY",
       dependencies: [
-        "PoDoFo"
-        //.product(name: "SwiftASN1", package: "swift-asn1"),
+        .product(name: "PoDoFo", package: "eudi-lib-podofo")
       ],
       path: "Sources",
       resources: [
