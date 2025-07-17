@@ -16,5 +16,5 @@
 import Foundation
 
 public protocol CredentialsListServiceType {
-    func getCredentialsList(request: CredentialsListRequest, accessToken: String, oauth2BaseUrl:String) async throws -> CredentialsListResponse
+    func getCredentialsList(request: CredentialsListRequest, accessToken: String, rsspUrl: String) async throws -> CredentialsListResponse
 }

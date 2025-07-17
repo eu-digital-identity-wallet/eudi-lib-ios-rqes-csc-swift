@@ -17,8 +17,8 @@ import Foundation
 
 final actor CredentialsListClient {
 
-    static func makeRequest(for request: CredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> Result<CredentialsListResponse, ClientError> {
-        let url = try oauth2BaseUrl.appendingEndpoint("/csc/v2/credentials/list").get()
+    static func makeRequest(for request: CredentialsListRequest, accessToken: String, rsspUrl: String) async throws -> Result<CredentialsListResponse, ClientError> {
+        let url = try rsspUrl.appendingEndpoint("/credentials/list").get()
         
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"

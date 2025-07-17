@@ -245,17 +245,13 @@ class RQESHandler {
                 clientSecret: "somesecret2"
             ),
             authFlowRedirectionURI: "https://oauthdebugger.com/debug",
-            scaBaseURL: "https://walletcentric.signer.eudiw.dev"
+            RSSPId: "https://walletcentric.signer.eudiw.dev/csc/v2",
+            tsaUrl: "http://ts.cartaodecidadao.pt/tsa/server"
         )
         let rqes = await RQES(cscClientConfig: cscClientConfig)
-
-        // STEP 2: Retrieve service information using the InfoService
-        let infoRequest = InfoServiceRequest(lang: "en-US")
-        let infoResponse = try await rqes.getInfo(request: infoRequest)
-        JSONUtils.prettyPrintResponseAsJSON(infoResponse, message: "InfoService Response:")
+       
         
-        
-        // STEP 3: Generate Wallet State and Prepare Authorization Request
+        // STEP 2: Generate Wallet State and Prepare Authorization Request
         let walletState = UUID().uuidString
         let response = try await rqes.prepareServiceAuthorizationRequest(walletState: walletState)
         
@@ -265,7 +261,7 @@ class RQESHandler {
         let serviceAuthorizationCode = readLine()!
         
         
-        // STEP 4: Request an OAuth2 Token using the authorization code
+        // STEP 3: Request an OAuth2 Token using the authorization code
         let accessServiceTokenRequest = AccessTokenRequest(
             code: serviceAuthorizationCode,
             state: walletState
@@ -275,7 +271,7 @@ class RQESHandler {
        
        
       
-        // STEP 5: Request the list of credentials using the access token
+        // STEP 4: Request the list of credentials using the access token
         let credentialListRequest = CredentialsListRequest(
             credentialInfo: true,
             certificates: "chain",
@@ -286,7 +282,7 @@ class RQESHandler {
         JSONUtils.prettyPrintResponseAsJSON(credentialListResponse, message: "Credential List Response:")
         
         
-        // STEP 6: Request the list of credentials using the access token
+        // STEP 5: Request the list of credentials using the access token
         let credentialInfoRequest = CredentialsInfoRequest(
             credentialID: credentialListResponse.credentialIDs[0],
             certificates: "chain",
@@ -300,7 +296,7 @@ class RQESHandler {
         // encodes it in Base64 format, and assigns it to the pdfDocument variable for further processing.
         let pdfDocument = FileUtils.getBase64EncodedDocument(fileNameWithExtension: "sample 1.pdf")
         
-        // STEP 7 (R5): Prepare and execute a request to calculate the hash for the specified document
+        // STEP 6 (R5): Prepare and execute a request to calculate the hash for the specified document
         let calculateHashRequest = CalculateHashRequest(
             documents: [
                 CalculateHashRequest.Document(
@@ -320,7 +316,7 @@ class RQESHandler {
         let documentDigests = try await rqes.calculateDocumentHashes(request: calculateHashRequest)
         JSONUtils.prettyPrintResponseAsJSON(documentDigests, message: "Calculate Document Hash Response:")
 
-        // STEP 8: Set up an credential authorization request using OAuth2AuthorizeRequest with required parameters
+        // STEP 7: Set up an credential authorization request using OAuth2AuthorizeRequest with required parameters
         let authorizationDetails = AuthorizationDetails([
             AuthorizationDetailsItem(
                 documentDigests: [
@@ -345,7 +341,7 @@ class RQESHandler {
         let credentialAuthorizationCode = readLine()!
         
         
-        // STEP 9: Request OAuth2 token for credential authorization
+        // STEP 8: Request OAuth2 token for credential authorization
         let accessCredentialTokenRequest = AccessTokenRequest(
             code: credentialAuthorizationCode,
             state: walletState,
@@ -355,7 +351,7 @@ class RQESHandler {
         JSONUtils.prettyPrintResponseAsJSON(accessCredentialTokenResponse, message: "Credential Access Token Response:")
         
      
-        // STEP 10: Sign the calculated hash with the credential
+        // STEP 9: Sign the calculated hash with the credential
         let signHashRequest =  SignHashRequest(
             credentialID: credentialListResponse.credentialIDs[0],
             hashes: [documentDigests.hashes[0]],
@@ -368,7 +364,7 @@ class RQESHandler {
         JSONUtils.prettyPrintResponseAsJSON(signHashResponse, message: "Sign Hash Response:")
         
         
-        // STEP 11 (R5): Obtain the signed document
+        // STEP 10 (R5): Obtain the signed document
         let signatures = signHashResponse.signatures
         
         try await rqes.createSignedDocuments(signatures: signatures!) //Signed PDF created in documentOutputPath

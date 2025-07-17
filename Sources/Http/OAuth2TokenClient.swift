@@ -17,8 +17,8 @@ import Foundation
 
 final actor OAuth2TokenClient {
     
-    static func makeRequest(for request: OAuth2TokenRequest, oauth2BaseUrl: String) async throws -> Result<AccessTokenResponse, ClientError> {
-        let urlResult = oauth2BaseUrl.appendingEndpoint("/oauth2/token")
+    static func makeRequest(for request: OAuth2TokenRequest, issuerURL: String) async throws -> Result<AccessTokenResponse, ClientError> {
+        let urlResult = issuerURL.appendingEndpoint("/oauth2/token")
 
         guard case let .success(baseUrl) = urlResult else {
             return .failure(.invalidRequestURL)

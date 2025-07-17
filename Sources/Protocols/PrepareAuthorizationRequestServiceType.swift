@@ -16,6 +16,6 @@
 import Foundation
 
 public protocol PrepareAuthorizationRequestServiceType {
-    func prepareServiceRequest(walletState: String, cscClientConfig: CSCClientConfig) async throws -> AuthorizationPrepareResponse
-    func prepareCredentialRequest(walletState: String, cscClientConfig: CSCClientConfig, authorizationDetails: String) async throws -> AuthorizationPrepareResponse
+    func prepareServiceRequest(walletState: String, cscClientConfig: CSCClientConfig, issuerURL: String) async throws -> AuthorizationPrepareResponse
+    func prepareCredentialRequest(walletState: String, cscClientConfig: CSCClientConfig, authorizationDetails: String, issuerURL: String) async throws -> AuthorizationPrepareResponse
 }

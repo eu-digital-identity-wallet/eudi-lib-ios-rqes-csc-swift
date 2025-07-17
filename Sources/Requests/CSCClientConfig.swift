@@ -18,13 +18,13 @@ import Foundation
 public struct CSCClientConfig: Codable, Sendable {
     public let OAuth2Client: OAuth2Client
     public let authFlowRedirectionURI: String
-    public let scaBaseURL: String
+    public let rsspId: String
     public let tsaUrl: String
   
-    public init(OAuth2Client: OAuth2Client, authFlowRedirectionURI: String, scaBaseURL: String, tsaUrl: String? = nil) {
+    public init(OAuth2Client: OAuth2Client, authFlowRedirectionURI: String, rsspId: String, tsaUrl: String? = nil) {
         self.OAuth2Client = OAuth2Client
         self.authFlowRedirectionURI = authFlowRedirectionURI
-        self.scaBaseURL = scaBaseURL
+        self.rsspId = rsspId
         self.tsaUrl = tsaUrl ?? ""
     }
     

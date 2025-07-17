@@ -19,7 +19,7 @@ final actor OAuth2TokenService: OAuth2TokenServiceType {
 
     init() {}
 
-    func getToken(request: AccessTokenRequest, cscClientConfig: CSCClientConfig) async throws -> AccessTokenResponse {
+    func getToken(request: AccessTokenRequest, cscClientConfig: CSCClientConfig, issuerURL: String) async throws -> AccessTokenResponse {
         
         guard let verifier = await PKCEState.shared.getVerifier() else {
             throw NSError(domain: "PKCEError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Code verifier is missing. Aborting request."])
@@ -39,7 +39,7 @@ final actor OAuth2TokenService: OAuth2TokenServiceType {
             authorizationDetails: request.authorizationDetails ?? nil
         )
         
-        let result = try await OAuth2TokenClient.makeRequest(for: tokenRequest, oauth2BaseUrl: cscClientConfig.scaBaseURL)
+        let result = try await OAuth2TokenClient.makeRequest(for: tokenRequest, issuerURL: issuerURL)
         
         try await PKCEState.shared.reset()
         

@@ -18,10 +18,10 @@ import Foundation
 final actor CredentialsInfoService: CredentialsInfoServiceType {
     init() { }
     
-    func getCredentialsInfo(request: CredentialsInfoRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CredentialInfo {
+    func getCredentialsInfo(request: CredentialsInfoRequest, accessToken: String, rsspUrl: String) async throws -> CredentialInfo {
 
         try CredentialsInfoValidator.validate(request)
-        let result = try await CredentialsInfoClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
+        let result = try await CredentialsInfoClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
 
         return try result.get()
     }
