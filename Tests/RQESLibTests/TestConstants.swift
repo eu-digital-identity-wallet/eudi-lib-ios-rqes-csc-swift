@@ -15,7 +15,7 @@
  */
 
 import Foundation
-@testable import RQES_LIBRARY
+@testable import RQESLib
 
 struct TimestampTestConstants {
     

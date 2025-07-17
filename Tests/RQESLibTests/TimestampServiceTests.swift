@@ -15,7 +15,7 @@
  */
 
 import XCTest
-@testable import RQES_LIBRARY
+@testable import RQESLib
 
 final class TimestampServiceTests: XCTestCase {
     

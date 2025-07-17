@@ -231,7 +231,7 @@ The released software is an initial development release version:
 
 ``` swift
 import Foundation
-import RQES_LIBRARY
+import RQESLib
 
 
 class RQESHandler {

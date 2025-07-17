@@ -20,12 +20,12 @@ import PackageDescription
 let package = Package(
   name: "eudi-lib-ios-rqes-csc-swift",
   platforms: [
-    .iOS(.v16)
+    .iOS(.v14)
   ],
   products: [
     .library(
-      name: "RQES_LIBRARY",
-      targets: ["RQES_LIBRARY"]
+      name: "RQESLib",
+      targets: ["RQESLib"]
     )
   ],
   dependencies: [
@@ -37,7 +37,7 @@ let package = Package(
       path: "Frameworks/PoDoFo.xcframework"
     ),
     .target(
-      name: "RQES_LIBRARY",
+      name: "RQESLib",
       dependencies: [
         "PoDoFo"
         //.product(name: "SwiftASN1", package: "swift-asn1"),
@@ -51,9 +51,9 @@ let package = Package(
       ]
     ),
     .testTarget(
-      name: "RQES_LIBRARYTests",
-      dependencies: ["RQES_LIBRARY"],
-      path: "Tests/RQES_LIBRARYTests",
+      name: "RQESLibTests",
+      dependencies: ["RQESLib"],
+      path: "Tests/RQESLibTests",
       resources: [
         .copy("sample.pdf")
       ]
