@@ -15,7 +15,7 @@
  */
 
 import XCTest
-@testable import RQES_LIBRARY
+@testable import RQESLib
 @testable import PoDoFo
 
 final class PoDoFoIntegrationTests: XCTestCase {

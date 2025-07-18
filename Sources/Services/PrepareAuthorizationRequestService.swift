@@ -18,11 +18,11 @@ import Foundation
 final actor PrepareAuthorizationRequestService: PrepareAuthorizationRequestServiceType {
     init() { }
 
-    func prepareServiceRequest(walletState: String, cscClientConfig: CSCClientConfig) async throws -> AuthorizationPrepareResponse {
+    func prepareServiceRequest(walletState: String, cscClientConfig: CSCClientConfig, issuerURL: String) async throws -> AuthorizationPrepareResponse {
    
         let codeChallenge = try await PKCEState.shared.initializeAndGetCodeChallenge()
      
-        guard var components = URLComponents(string: cscClientConfig.scaBaseURL + "/oauth2/authorize") else {
+        guard var components = URLComponents(string: issuerURL + "/oauth2/authorize") else {
             throw ClientError.invalidRequestURL
         }
         
@@ -43,11 +43,11 @@ final actor PrepareAuthorizationRequestService: PrepareAuthorizationRequestServi
         return AuthorizationPrepareResponse(authorizationCodeURL: authorizationCodeURL)
     }
     
-    func prepareCredentialRequest(walletState: String, cscClientConfig: CSCClientConfig, authorizationDetails: String) async throws -> AuthorizationPrepareResponse {
+    func prepareCredentialRequest(walletState: String, cscClientConfig: CSCClientConfig, authorizationDetails: String, issuerURL: String) async throws -> AuthorizationPrepareResponse {
        
         let codeChallenge = try await PKCEState.shared.initializeAndGetCodeChallenge()
    
-        guard var components = URLComponents(string: cscClientConfig.scaBaseURL + "/oauth2/authorize") else {
+        guard var components = URLComponents(string: issuerURL + "/oauth2/authorize") else {
             throw ClientError.invalidRequestURL
         }
         

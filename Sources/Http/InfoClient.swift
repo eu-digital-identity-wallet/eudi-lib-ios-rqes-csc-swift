@@ -16,8 +16,8 @@
 import Foundation
 
 final actor InfoClient{
-    static func makeRequest(for request: InfoServiceRequest,oauth2BaseUrl: String) async throws -> Result<InfoServiceResponse, ClientError> {
-        let url = try oauth2BaseUrl.appendingEndpoint("/csc/v2/info").get()
+    static func makeRequest(for request: InfoServiceRequest, rsspUrl: String) async throws -> Result<InfoServiceResponse, ClientError> {
+        let url = try rsspUrl.appendingEndpoint("/info").get()
 
         let urlRequest = try createUrlRequest(with: url, request: request)
 

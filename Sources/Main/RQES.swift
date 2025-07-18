@@ -23,7 +23,8 @@ public class RQES {
     private let credentialsInfoService: CredentialsInfoServiceType
     private let signHashService: SignHashServiceType
     private let prepareAuthorizationRequestService: PrepareAuthorizationRequestServiceType 
-    private var baseProviderUrl: String
+    private var rsspId: String
+    private var issuerURL: String
     private let cscClientConfig: CSCClientConfig
     private let podofoManager: PodofoManager
     
@@ -34,31 +35,31 @@ public class RQES {
         self.credentialsInfoService = await ServiceLocator.shared.resolve() ?? CredentialsInfoService()
         self.signHashService = await ServiceLocator.shared.resolve() ?? SignHashService()
         self.prepareAuthorizationRequestService = await ServiceLocator.shared.resolve() ?? PrepareAuthorizationRequestService()
-        self.baseProviderUrl = cscClientConfig.scaBaseURL
+        self.rsspId = cscClientConfig.rsspId
         self.cscClientConfig = cscClientConfig
         self.podofoManager = PodofoManager()
+        self.issuerURL = ""
     }
 
-    public func getInfo(request: InfoServiceRequest? = nil) async throws -> InfoServiceResponse {
-        let response = try await infoService.getInfo(request: request, oauth2BaseUrl: self.baseProviderUrl)
-        self.baseProviderUrl = response.oauth2
+    private func getInfo(request: InfoServiceRequest? = nil) async throws -> InfoServiceResponse {
+        let response = try await infoService.getInfo(request: request, rsspUrl: self.rsspId)
         return response
     }
 
     public func requestAccessTokenAuthFlow(request: AccessTokenRequest) async throws -> AccessTokenResponse {
-        return try await oauth2TokenService.getToken(request: request, cscClientConfig: self.cscClientConfig)
+        return try await oauth2TokenService.getToken(request: request, cscClientConfig: self.cscClientConfig, issuerURL: self.issuerURL)
     }
 
     public func listCredentials(request: CredentialsListRequest, accessToken: String) async throws -> CredentialsListResponse {
-        return try await credentialsListService.getCredentialsList(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
+        return try await credentialsListService.getCredentialsList(request: request, accessToken: accessToken, rsspUrl: self.rsspId)
     }
 
     public func getCredentialInfo(request: CredentialsInfoRequest, accessToken: String) async throws -> CredentialInfo {
-        return try await credentialsInfoService.getCredentialsInfo(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
+        return try await credentialsInfoService.getCredentialsInfo(request: request, accessToken: accessToken, rsspUrl: self.rsspId)
     }
 
     public func signHash(request: SignHashRequest, accessToken: String) async throws -> SignHashResponse {
-        return try await signHashService.signHash(request: request, accessToken: accessToken, oauth2BaseUrl: self.baseProviderUrl)
+        return try await signHashService.signHash(request: request, accessToken: accessToken, rsspUrl: self.rsspId)
     }
 
     public func calculateDocumentHashes(request: CalculateHashRequest) async throws -> DocumentDigests {
@@ -70,10 +71,12 @@ public class RQES {
     }
     
     public func prepareServiceAuthorizationRequest(walletState: String) async throws -> AuthorizationPrepareResponse {
-        return try await prepareAuthorizationRequestService.prepareServiceRequest(walletState: walletState, cscClientConfig: self.cscClientConfig )
+        let infoResponse = try await getInfo()
+        self.issuerURL = infoResponse.oauth2
+        return try await prepareAuthorizationRequestService.prepareServiceRequest(walletState: walletState, cscClientConfig: self.cscClientConfig, issuerURL: self.issuerURL)
     }
     
     public func prepareCredentialAuthorizationRequest(walletState: String, authorizationDetails: String) async throws -> AuthorizationPrepareResponse {
-        return try await prepareAuthorizationRequestService.prepareCredentialRequest(walletState: walletState, cscClientConfig: self.cscClientConfig, authorizationDetails: authorizationDetails )
+        return try await prepareAuthorizationRequestService.prepareCredentialRequest(walletState: walletState, cscClientConfig: self.cscClientConfig, authorizationDetails: authorizationDetails, issuerURL: self.issuerURL)
     }
 }
