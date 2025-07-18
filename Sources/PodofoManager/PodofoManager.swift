@@ -79,13 +79,22 @@ public actor PodofoManager {
             let sessionWrapper = podofoSessions[i]
             let signedHash     = signatures[i]
             sessionWrapper.session.printState()
-            let tsRequest = TimestampRequest(
-                signedHash: signedHash,
-                tsaUrl: tsaUrl
-            )
-            let tsResponse = try await tsService.requestTimestamp(request: tsRequest)
+            
+            
+            if tsaUrl != "" {
+                let tsRequest = TimestampRequest(
+                    signedHash: signedHash,
+                    tsaUrl: tsaUrl
+                )
+                let tsResponse = try await tsService.requestTimestamp(request: tsRequest)
 
-            sessionWrapper.session.finalizeSigning(withSignedHash: signedHash, tsr: tsResponse.base64Tsr)
+                sessionWrapper.session.finalizeSigning(withSignedHash: signedHash, tsr: tsResponse.base64Tsr)
+                
+            } else {
+                sessionWrapper.session.finalizeSigning(withSignedHash: signedHash, tsr: "")
+            }
+            
+
         }
     }
     

@@ -1,5 +1,22 @@
 # 📦 Changelog
 
+## [R5] - 2025-17-7 - SCA URL Removed
+
+### 🔄 Changed
+SCA URL removed and replaced by rsspId
+
+```Swift
+let cscClientConfig = CSCClientConfig(
+    OAuth2Client: CSCClientConfig.OAuth2Client(
+        clientId: "wallet-client",
+        clientSecret: "somesecret2"
+    ),
+    authFlowRedirectionURI: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
+    rsspId: "https://walletcentric.signer.eudiw.dev/csc/v2", //Before: scaBaseURL: "https://walletcentric.signer.eudiw.dev",
+    tsaUrl: "http://ts.cartaodecidadao.pt/tsa/server"
+)
+```
+
 
 ## [R5] - 2025-17-6 - Added Support for Pades B-T 
 

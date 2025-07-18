@@ -19,11 +19,11 @@ final actor SignHashService: SignHashServiceType {
     
     init() {}
 
-    func signHash(request: SignHashRequest, accessToken: String, oauth2BaseUrl: String) async throws -> SignHashResponse {
+    func signHash(request: SignHashRequest, accessToken: String, rsspUrl: String) async throws -> SignHashResponse {
 
         try SignHashValidator.validate(request)
 
-        let result = try await SignHashClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
+        let result = try await SignHashClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
         
         return try result.get() 
     }

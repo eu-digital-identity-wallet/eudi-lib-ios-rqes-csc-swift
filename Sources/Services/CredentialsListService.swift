@@ -18,8 +18,8 @@ import Foundation
 final actor CredentialsListService: CredentialsListServiceType {
     
     init() {}
-    func getCredentialsList(request: CredentialsListRequest, accessToken: String, oauth2BaseUrl: String) async throws -> CredentialsListResponse {
-        let result = try await CredentialsListClient.makeRequest(for: request, accessToken: accessToken, oauth2BaseUrl:oauth2BaseUrl)
+    func getCredentialsList(request: CredentialsListRequest, accessToken: String, rsspUrl: String) async throws -> CredentialsListResponse {
+        let result = try await CredentialsListClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
         return try result.get()
     }
 }

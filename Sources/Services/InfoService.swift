@@ -19,7 +19,7 @@ final actor InfoService: InfoServiceType {
     
     init() {}
 
-    func getInfo(request: InfoServiceRequest? = nil, oauth2BaseUrl: String) async throws -> InfoServiceResponse {
+    func getInfo(request: InfoServiceRequest? = nil, rsspUrl: String) async throws -> InfoServiceResponse {
         
         let req = request ?? InfoServiceRequest(lang: "en-US")
 
@@ -27,7 +27,7 @@ final actor InfoService: InfoServiceType {
             throw InfoServiceError.invalidLanguage
         }
 
-        return try await InfoClient.makeRequest(for: req, oauth2BaseUrl: oauth2BaseUrl).get()
+        return try await InfoClient.makeRequest(for: req, rsspUrl: rsspUrl).get()
     }
 
     

@@ -16,5 +16,5 @@
 import Foundation
 
 public protocol CredentialsInfoServiceType {
-    func getCredentialsInfo(request: CredentialsInfoRequest, accessToken: String, oauth2BaseUrl:String) async throws -> CredentialInfo
+    func getCredentialsInfo(request: CredentialsInfoRequest, accessToken: String, rsspUrl: String) async throws -> CredentialInfo
 }

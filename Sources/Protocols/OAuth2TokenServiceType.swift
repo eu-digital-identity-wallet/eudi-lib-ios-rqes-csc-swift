@@ -16,5 +16,5 @@
 import Foundation
 
 public protocol OAuth2TokenServiceType {
-    func getToken(request: AccessTokenRequest, cscClientConfig: CSCClientConfig) async throws -> AccessTokenResponse
+    func getToken(request: AccessTokenRequest, cscClientConfig: CSCClientConfig, issuerURL: String) async throws -> AccessTokenResponse
 }

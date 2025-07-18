@@ -24,16 +24,16 @@ let package = Package(
   ],
   products: [
     .library(
-      name: "RQES_LIBRARY",
-      targets: ["RQES_LIBRARY"]
+      name: "RQESLib",
+      targets: ["RQESLib"]
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", from: "0.1.1")
+    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", from: "0.1.2")
   ],
   targets: [
     .target(
-      name: "RQES_LIBRARY",
+      name: "RQESLib",
       dependencies: [
         .product(name: "PoDoFo", package: "eudi-lib-podofo")
       ],
@@ -46,9 +46,9 @@ let package = Package(
       ]
     ),
     .testTarget(
-      name: "RQES_LIBRARYTests",
-      dependencies: ["RQES_LIBRARY"],
-      path: "Tests/RQES_LIBRARYTests",
+      name: "RQESLibTests",
+      dependencies: ["RQESLib"],
+      path: "Tests/RQESLibTests",
       resources: [
         .copy("sample.pdf")
       ]
