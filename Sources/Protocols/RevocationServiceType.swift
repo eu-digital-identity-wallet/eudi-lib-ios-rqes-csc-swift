@@ -13,18 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import Foundation
 
-public struct TimestampRequest: Codable, Sendable {
-    public let hashToTimestamp: String
-    public let tsaUrl: String
-
-    public init(
-        hashToTimestamp: String,
-        tsaUrl: String
-    ) {
-        self.hashToTimestamp = hashToTimestamp
-        self.tsaUrl = tsaUrl
-    }
+public protocol RevocationServiceType {
+    func getCrlData(request: CrlRequest) async throws -> CrlResponse
 }

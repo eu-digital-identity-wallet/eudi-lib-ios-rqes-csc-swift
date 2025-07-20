@@ -21,7 +21,7 @@ public final actor TimestampService: TimestampServiceType {
 
     public func requestTimestamp(request: TimestampRequest) async throws -> TimestampResponse  {
 
-        let tsq = try TimestampUtils.buildTSQ(from: request.signedHash)
+        let tsq = try TimestampUtils.buildTSQ(from: request.hashToTimestamp)
 
         let tsqHex = tsq.map { String(format: "%02x", $0) }.joined()
 

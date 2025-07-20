@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import Foundation
 
-public struct TimestampRequest: Codable, Sendable {
-    public let hashToTimestamp: String
-    public let tsaUrl: String
+public struct CrlRequest: Codable, Sendable {
+    public let crlUrl: String
 
-    public init(
-        hashToTimestamp: String,
-        tsaUrl: String
-    ) {
-        self.hashToTimestamp = hashToTimestamp
-        self.tsaUrl = tsaUrl
+    public init(crlUrl: String) {
+        self.crlUrl = crlUrl
     }
 }

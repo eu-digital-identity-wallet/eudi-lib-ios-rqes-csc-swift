@@ -16,15 +16,16 @@
 
 import Foundation
 
-public struct TimestampRequest: Codable, Sendable {
-    public let hashToTimestamp: String
-    public let tsaUrl: String
+final actor RevocationService: RevocationServiceType {
+    
+    init() {}
 
-    public init(
-        hashToTimestamp: String,
-        tsaUrl: String
-    ) {
-        self.hashToTimestamp = hashToTimestamp
-        self.tsaUrl = tsaUrl
+    func getCrlData(request: CrlRequest) async throws -> CrlResponse {
+        let result = try await CrlClient.makeRequest(for: request).get()
+
+        let base64String = result.base64EncodedString()
+        
+        return CrlResponse(crlInfoBase64: base64String)
     }
 }
+

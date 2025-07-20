@@ -37,13 +37,19 @@ public actor PodofoManager {
             do {
                 let podofoWrapper = try PodofoWrapper(
                     conformanceLevel: doc.conformanceLevel.rawValue,
-                    hashAlgorithm:    request.hashAlgorithmOID.rawValue,
-                    inputPath:        doc.documentInputPath,
-                    outputPath:       doc.documentOutputPath,
-                    certificate:      request.endEntityCertificate,
+                    hashAlgorithm: request.hashAlgorithmOID.rawValue,
+                    inputPath: doc.documentInputPath,
+                    outputPath: doc.documentOutputPath,
+                    certificate: request.endEntityCertificate,
                     chainCertificates: request.certificateChain
                 )
-                let session = PodofoSession(id: "\(c)", session: podofoWrapper)
+                let session = PodofoSession(
+                    id: "\(c)",
+                    session: podofoWrapper,
+                    conformanceLevel: doc.conformanceLevel,
+                    endCertificate: request.endEntityCertificate,
+                    chainCertificates: request.certificateChain
+                )
                 c += 1
                 let hashOptional = podofoWrapper.calculateHash()
                 if let hash = hashOptional {
@@ -72,37 +78,141 @@ public actor PodofoManager {
                 countSignatures: signatures.count
             )
         }
-        
-        let tsService = TimestampService()
 
         for i in 0..<podofoSessions.count {
-            let sessionWrapper = podofoSessions[i]
-            let signedHash     = signatures[i]
+            var sessionWrapper = podofoSessions[i]
+            let signedHash = signatures[i]
             sessionWrapper.session.printState()
-            
-            
-            if tsaUrl != "" {
-                let tsRequest = TimestampRequest(
-                    signedHash: signedHash,
-                    tsaUrl: tsaUrl
-                )
-                let tsResponse = try await tsService.requestTimestamp(request: tsRequest)
 
-                sessionWrapper.session.finalizeSigning(withSignedHash: signedHash, tsr: tsResponse.base64Tsr)
-                
-            } else {
-                sessionWrapper.session.finalizeSigning(withSignedHash: signedHash, tsr: "")
+            if sessionWrapper.conformanceLevel.rawValue == ConformanceLevel.ADES_B_B.rawValue {
+                try await handleAdesB_B(sessionWrapper: sessionWrapper, signedHash: signedHash)
+            } else if sessionWrapper.conformanceLevel.rawValue == ConformanceLevel.ADES_B_T.rawValue {
+                try await handleAdesB_T(sessionWrapper: sessionWrapper, signedHash: signedHash, tsaUrl: tsaUrl)
+            } else if sessionWrapper.conformanceLevel.rawValue == ConformanceLevel.ADES_B_LT.rawValue {
+                try await handleAdesB_LT(sessionWrapper: sessionWrapper, signedHash: signedHash, tsaUrl: tsaUrl)
+            } else if sessionWrapper.conformanceLevel.rawValue == ConformanceLevel.ADES_B_LTA.rawValue {
+                try await handleAdesB_LTA(sessionWrapper: sessionWrapper, signedHash: signedHash, tsaUrl: tsaUrl)
             }
-            
-
         }
     }
     
-    private func validateTsaUrlRequirement(for docs: [CalculateHashRequest.Document], tsaUrl: String
+    private func handleAdesB_B(sessionWrapper: PodofoSession, signedHash: String) async throws {
+        sessionWrapper.session.finalizeSigning(
+            withSignedHash: signedHash,
+            tsr: "",
+            validationCertificates: [],
+            validationCRLs: [],
+            validationOCSPs: []
+        )
+    }
+    
+    private func handleAdesB_T(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
+        print("Handling ADES-B-T...")
+        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
+        
+        sessionWrapper.session.finalizeSigning(
+            withSignedHash: signedHash,
+            tsr: tsResponse.base64Tsr,
+            validationCertificates: [],
+            validationCRLs: [],
+            validationOCSPs: []
+        )
+    }
+    
+    private func handleAdesB_LT(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
+        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
+        
+        let validationCertificates = prepareValidationCertificates(
+            sessionWrapper: sessionWrapper,
+            timestampResponse: tsResponse.base64Tsr
+        )
+
+        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
+        var crlUrls: Set<String> = []
+        
+        for certificate in certificatesForCrlExtraction {
+            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
+            crlUrls.insert(crlUrl)
+            print("CRL URL: \(crlUrl)")
+        }
+        
+        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
+        
+        sessionWrapper.session.finalizeSigning(
+            withSignedHash: signedHash,
+            tsr: tsResponse.base64Tsr,
+            validationCertificates: validationCertificates,
+            validationCRLs: validationCrls,
+            validationOCSPs: []
+        )
+    }
+    
+    private func handleAdesB_LTA(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
+        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
+        
+        let validationCertificates = prepareValidationCertificates(
+            sessionWrapper: sessionWrapper,
+            timestampResponse: tsResponse.base64Tsr
+        )
+
+        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
+        var crlUrls: Set<String> = []
+        
+        for certificate in certificatesForCrlExtraction {
+            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
+            crlUrls.insert(crlUrl)
+            print("CRL URL: \(crlUrl)")
+        }
+        
+        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
+        
+        sessionWrapper.session.finalizeSigning(
+            withSignedHash: signedHash,
+            tsr: tsResponse.base64Tsr,
+            validationCertificates: validationCertificates,
+            validationCRLs: validationCrls,
+            validationOCSPs: []
+        )
+
+        let ltaRawHash = try sessionWrapper.session.beginSigningLTA()
+        let tsLtaResponse = try await requestTimestamp(hash: ltaRawHash, tsaUrl: tsaUrl)
+        try sessionWrapper.session.finishSigningLTA(withTSR: tsLtaResponse.base64Tsr)
+    }
+    
+    private func requestTimestamp(hash: String, tsaUrl: String) async throws -> TimestampResponse {
+        let tsService = TimestampService()
+        let tsRequest = TimestampRequest(
+            hashToTimestamp: hash,
+            tsaUrl: tsaUrl
+        )
+        return try await tsService.requestTimestamp(request: tsRequest)
+    }
+    
+    private func prepareValidationCertificates(sessionWrapper: PodofoSession, timestampResponse: String) -> [String] {
+        return [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates + [timestampResponse]
+    }
+    
+    private func fetchCrlDataFromUrls(crlUrls: [String]) async throws -> [String] {
+        var validationCrlResponses: [String] = []
+        let revocationService = RevocationService()
+        
+        for crlUrl in crlUrls {
+            let crlRequest = CrlRequest(crlUrl: crlUrl)
+            let crlInfo = try await revocationService.getCrlData(request: crlRequest)
+            print("CRL Info Base64: \(crlInfo.crlInfoBase64)")
+            validationCrlResponses.append(crlInfo.crlInfoBase64)
+        }
+        
+        return validationCrlResponses
+    }
+
+    private func validateTsaUrlRequirement(
+        for docs: [CalculateHashRequest.Document], tsaUrl: String
     ) throws {
         for doc in docs {
             if doc.conformanceLevel != .ADES_B_B && tsaUrl.isEmpty {
-                throw CalculateHashError.missingTsaURL(conformanceLevel: doc.conformanceLevel.rawValue )
+                throw CalculateHashError.missingTsaURL(
+                    conformanceLevel: doc.conformanceLevel.rawValue)
             }
         }
     }

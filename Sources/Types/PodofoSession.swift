@@ -19,13 +19,30 @@ import PoDoFo
 public struct PodofoSession {
     public let id: String
     public let session: PodofoWrapper
+    public var conformanceLevel: ConformanceLevel
+    public var endCertificate: String
+    public var chainCertificates: [String]
+    public var tsrLT: String?
+    public var tsrLTA: String?
+    public var crlUrls: Set<String>
+    public var ocspUrls: Set<String>
     
     public init(
         id: String,
-        session: PodofoWrapper
+        session: PodofoWrapper,
+        conformanceLevel: ConformanceLevel,
+        endCertificate: String,
+        chainCertificates: [String] = []
+
     ) {
         self.id = id
         self.session = session
+        self.conformanceLevel = conformanceLevel
+        self.endCertificate = endCertificate
+        self.chainCertificates = chainCertificates
+        self.tsrLT = nil
+        self.tsrLTA = nil
+        self.crlUrls = Set<String>()
+        self.ocspUrls = Set<String>()
     }
-
 }
