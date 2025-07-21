@@ -13,23 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import Foundation
 
-final actor InfoService: InfoServiceType {
-    private let infoClient: InfoClient
-    
-    init(infoClient: InfoClient = InfoClient()) {
-        self.infoClient = infoClient
-    }
-
-    func getInfo(request: InfoServiceRequest? = nil, rsspUrl: String) async throws -> InfoServiceResponse {
-        
-        let req = request ?? InfoServiceRequest(lang: "en-US")
-
-        guard let lang = req.lang else {
-            throw InfoServiceError.invalidLanguage
-        }
-
-        return try await infoClient.makeRequest(for: req, rsspUrl: rsspUrl).get()
-    }
-}
+public protocol HTTPClientType: Sendable {
+    func getData(from url: URL) async throws -> (Data, HTTPURLResponse)
+    func postData(_ data: Data, to url: URL, contentType: String, accept: String?) async throws -> (Data, HTTPURLResponse)
+    func upload(for request: URLRequest, from data: Data) async throws -> (Data, URLResponse)
+} 

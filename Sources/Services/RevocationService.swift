@@ -17,11 +17,14 @@
 import Foundation
 
 final actor RevocationService: RevocationServiceType {
+    private let crlClient: CrlClient
     
-    init() {}
+    init(crlClient: CrlClient = CrlClient()) {
+        self.crlClient = crlClient
+    }
 
     func getCrlData(request: CrlRequest) async throws -> CrlResponse {
-        let result = try await CrlClient.makeRequest(for: request).get()
+        let result = try await crlClient.makeRequest(for: request).get()
 
         let base64String = result.base64EncodedString()
         

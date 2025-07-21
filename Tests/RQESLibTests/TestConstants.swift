@@ -20,32 +20,36 @@ import Foundation
 struct TimestampTestConstants {
     
     struct Hashes {
-        static let validSignedHash = "SGVsbG8gV29ybGQ=" // "Hello World" in base64
+        static let validSignedHash = "SGVsbG8gV29ybGQ="
         static let invalidSignedHash = "InvalidBase64!@#"
         static let realisticSignedHash = "MEUCIQCpel09QAFtK/fPUvn+Nhx4VPH7Fm+vspv/UXluxXSKBAIge68SlU0JHVJCbKABh1GpNEiU2gD9sMVaWtLBv3Vb7kE="
         
         static let testCases = [
-            "SGVsbG8gV29ybGQ=", // "Hello World" in base64
-            "U29tZVRlc3REYXRh", // "SomeTestData" in base64
-            "VGVzdFN0cmluZw==", // "TestString" in base64
-            "MTIzNDU2Nzg5MA=="  // "1234567890" in base64
+            "SGVsbG8gV29ybGQ=",
+            "U29tZVRlc3REYXRh",
+            "VGVzdFN0cmluZw==",
+            "MTIzNDU2Nzg5MA=="
         ]
     }
     
     struct URLs {
-        static let tsaUrl = "http://ts.cartaodecidadao.pt/tsa/server" // Example TSA URL
+        static let tsaUrl = "https://mock-tsa.example.com/timestamp"
         static let invalidTsaUrl = "invalid-url"
         static let unreachableTsaUrl = "https://unreachable-tsa-server.com/timestamp"
     }
     
-    struct Data {
+    struct TestData {
         static let testDataString = "Test data for timestamping"
         static let largeDataByte: UInt8 = 0x42
         static let largeDataSize = 1000
     }
+    
+    struct MockResponses {
+        static let validTimestampResponse = "MIIBhAYJKoZIhvcNAQcCoIIBdTCCAXECAQMxDzANBglghkgBZQMEAgEFADB8BgsqhkiG9w0BCRABBKB".data(using: .utf8)!
+        static let largeTimestampResponse = String(repeating: "MOCK_TSA_RESPONSE_", count: 50).data(using: .utf8)!
+        static let emptyTimestampResponse = Data()
+    }
 }
-
-// MARK: - PoDoFo Integration Test Constants
 
 struct PoDoFoTestConstants {
     
@@ -55,7 +59,7 @@ struct PoDoFoTestConstants {
         """
         
         static let chainCertificate = """
-        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
+        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
         """
     }
     
@@ -74,18 +78,59 @@ struct PoDoFoTestConstants {
     }
 }
 
-// MARK: - File Management Test Constants
-
 struct FileTestConstants {
     
     struct Paths {
         static let samplePDFName = "sample"
         static let samplePDFExtension = "pdf"
+        static let samplePDFFullName = "sample.pdf"
         static let inputPDFName = "input.pdf"
         static let outputPDFName = "signed-output.pdf"
+        static let nonExistentFileName = "nonexistent.pdf"
+        static let testOutputFile = "test-output.pdf"
+        static let emptyFileName = ""
+        static let invalidFileName = "///invalid///.pdf"
     }
     
     struct Directories {
         static let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    }
+    
+    struct TestData {
+        static let sampleBase64 = "SGVsbG8gV29ybGQh"
+        static let binaryData = Data([0x48, 0x65, 0x6C, 0x6C, 0x6F])
+        static let largeBase64 = String(repeating: "QQ==", count: 1000)
+        static let malformedBase64 = "Invalid-Base64!@#"
+        static let emptyBase64 = ""
+        static let validPDFBase64 = "JVBERi0xLjQKJcOkw7zDssOgCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nCvkMlAwtU0rSUxOLXL3LdBNySxJLVIwUDC2NbGwsBUwyEwuyU9VyC4qTS0pTk1VyE4tjk8sKs7ILy7RLSgtNtVtAQBaERdCCmVuZHN0cmVhbQplbmRvYmoKCjMgMCBvYmoKNTMKZW5kb2JqCgo0IDAgb2JqCjw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAxIDAgUj4+CmVuZG9iagoKNSAwIG9iago8PC9UeXBlL1Jlc291cmNlRGljdGlvbmFyeS9Gb250PDwvRjEgNiAwIFI+Pj4+CmVuZG9iagoKNiAwIG9iago8PC9UeXBlL0ZvbnQvU3VidHlwZS9UeXBlMS9CYXNlRm9udC9UaW1lcy1Sb21hbj4+CmVuZG9iagoKMSAwIG9iago8PC9UeXBlL1BhZ2VzL0NvdW50IDEvS2lkc1s3IDAgUl0+PgplbmRvYmoKCjcgMCBvYmoKPDwvVHlwZS9QYWdlL1BhcmVudCAxIDAgUi9SZXNvdXJjZXMgNSAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL0NvbnRlbnRzIDIgMCBSPj4KZW5kb2JqCgp4cmVmCjAgOAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyNzUgMDAwMDAgbiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMTI3IDAwMDAwIG4gCjAwMDAwMDAxNDYgMDAwMDAgbiAKMDAwMDAwMDE5MyAwMDAwMCBuIAowMDAwMDAyMjUzIDAwMDAwIG4gCjAwMDAwMDAzMDIgMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDgvUm9vdCA0IDAgUj4+CnN0YXJ0eHJlZgozOTcKJSVFT0Y="
+        static let smallBinaryData = Data([0x01, 0x02, 0x03, 0x04])
+        static let largeBinaryData = Data(repeating: 0xAB, count: 10000)
+    }
+    
+    struct JSONData {
+        static let validJSONString = """
+        {
+            "name": "Test User",
+            "age": 30,
+            "active": true
+        }
+        """
+        static let invalidJSONString = "{ invalid json }"
+        static let complexJSONString = """
+        {
+            "array": [1, 2, 3],
+            "nested": {
+                "value": "test"
+            },
+            "null_field": null
+        }
+        """
+    }
+    
+    struct URLs {
+        static let baseURL = "https://example.com"
+        static let endpointPath = "/api/v1/test"
+        static let malformedBase = "invalid-url"
+        static let complexEndpoint = "/api/v1/users/123/details"
     }
 } 

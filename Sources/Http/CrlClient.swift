@@ -15,22 +15,20 @@
  */
 import Foundation
 
-final actor CrlClient{
-    static func makeRequest(for request: CrlRequest) async throws -> Result<Data, ClientError> {
+final actor CrlClient {
+    private let httpClient: HTTPClientType
+    
+    init(httpClient: HTTPClientType = HTTPService()) {
+        self.httpClient = httpClient
+    }
+    
+    func makeRequest(for request: CrlRequest) async throws -> Result<Data, ClientError> {
         guard let url = URL(string: request.crlUrl) else {
             return .failure(.invalidRequestURL)
         }
         
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = "GET"
-        
         do {
-            let (data, response) = try await URLSession.shared.data(for: urlRequest)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                return .failure(.invalidResponse)
-            }
-            
+            let (data, httpResponse) = try await httpClient.getData(from: url)
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorMessage = String(data: data, encoding: .utf8) ?? "CRL request failed"
                 return .failure(.clientError(message: errorMessage, statusCode: httpResponse.statusCode))

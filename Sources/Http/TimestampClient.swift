@@ -17,14 +17,16 @@
 import Foundation
 
 public final actor TimestampClient {
-    public init() { }
+    private let httpClient: HTTPClientType
+    
+    public init(httpClient: HTTPClientType = HTTPService()) {
+        self.httpClient = httpClient
+    }
 
-    public static func makeRequest(
+    public func makeRequest(
         for tsqData: Data,
         tsaUrl: String
     ) async -> Result<Data, ClientError> {
-        let prefix = "[TimestampClient]"
-
         guard let url = URL(string: tsaUrl) else {
             return .failure(.invalidRequestURL)
         }
@@ -35,7 +37,8 @@ public final actor TimestampClient {
         request.setValue("application/timestamp-reply", forHTTPHeaderField: "Accept")
 
         do {
-            let (data, response) = try await URLSession.shared.upload(for: request, from: tsqData)
+
+            let (data, response) = try await httpClient.upload(for: request, from: tsqData)
 
             guard let http = response as? HTTPURLResponse else {
                 return .failure(.noData)

@@ -19,10 +19,8 @@ import XCTest
 
 final class TimestampUtilsTests: XCTestCase {
     
-    // MARK: - buildTSQ Tests
-    
     func testBuildTSQWithValidBase64Hash() throws {
-        let validBase64Hash = "SGVsbG8gV29ybGQ=" // "Hello World" in base64
+        let validBase64Hash = "SGVsbG8gV29ybGQ="
         let tsqData = try TimestampUtils.buildTSQ(from: validBase64Hash)
 
         XCTAssertFalse(tsqData.isEmpty, "TSQ data should not be empty")
@@ -47,9 +45,9 @@ final class TimestampUtilsTests: XCTestCase {
     
     func testBuildTSQWithDifferentInputs() throws {
         let testCases = [
-            "U29tZVRlc3REYXRh", // "SomeTestData" in base64
-            "VGVzdFN0cmluZw==",   // "TestString" in base64
-            "MTIzNDU2Nzg5MA=="    // "1234567890" in base64
+            "U29tZVRlc3REYXRh",
+            "VGVzdFN0cmluZw==",
+            "MTIzNDU2Nzg5MA=="
         ]
 
         for testCase in testCases {
@@ -58,7 +56,66 @@ final class TimestampUtilsTests: XCTestCase {
         }
     }
     
-    // MARK: - encodeTSRToBase64 Tests
+    func testBuildTSQWithWhitespaceOnlyHash() {
+        let whitespaceHash = "   "
+
+        XCTAssertThrowsError(try TimestampUtils.buildTSQ(from: whitespaceHash)) { error in
+            XCTAssertEqual(error as? TimestampUtilsError, .invalidBase64Hash, "Whitespace-only string should be invalid base64")
+        }
+    }
+    
+    func testBuildTSQWithSingleCharacterHash() {
+        let singleCharHash = "A"
+
+        XCTAssertThrowsError(try TimestampUtils.buildTSQ(from: singleCharHash)) { error in
+            XCTAssertEqual(error as? TimestampUtilsError, .invalidBase64Hash, "Single character should be invalid base64")
+        }
+    }
+    
+    func testBuildTSQWithMalformedBase64Padding() {
+        let malformedHashes = [
+            "SGVsbG8=A",
+            "SGVs!bG8=",
+            "!@#$%^&*",
+        ]
+
+        for malformedHash in malformedHashes {
+            XCTAssertThrowsError(try TimestampUtils.buildTSQ(from: malformedHash)) { error in
+                XCTAssertEqual(error as? TimestampUtilsError, .invalidBase64Hash, "Malformed base64 '\(malformedHash)' should be invalid")
+            }
+        }
+    }
+    
+    func testBuildTSQWithSpecialCharacters() {
+        let validBase64WithPlus = "SGVsbG8+V29ybGQ="
+        let validBase64WithSlash = "SGVsbG8/V29ybGQ="
+        
+        XCTAssertNoThrow(try TimestampUtils.buildTSQ(from: validBase64WithPlus))
+        XCTAssertNoThrow(try TimestampUtils.buildTSQ(from: validBase64WithSlash))
+        
+        let invalidBase64 = "Data_Test-"
+        XCTAssertThrowsError(try TimestampUtils.buildTSQ(from: invalidBase64)) { error in
+            XCTAssertEqual(error as? TimestampUtilsError, .invalidBase64Hash)
+        }
+    }
+    
+    func testBuildTSQWithVeryLargeInput() throws {
+        let largeInput = String(repeating: "Hello World! ", count: 100)
+        let largeBase64 = largeInput.data(using: .utf8)!.base64EncodedString()
+        
+        let tsqData = try TimestampUtils.buildTSQ(from: largeBase64)
+        XCTAssertFalse(tsqData.isEmpty, "TSQ should handle large inputs")
+        XCTAssertGreaterThan(tsqData.count, 50, "TSQ for large input should be substantial")
+    }
+    
+    func testBuildTSQGeneratesConsistentOutput() throws {
+        let input = "SGVsbG8gV29ybGQ="
+        
+        let tsq1 = try TimestampUtils.buildTSQ(from: input)
+        let tsq2 = try TimestampUtils.buildTSQ(from: input)
+        
+        XCTAssertEqual(tsq1, tsq2, "Same input should generate identical TSQ")
+    }
     
     func testEncodeTSRToBase64() {
         let testData = "Test TSR Data".data(using: .utf8)!
@@ -88,6 +145,41 @@ final class TimestampUtilsTests: XCTestCase {
         XCTAssertEqual(decodedData, largeData, "Decoded data should match original data")
     }
     
+    func testEncodeTSRToBase64WithBinaryData() {
+        let binaryData = Data([0x00, 0xFF, 0x7F, 0x80, 0x01, 0xFE])
+        let base64String = TimestampUtils.encodeTSRToBase64(binaryData)
+        
+        XCTAssertFalse(base64String.isEmpty, "Binary data should encode to base64")
+        
+        let decodedData = Data(base64Encoded: base64String)
+        XCTAssertNotNil(decodedData, "Encoded binary data should decode back")
+        XCTAssertEqual(decodedData, binaryData, "Round-trip should preserve binary data")
+    }
+    
+    func testEncodeTSRToBase64WithUnicodeData() {
+        let unicodeString = "Hello 🌍 World 测试 данные"
+        let unicodeData = unicodeString.data(using: .utf8)!
+        let base64String = TimestampUtils.encodeTSRToBase64(unicodeData)
+        
+        XCTAssertFalse(base64String.isEmpty, "Unicode data should encode to base64")
+        
+        let decodedData = Data(base64Encoded: base64String)
+        XCTAssertNotNil(decodedData, "Encoded unicode data should decode back")
+        XCTAssertEqual(decodedData, unicodeData, "Round-trip should preserve unicode data")
+    }
+    
+    func testEncodeTSRToBase64ProducesValidBase64() {
+        let testData = "Random test data for validation".data(using: .utf8)!
+        let base64String = TimestampUtils.encodeTSRToBase64(testData)
+        
+        let base64Pattern = "^[A-Za-z0-9+/]*={0,2}$"
+        let regex = try! NSRegularExpression(pattern: base64Pattern)
+        let range = NSRange(location: 0, length: base64String.utf16.count)
+        let matches = regex.firstMatch(in: base64String, options: [], range: range)
+        
+        XCTAssertNotNil(matches, "Output should be valid base64 format")
+    }
+    
     func testBuildTSQAndEncodeTSRIntegration() throws {
         let validBase64Hash = "SGVsbG8gV29ybGQ="
 
@@ -100,5 +192,112 @@ final class TimestampUtilsTests: XCTestCase {
         let decodedData = Data(base64Encoded: encodedTSR)
         XCTAssertNotNil(decodedData, "Encoded TSR should be valid base64")
         XCTAssertEqual(decodedData, tsqData, "Decoded TSR should match original TSQ data")
+    }
+    
+    func testTimestampUtilsErrorEquality() {
+        XCTAssertEqual(TimestampUtilsError.emptyHash, TimestampUtilsError.emptyHash)
+        XCTAssertEqual(TimestampUtilsError.invalidBase64Hash, TimestampUtilsError.invalidBase64Hash)
+        XCTAssertNotEqual(TimestampUtilsError.emptyHash, TimestampUtilsError.invalidBase64Hash)
+    }
+    
+    func testFileUtilsBase64Operations() {
+        let validBase64 = FileTestConstants.TestData.sampleBase64
+        let decodedData = FileUtils.decodeBase64ToData(base64String: validBase64)
+        
+        XCTAssertNotNil(decodedData, "Valid base64 should decode successfully")
+        XCTAssertEqual(String(data: decodedData!, encoding: .utf8), "Hello World!", "Decoded data should match expected content")
+        
+        let malformedBase64 = FileTestConstants.TestData.malformedBase64
+        let failedDecoding = FileUtils.decodeBase64ToData(base64String: malformedBase64)
+        XCTAssertNil(failedDecoding, "Malformed base64 should return nil")
+        
+        let emptyDecoding = FileUtils.decodeBase64ToData(base64String: "")
+        XCTAssertNotNil(emptyDecoding, "Empty string should return empty data")
+        XCTAssertTrue(emptyDecoding!.isEmpty, "Empty string should decode to empty data")
+    }
+    
+    func testFileUtilsBinaryDataHandling() {
+        let binaryData = FileTestConstants.TestData.binaryData
+        let base64Encoded = binaryData.base64EncodedString()
+        let decodedBack = FileUtils.decodeBase64ToData(base64String: base64Encoded)
+        
+        XCTAssertNotNil(decodedBack, "Binary data round-trip should work")
+        XCTAssertEqual(decodedBack, binaryData, "Binary data should round-trip correctly")
+    }
+    
+    func testJSONUtilsStringifyValidObject() {
+        struct TestObject: Codable {
+            let name: String
+            let age: Int
+            let active: Bool
+        }
+        
+        let testObj = TestObject(name: "Test User", age: 30, active: true)
+        let jsonString = JSONUtils.stringify(testObj)
+        
+        XCTAssertNotNil(jsonString, "Valid object should stringify successfully")
+        XCTAssertTrue(jsonString!.contains("Test User"), "JSON should contain expected data")
+        XCTAssertTrue(jsonString!.contains("30"), "JSON should contain age")
+        XCTAssertTrue(jsonString!.contains("true"), "JSON should contain boolean value")
+    }
+    
+    func testJSONUtilsStringifyEmptyObject() {
+        struct EmptyObject: Codable {}
+        
+        let emptyObj = EmptyObject()
+        let jsonString = JSONUtils.stringify(emptyObj)
+        
+        XCTAssertNotNil(jsonString, "Empty object should stringify successfully")
+        XCTAssertEqual(jsonString, "{}", "Empty object should produce empty JSON")
+    }
+    
+    func testJSONUtilsStringifyArrays() {
+        let stringArray = ["hello", "world"]
+        let numberArray = [1, 2, 3, 4, 5]
+        
+        let stringArrayJSON = JSONUtils.stringify(stringArray)
+        let numberArrayJSON = JSONUtils.stringify(numberArray)
+        
+        XCTAssertNotNil(stringArrayJSON, "String array should stringify")
+        XCTAssertNotNil(numberArrayJSON, "Number array should stringify")
+        
+        XCTAssertTrue(stringArrayJSON!.contains("hello"), "String array JSON should contain elements")
+        XCTAssertTrue(numberArrayJSON!.contains("1"), "Number array JSON should contain elements")
+    }
+    
+    func testJSONUtilsStringifySpecialCharacters() {
+        struct SpecialCharObject: Codable {
+            let unicode: String
+            let quotes: String
+            let newlines: String
+        }
+        
+        let specialObj = SpecialCharObject(
+            unicode: "Hello 🌍 World",
+            quotes: "He said \"Hello\"",
+            newlines: "Line 1\nLine 2"
+        )
+        
+        let jsonString = JSONUtils.stringify(specialObj)
+        
+        XCTAssertNotNil(jsonString, "Object with special characters should stringify")
+        XCTAssertTrue(jsonString!.contains("🌍"), "Unicode should be preserved")
+        XCTAssertTrue(jsonString!.contains("\\\""), "Quotes should be escaped")
+        XCTAssertTrue(jsonString!.contains("\\n"), "Newlines should be escaped")
+    }
+    
+    func testTimestampUtilsWithRealWorldData() throws {
+        let realisticHashData = "ZjNkYmIwMzk5ODM5ODY5ZGE2ZjY4M2JjZWQyNDczNDQ="
+        let tsqData = try TimestampUtils.buildTSQ(from: realisticHashData)
+        
+        XCTAssertFalse(tsqData.isEmpty, "TSQ should be generated for realistic data")
+        XCTAssertGreaterThan(tsqData.count, 30, "TSQ should have substantial length")
+        
+        let encodedTSQ = TimestampUtils.encodeTSRToBase64(tsqData)
+        XCTAssertFalse(encodedTSQ.isEmpty, "TSQ should encode to base64")
+        
+        let decodedTSQ = Data(base64Encoded: encodedTSQ)
+        XCTAssertNotNil(decodedTSQ, "Encoded TSQ should decode back")
+        XCTAssertEqual(decodedTSQ, tsqData, "Round trip should preserve data")
     }
 } 

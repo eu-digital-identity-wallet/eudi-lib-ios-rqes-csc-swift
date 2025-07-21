@@ -15,30 +15,40 @@
  */
 import Foundation
 
-final actor InfoClient{
-    static func makeRequest(for request: InfoServiceRequest, rsspUrl: String) async throws -> Result<InfoServiceResponse, ClientError> {
-        let url = try rsspUrl.appendingEndpoint("/info").get()
-
-        let urlRequest = try createUrlRequest(with: url, request: request)
-
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
- 
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw ClientError.invalidResponse
-        }
-        return handleResponse(data, response, ofType: InfoServiceResponse.self)
-        
+final actor InfoClient {
+    private let httpClient: HTTPClientType
+    
+    init(httpClient: HTTPClientType = HTTPService()) {
+        self.httpClient = httpClient
     }
     
+    func makeRequest(for request: InfoServiceRequest, rsspUrl: String) async throws -> Result<InfoServiceResponse, ClientError> {
+        let url = try rsspUrl.appendingEndpoint("/info").get()
 
-    private static func createUrlRequest(with url: URL, request: InfoServiceRequest) throws -> URLRequest {
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let jsonData = try JSONEncoder().encode(request)
-        urlRequest.httpBody = jsonData
-        
-        return urlRequest
+        do {
+            let jsonData = try JSONEncoder().encode(request)
+            
+            let (data, httpResponse) = try await httpClient.postData(
+                jsonData,
+                to: url,
+                contentType: "application/json",
+                accept: nil
+            )
+            
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorMessage = String(data: data, encoding: .utf8) ?? "Info request failed"
+                return .failure(.clientError(message: errorMessage, statusCode: httpResponse.statusCode))
+            }
+            
+            let decodedResponse = try JSONDecoder().decode(InfoServiceResponse.self, from: data)
+            return .success(decodedResponse)
+            
+        } catch is EncodingError {
+            return .failure(.encodingFailed)
+        } catch is DecodingError {
+            return .failure(.invalidResponse)
+        } catch {
+            return .failure(.noData)
+        }
     }
 }
