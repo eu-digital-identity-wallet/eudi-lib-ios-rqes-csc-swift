@@ -133,4 +133,86 @@ struct FileTestConstants {
         static let malformedBase = "invalid-url"
         static let complexEndpoint = "/api/v1/users/123/details"
     }
+}
+
+struct SignHashTestConstants {
+    
+    struct Requests {
+        static let validSignHashRequest = SignHashRequest(
+            credentialID: "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85",
+            hashes: ["gA6NvbA7MA5BwMOG7KPcM7kA74Xd1OrdoM6A9AoRlAqH9MEbNyTNGbox6T3fc8kcHITYsKkA8KLcZmkTimg3DK3D"],
+            hashAlgorithmOID: .SHA256,
+            signAlgo: .ECDSA,
+            operationMode: "S"
+        )
+        
+        static let multipleHashesRequest = SignHashRequest(
+            credentialID: "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85",
+            hashes: [
+                "gA6NvbA7MA5BwMOG7KPcM7kA74Xd1OrdoM6A9AoRlAqH9MEbNyTNGbox6T3fc8kcHITYsKkA8KLcZmkTimg3DK3D",
+                "bB7OvcB8NB6CxNPH8LQdN8lB85Ye2PseqN7B0BpSmBrI0NFcOzUOHcpwy4gd9dlcIJUZtLlB9LMdanzUjnh4EL4E"
+            ],
+            hashAlgorithmOID: .SHA256,
+            signAlgo: .ECDSA,
+            operationMode: "S"
+        )
+    }
+    
+    struct Responses {
+        static let validSignHashResponse = SignHashResponse(
+            signatures: ["MEUCIQAssqE1K+gIofKPQGL3ejPmPbMn9fKSGTXfW0Rde546yAiEAg1Yaj25jbdbzIlf9MfNiJ/vPiK0Gi4uPC3CVsxy7Fiw="]
+        )
+        
+        static let multipleSignaturesResponse = SignHashResponse(
+            signatures: [
+                "MEUCIQAssqE1K+gIofKPQGL3ejPmPbMn9fKSGTXfW0Rde546yAiEAg1Yaj25jbdbzIlf9MfNiJ/vPiK0Gi4uPC3CVsxy7Fiw=",
+                "MEQCIFa9T+KJf8QLA0mNw3W9YGLqzf2HvBNw3M4fQLrB6f7NAiBG8XbVzGmPFjH4vKEe9WJHqKwQ5LkYQF4hGZ8vQcRzLw=="
+            ]
+        )
+    }
+    
+    struct URLs {
+        static let rsspUrl = "https://mock-rssp.example.com"
+        static let signHashEndpoint = "/signatures/signHash"
+        static let fullSignHashUrl = "https://mock-rssp.example.com/signatures/signHash"
+        static let invalidRsspUrl = "invalid-url"
+    }
+    
+    struct AccessTokens {
+        static let validAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        static let expiredAccessToken = "expired.token.here"
+        static let malformedAccessToken = "not-a-valid-token"
+    }
+    
+    struct MockResponses {
+        static func createValidSignHashResponseJSON() -> String {
+            return """
+            {
+              "signatures": [
+                "MEUCIQAssqE1K+gIofKPQGL3ejPmPbMn9fKSGTXfW0Rde546yAiEAg1Yaj25jbdbzIlf9MfNiJ/vPiK0Gi4uPC3CVsxy7Fiw="
+              ]
+            }
+            """
+        }
+        
+        static func createMultipleSignaturesResponseJSON() -> String {
+            return """
+            {
+              "signatures": [
+                "MEUCIQAssqE1K+gIofKPQGL3ejPmPbMn9fKSGTXfW0Rde546yAiEAg1Yaj25jbdbzIlf9MfNiJ/vPiK0Gi4uPC3CVsxy7Fiw=",
+                "MEQCIFa9T+KJf8QLA0mNw3W9YGLqzf2HvBNw3M4fQLrB6f7NAiBG8XbVzGmPFjH4vKEe9WJHqKwQ5LkYQF4hGZ8vQcRzLw=="
+              ]
+            }
+            """
+        }
+        
+        static func createErrorResponseJSON() -> String {
+            return """
+            {
+              "error": "invalid_request",
+              "error_description": "The credential ID is not valid or has been revoked"
+            }
+            """
+        }
+    }
 } 

@@ -16,15 +16,18 @@
 import Foundation
 
 final actor SignHashService: SignHashServiceType {
+    private let signHashClient: SignHashClient
     
-    init() {}
+    init(signHashClient: SignHashClient = SignHashClient()) {
+        self.signHashClient = signHashClient
+    }
 
     func signHash(request: SignHashRequest, accessToken: String, rsspUrl: String) async throws -> SignHashResponse {
 
         try SignHashValidator.validate(request)
 
-        let result = try await SignHashClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
-        
-        return try result.get() 
+        let result = try await signHashClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
+
+        return try result.get()
     }
 }
