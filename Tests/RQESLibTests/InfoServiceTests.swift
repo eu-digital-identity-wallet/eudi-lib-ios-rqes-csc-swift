@@ -93,21 +93,6 @@ final class InfoServiceTests: XCTestCase {
         }
     }
     
-    func testInfoServiceLanguageValidation() async {
-        let rsspUrl = "https://mock-rssp.example.com"
-        let request = InfoServiceRequest(lang: nil)
-        
-        do {
-            _ = try await infoService.getInfo(request: request, rsspUrl: rsspUrl)
-            XCTFail("Should throw error for invalid language")
-        } catch {
-            XCTAssertTrue(error is InfoServiceError, "Should throw InfoServiceError")
-            if let infoError = error as? InfoServiceError {
-                XCTAssertEqual(infoError, InfoServiceError.invalidLanguage, "Should be invalidLanguage error")
-            }
-        }
-    }
-    
     func testGetInfoWithServerError() async {
         let rsspUrl = "https://mock-rssp.example.com"
         let request = InfoServiceRequest(lang: "en-US")

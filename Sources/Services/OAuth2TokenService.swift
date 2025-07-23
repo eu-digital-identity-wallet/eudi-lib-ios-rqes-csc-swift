@@ -41,7 +41,7 @@ final actor OAuth2TokenService: OAuth2TokenServiceType {
         
         let result = try await OAuth2TokenClient.makeRequest(for: tokenRequest, issuerURL: issuerURL)
         
-        try await PKCEState.shared.reset()
+        await PKCEState.shared.reset()
         
         return try result.get()
     }

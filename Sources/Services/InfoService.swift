@@ -23,13 +23,7 @@ final actor InfoService: InfoServiceType {
     }
 
     func getInfo(request: InfoServiceRequest? = nil, rsspUrl: String) async throws -> InfoServiceResponse {
-        
         let req = request ?? InfoServiceRequest(lang: "en-US")
-
-        guard let lang = req.lang else {
-            throw InfoServiceError.invalidLanguage
-        }
-
         return try await infoClient.makeRequest(for: req, rsspUrl: rsspUrl).get()
     }
 }

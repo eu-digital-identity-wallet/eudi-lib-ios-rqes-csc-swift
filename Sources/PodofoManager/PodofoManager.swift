@@ -35,7 +35,7 @@ public actor PodofoManager {
         for doc in request.documents {
             
             do {
-                let podofoWrapper = try PodofoWrapper(
+                let podofoWrapper = PodofoWrapper(
                     conformanceLevel: doc.conformanceLevel.rawValue,
                     hashAlgorithm: request.hashAlgorithmOID.rawValue,
                     inputPath: doc.documentInputPath,
@@ -80,7 +80,7 @@ public actor PodofoManager {
         }
 
         for i in 0..<podofoSessions.count {
-            var sessionWrapper = podofoSessions[i]
+            let sessionWrapper = podofoSessions[i]
             let signedHash = signatures[i]
             sessionWrapper.session.printState()
 

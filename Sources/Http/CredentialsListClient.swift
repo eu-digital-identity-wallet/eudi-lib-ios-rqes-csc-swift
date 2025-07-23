@@ -34,7 +34,7 @@ final actor CredentialsListClient {
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
         
-        guard let httpResponse = response as? HTTPURLResponse else {
+        guard response is HTTPURLResponse else {
             return .failure(ClientError.invalidResponse)
         }
 

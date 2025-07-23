@@ -47,8 +47,8 @@ final actor OAuth2TokenClient {
         }
         
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
+
+        guard response is HTTPURLResponse else {
             throw ClientError.invalidResponse
         }
         return handleResponse(data, response, ofType: AccessTokenResponse.self)
