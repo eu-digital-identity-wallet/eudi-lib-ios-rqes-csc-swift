@@ -45,6 +45,11 @@ final class MockHTTPClient: HTTPClientType, @unchecked Sendable {
         return (responseData, httpResponse as URLResponse)
     }
     
+    func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        let (responseData, httpResponse) = try await performRequest(for: request.url!)
+        return (responseData, httpResponse as URLResponse)
+    }
+    
     private func performRequest(for url: URL) async throws -> (Data, HTTPURLResponse) {
         if let error = mockError {
             throw error
@@ -109,6 +114,12 @@ final class CapturingMockHTTPClient: HTTPClientType, @unchecked Sendable {
     func upload(for request: URLRequest, from data: Data) async throws -> (Data, URLResponse) {
         lastCapturedRequest = request
         
+        let (responseData, httpResponse) = try await performRequest(for: request.url!)
+        return (responseData, httpResponse as URLResponse)
+    }
+
+    func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        lastCapturedRequest = request
         let (responseData, httpResponse) = try await performRequest(for: request.url!)
         return (responseData, httpResponse as URLResponse)
     }

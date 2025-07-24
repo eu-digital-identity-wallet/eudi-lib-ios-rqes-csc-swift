@@ -102,7 +102,7 @@ struct FileTestConstants {
         static let largeBase64 = String(repeating: "QQ==", count: 1000)
         static let malformedBase64 = "Invalid-Base64!@#"
         static let emptyBase64 = ""
-        static let validPDFBase64 = "JVBERi0xLjQKJcOkw7zDssOgCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nCvkMlAwtU0rSUxOLXL3LdBNySxJLVIwUDC2NbGwsBUwyEwuyU9VyC4qTS0pTk1VyE4tjk8sKs7ILy7RLSgtNtVtAQBaERdCCmVuZHN0cmVhbQplbmRvYmoKCjMgMCBvYmoKNTMKZW5kb2JqCgo0IDAgb2JqCjw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAxIDAgUj4+CmVuZG9iagoKNSAwIG9iago8PC9UeXBlL1Jlc291cmNlRGljdGlvbmFyeS9Gb250PDwvRjEgNiAwIFI+Pj4+CmVuZG9iagoKNiAwIG9iago8PC9UeXBlL0ZvbnQvU3VidHlwZS9UeXBlMS9CYXNlRm9udC9UaW1lcy1Sb21hbj4+CmVuZG9iagoKMSAwIG9iago8PC9UeXBlL1BhZ2VzL0NvdW50IDEvS2lkc1s3IDAgUl0+PgplbmRvYmoKCjcgMCBvYmoKPDwvVHlwZS9QYWdlL1BhcmVudCAxIDAgUi9SZXNvdXJjZXMgNSAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL0NvbnRlbnRzIDIgMCBSPj4KZW5kb2JqCgp4cmVmCjAgOAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyNzUgMDAwMDAgbiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMTI3IDAwMDAwIG4gCjAwMDAwMDAxNDYgMDAwMDAgbiAKMDAwMDAwMDE5MyAwMDAwMCBuIAowMDAwMDAyMjUzIDAwMDAwIG4gCjAwMDAwMDAzMDIgMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDgvUm9vdCA0IDAgUj4+CnN0YXJ0eHJlZgozOTcKJSVFT0Y="
+        static let validPDFBase64 = "JVBERi0xLjQKJcOkw7zDssOgCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nCvkMlAwtU0rSUxOLXL3LdBNySxJLVIwUDC2NbGwsBUwyEwuyU9VyC4qTS0pTk1VyE4tjk8sKs7ILy7RLSgtNtVtAQBaERdCCmVuZHN0cmVhbQplbmRvYmoKCjMgMCBvYmoKNTMKZW5kb2JqCgo0IDAgb2JqCjw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAxIDAgUj4+CmVuZG9iagoKNSAwIG9iago8PC9UeXBlL1Jlc291cmNlRGljdGlvbmFyeS9Gb250PDwvRjEgNiAwIFI+Pj4KZW5kb2JqCgoKNiAwIG9iago8PC9UeXBlL0ZvbnQvU3VidHlwZS9UeXBlMS9CYXNlRm9udC9UaW1lcy1Sb21hbj4+CmVuZG9iagoKMSAwIG9iago8PC9UeXBlL1BhZ2VzL0NvdW50IDEvS2lkc1s3IDAgUl0+PgplbmRvYmoKCjcgMCBvYmoKPDwvVHlwZS9QYWdlL1BhcmVudCAxIDAgUi9SZXNvdXJjZXMgNSAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL0NvbnRlbnRzIDIgMCBSPj4KZW5kb2JqCgp4cmVmCjAgOAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyNzUgMDAwMDAgbiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMTI3IDAwMDAwIG4gCjAwMDAwMDAxNDYgMDAwMDAgbiAKMDAwMDAwMDE5MyAwMDAwMCBuIAowMDAwMDAyMjUzIDAwMDAwIG4gCjAwMDAwMDAzMDIgMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDgvUm9vdCA0IDAgUj4+CnN0YXJ0eHJlZgozOTcKJSVFT0Y="
         static let smallBinaryData = Data([0x01, 0x02, 0x03, 0x04])
         static let largeBinaryData = Data(repeating: 0xAB, count: 10000)
     }
@@ -214,5 +214,520 @@ struct SignHashTestConstants {
             }
             """
         }
+    }
+} 
+
+struct TestConstants {
+    static let rsspUrl = "https://mock-rssp.example.com"
+
+    static let standardCredentialsListRequest = CredentialsListRequest(
+        userID: nil,
+        credentialInfo: true,
+        certificates: "chain",
+        certInfo: true,
+        authInfo: nil,
+        onlyValid: nil,
+        lang: nil,
+        clientData: nil
+    )
+    
+    static let minimalCredentialsListRequest = CredentialsListRequest(
+        userID: nil,
+        credentialInfo: false,
+        certificates: "single",
+        certInfo: false,
+        authInfo: nil,
+        onlyValid: nil,
+        lang: nil,
+        clientData: nil
+    )
+
+    static let standardCredentialsInfoRequest = CredentialsInfoRequest(
+        credentialID: "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85",
+        certificates: "chain",
+        certInfo: true,
+        authInfo: true,
+        lang: nil,
+        clientData: nil
+    )
+    
+    static let minimalCredentialsInfoRequest = CredentialsInfoRequest(
+        credentialID: "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85",
+        certificates: "single",
+        certInfo: false,
+        authInfo: false,
+        lang: "en-US",
+        clientData: nil
+    )
+
+    static let serverResponseCredentialsInfoRequest = """
+    {
+      "credentialID": "server-credential-456",
+      "certificates": "chain",
+      "certInfo": true,
+      "auth_info": false,
+      "lang": "de-DE",
+      "client_data": "server-data"
+    }
+    """
+    
+    static let credentialsListResponse = """
+    {
+      "credentialInfos" : [
+        {
+          "credentialID" : "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85",
+          "cert" : {
+            "serialNumber" : "184966370757515800362535864175063713398032096472",
+            "certificates" : [
+              "MIICmDCCAh+gAwIBAgIUIGYtzcs9IBXguB9P0riuz8l+3NgwCgYIKoZIzj0EAwIwXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMB4XDTI1MDMyMTIyMDUxM1oXDTI3MDMyMTIyMDUxMlowVTEdMBsGA1UEAwwURmlyc3ROYW1lIFRlc3RlclVzZXIxEzARBgNVBAQMClRlc3RlclVzZXIxEjAQBgNVBCoMCUZpcnN0TmFtZTELMAkGA1UEBhMCRkMwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATKfz322k66qo078TlOuj7DnCIysLH4Luq/rJXNXtlS5WvGOVNIc95blK/XRIgx8/Q0SYHrXwumDOaJxKZzs222o4HFMIHCMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUs2y4kRcc16QaZjGHQuGLwEDMlRswHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMEMGA1UdHwQ8MDowOKA2oDSGMmh0dHBzOi8vcHJlcHJvZC5wa2kuZXVkaXcuZGV2L2NybC9waWRfQ0FfVVRfMDEuY3JsMB0GA1UdDgQWBBRwUXIdDj4Rr+AfehggZXvcNj9wUTAOBgNVHQ8BAf8EBAMCBkAwCgYIKoZIzj0EAwIDZwAwZAIwUH8UEK/Vc+EDC4ZrRwBPpOCeJC5+9pky0hIyghFpaAOFUSsrqFjRxF9BlP/p1kNmAjA3B8sBJKNnlyEEHd0h+E6gaj5p/rgzj+kVX/30h8oZtAMpe1oamOGYhoLiZwmJH7Y=",
+              "MIIDHTCCAqOgAwIBAgIUVqjgtJqf4hUYJkqdYzi+0xwhwFYwCgYIKoZIzj0EAwMwXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMB4XDTIzMDkwMTE4MzQxN1oXDTMyMTEyNzE4MzQxNlowXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEFg5Shfsxp5R/UFIEKS3L27dwnFhnjSgUh2btKOQEnfb3doyeqMAvBtUMlClhsF3uefKinCw08NB31rwC+dtj6X/LE3n2C9jROIUN8PrnlLS5Qs4Rs4ZU5OIgztoaO8G9o4IBJDCCASAwEgYDVR0TAQH/BAgwBgEB/wIBADAfBgNVHSMEGDAWgBSzbLiRFxzXpBpmMYdC4YvAQMyVGzAWBgNVHSUBAf8EDDAKBggrgQICAAABBzBDBgNVHR8EPDA6MDigNqA0hjJodHRwczovL3ByZXByb2QucGtpLmV1ZGl3LmRldi9jcmwvcGlkX0NBX1VUXzAxLmNybDAdBgNVHQ4EFgQUs2y4kRcc16QaZjGHQuGLwEDMlRswDgYDVR0PAQH/BAQDAgEGMF0GA1UdEgRWMFSGUmh0dHBzOi8vZ2l0aHViLmNvbS9ldS1kaWdpdGFsLWlkZW50aXR5LXdhbGxldC9hcmNoaXRlY3R1cmUtYW5kLXJlZmVyZW5jZS1mcmFtZXdvcmswCgYIKoZIzj0EAwMDaAAwZQIwaXUA3j++xl/tdD76tXEWCikfM1CaRz4vzBC7NS0wCdItKiz6HZeV8EPtNCnsfKpNAjEAqrdeKDnr5Kwf8BA7tATehxNlOV4Hnc10XO1XULtigCwb49RpkqlS2Hul+DpqObUs"
+            ],
+            "validFrom" : "20250321220513Z",
+            "validTo" : "20270321220512Z",
+            "subjectDN" : "C=FC, GIVENNAME=FirstName, SURNAME=TesterUser, CN=FirstName TesterUser",
+            "status" : "valid",
+            "issuerDN" : "C=UT, O=EUDI Wallet Reference Implementation, CN=PID Issuer CA - UT 01"
+          },
+          "signatureQualifier" : "eu_eidas_qes",
+          "description" : "This is a credential for tests",
+          "multisign" : 1,
+          "key" : {
+            "status" : "enabled",
+            "curve" : "1.2.840.10045.3.1.7",
+            "algo" : [
+              "1.2.840.10045.2.1",
+              "1.2.840.10045.4.3.2"
+            ],
+            "len" : 256
+          },
+          "lang" : "en-US"
+        }
+      ],
+      "onlyValid" : false,
+      "credentialIDs" : [
+        "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85"
+      ]
+    }
+    """
+    
+    static let credentialsInfoResponse = """
+    {
+      "signatureQualifier" : "eu_eidas_qes",
+      "description" : "This is a credential for tests",
+      "lang" : "en-US",
+      "key" : {
+        "status" : "enabled",
+        "curve" : "1.2.840.10045.3.1.7",
+        "algo" : [
+          "1.2.840.10045.2.1",
+          "1.2.840.10045.4.3.2"
+        ],
+        "len" : 256
+      },
+      "multisign" : 1,
+      "cert" : {
+        "validFrom" : "20250321220513Z",
+        "serialNumber" : "184966370757515800362535864175063713398032096472",
+        "subjectDN" : "C=FC, GIVENNAME=FirstName, SURNAME=TesterUser, CN=FirstName TesterUser",
+        "validTo" : "20270321220512Z",
+        "certificates" : [
+          "MIICmDCCAh+gAwIBAgIUIGYtzcs9IBXguB9P0riuz8l+3NgwCgYIKoZIzj0EAwIwXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxLS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMB4XDTI1MDMyMTIyMDUxM1oXDTI3MDMyMTIyMDUxMlowVTEdMBsGA1UEAwwURmlyc3ROYW1lIFRlc3RlclVzZXIxEzARBgNVBAQMClRlc3RlclVzZXIxEjAQBgNVBCoMCUZpcnN0TmFtZTELMAkGA1UEBhMCRkMwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATKfz322k66qo078TlOuj7DnCIysLH4Luq/rJXNXtlS5WvGOVNIc95blK/XRIgx8/Q0SYHrXwumDOaJxKZzs222o4HFMIHCMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUs2y4kRcc16QaZjGHQuGLwEDMlRswHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMEMGA1UdHwQ8MDowOKA2oDSGMmh0dHBzOi8vcHJlcHJvZC5wa2kuZXVkaXcuZGV2L2NybC9waWRfQ0FfVVRfMDEuY3JsMB0GA1UdDgQWBBRwUXIdDj4Rr+AfehggZXvcNj9wUTAOBgNVHQ8BAf8EBAMCBkAwCgYIKoZIzj0EAwIDZwAwZAIwUH8UEK/Vc+EDC4ZrRwBPpOCeJC5+9pky0hIyghFpaAOFUSsrqFjRxF9BlP/p1kNmAjA3B8sBJKNnlyEEHd0h+E6gaj5p/rgzj+kVX/30h8oZtAMpe1oamOGYhoLiZwmJH7Y=",
+          "MIIDHTCCAqOgAwIBAgIUVqjgtJqf4hUYJkqdYzi+0xwhwFYwCgYIKoZIzj0EAwMwXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMB4XDTIzMDkwMTE4MzQxN1oXDTMyMTEyNzE4MzQxNlowXDEeMBwGA1UEAwwVUElEIElzc3VlciBDQSAtIFVUIDAxMS0wKwYDVQQKDCRFVURJIFdhbGxldCBSZWZlcmVuY2UgSW1wbGVtZW50YXRpb24xCzAJBgNVBAYTAlVUMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEFg5Shfsxp5R/UFIEKS3L27dwnFhnjSgUh2btKOQEnfb3doyeqMAvBtUMlClhsF3uefKinCw08NB31rwC+dtj6X/LE3n2C9jROIUN8PrnlLS5Qs4Rs4ZU5OIgztoaO8G9o4IBJDCCASAwEgYDVR0TAQH/BAgwBgEB/wIBADAfBgNVHSMEGDAWgBSzbLiRFxzXpBpmMYdC4YvAQMyVGzAWBgNVHSUBAf8EDDAKBggrgQICAAABBzBDBgNVHR8EPDA6MDigNqA0hjJodHRwczovL3ByZXByb2QucGtpLmV1ZGl3LmRldi9jcmwvcGlkX0NBX1VUXzAxLmNybDAdBgNVHQ4EFgQUs2y4kRcc16QaZjGHQuGLwEDMlRswDgYDVR0PAQH/BAQDAgEGMF0GA1UdEgRWMFSGUmh0dHBzOi8vZ2l0aHViLmNvbS9ldS1kaWdpdGFsLWlkZW50aXR5LXdhbGxldC9hcmNoaXRlY3R1cmUtYW5kLXJlZmVyZW5jZS1mcmFtZXdvcmswCgYIKoZIzj0EAwMDaAAwZQIwaXUA3j++xl/tdD76tXEWCikfM1CaRz4vzBC7NS0wCdItKiz6HZeV8EPtNCnsfKpNAjEAqrdeKDnr5Kwf8BA7tATehxNlOV4Hnc10XO1XULtigCwb49RpkqlS2Hul+DpqObUs"
+        ],
+        "issuerDN" : "C=UT, O=EUDI Wallet Reference Implementation, CN=PID Issuer CA - UT 01",
+        "status" : "valid"
+      }
+    }
+    """
+
+    static let completeCredentialInfoResponse = """
+    {
+      "description" : "Complete test credential",
+      "signatureQualifier" : "eu_eidas_qes",
+      "multisign" : 5,
+      "lang" : "en-US",
+      "scal" : "1",
+      "key" : {
+        "status" : "enabled",
+        "algo" : ["1.2.840.10045.2.1", "1.2.840.10045.4.3.2"],
+        "len" : 256,
+        "curve" : "1.2.840.10045.3.1.7"
+      },
+      "cert" : {
+        "status" : "valid",
+        "certificates" : ["MIICmDCCAh+...cert1", "MIIDHTCCAqO...cert2"],
+        "issuerDN" : "C=UT, O=Test CA, CN=Test Issuer",
+        "serialNumber" : "123456789012345",
+        "subjectDN" : "C=US, CN=John Doe, O=Test Org",
+        "validFrom" : "20240101000000Z",
+        "validTo" : "20251231235959Z"
+      },
+      "auth" : {
+        "mode" : "explicit",
+        "expression" : "PIN",
+        "objects" : [
+          {
+            "type" : "PIN",
+            "id" : "pin-id-1",
+            "format" : "N",
+            "label" : "Enter PIN",
+            "description" : "6-digit PIN"
+          }
+        ]
+      }
+    }
+    """
+    
+    static let minimalCredentialInfoResponse = """
+    {
+      "multisign" : 1,
+      "key" : {
+        "status" : "enabled",
+        "algo" : ["1.2.840.10045.2.1"],
+        "len" : 256
+      }
+    }
+    """
+    
+    static let multipleAuthObjectsCredentialInfoResponse = """
+    {
+      "multisign" : 1,
+      "key" : {
+        "status" : "enabled",
+        "algo" : ["1.2.840.10045.2.1"],
+        "len" : 256
+      },
+      "auth" : {
+        "mode" : "implicit",
+        "expression" : "PIN || BIOMETRIC",
+        "objects" : [
+          {
+            "type" : "PIN",
+            "id" : "pin-primary",
+            "format" : "N",
+            "label" : "Primary PIN",
+            "description" : "Main authentication PIN"
+          },
+          {
+            "type" : "BIOMETRIC",
+            "id" : "bio-fingerprint",
+            "format" : "B",
+            "label" : "Fingerprint",
+            "description" : "Fingerprint scan"
+          }
+        ]
+      }
+    }
+    """
+
+    static let keyVariations = [
+        ("""
+        {"status": "enabled", "algo": ["1.2.840.10045.2.1"], "len": 256}
+        """, 1),
+        
+        ("""
+        {"status": "enabled", "algo": ["1.2.840.10045.2.1", "1.2.840.10045.4.3.2", "1.2.840.10045.4.3.3"], "len": 384}
+        """, 3),
+        
+        ("""
+        {"status": "disabled", "algo": ["1.2.840.10045.2.1"], "len": 521}
+        """, 1)
+    ]
+
+    static let invalidCredentialInfoJsons = [
+        """
+        {
+          "multisign" : 1
+        }
+        """,
+        """
+        {
+          "key" : {
+            "status" : "enabled",
+            "algo" : ["1.2.840.10045.2.1"],
+            "len" : 256
+          }
+        }
+        """,
+        """
+        {
+          "multisign" : 1,
+          "key" : {
+            "algo" : ["1.2.840.10045.2.1"],
+            "len" : 256
+          }
+        }
+        """,
+        """
+        {
+          "multisign" : 1,
+          "key" : {
+            "status" : "enabled",
+            "len" : 256
+          }
+        }
+        """,
+        """
+        {
+          "multisign" : 1,
+          "key" : {
+            "status" : "enabled",
+            "algo" : ["1.2.840.10045.2.1"]
+          }
+        }
+        """
+    ]
+    static let completeCredentialsListResponse = """
+    {
+      "credentialInfos" : [
+        {
+          "credentialID" : "test-credential-123",
+          "cert" : {
+            "serialNumber" : "123456789",
+            "certificates" : ["cert1", "cert2"],
+            "validFrom" : "20240101000000Z",
+            "validTo" : "20251231235959Z",
+            "subjectDN" : "C=US, CN=Test User",
+            "status" : "valid",
+            "issuerDN" : "C=US, O=Test CA"
+          },
+          "signatureQualifier" : "eu_eidas_qes",
+          "description" : "Test credential",
+          "multisign" : 5,
+          "key" : {
+            "status" : "enabled",
+            "curve" : "1.2.840.10045.3.1.7",
+            "algo" : ["1.2.840.10045.2.1", "1.2.840.10045.4.3.2"],
+            "len" : 256
+          },
+          "lang" : "en-US"
+        }
+      ],
+      "onlyValid" : true,
+      "credentialIDs" : ["test-credential-123"]
+    }
+    """
+    
+    static let emptyCredentialsListResponse = """
+    {
+      "credentialInfos" : [],
+      "onlyValid" : false,
+      "credentialIDs" : []
+    }
+    """
+    
+    static let multipleCredentialsListResponse = """
+    {
+      "credentialInfos" : [
+        {
+          "credentialID" : "cred-1",
+          "cert" : {
+            "serialNumber" : "111",
+            "certificates" : ["cert1"],
+            "validFrom" : "20240101000000Z",
+            "validTo" : "20251231235959Z",
+            "subjectDN" : "C=US, CN=User 1",
+            "status" : "valid",
+            "issuerDN" : "C=US, O=CA 1"
+          },
+          "signatureQualifier" : "eu_eidas_qes",
+          "multisign" : 1,
+          "key" : {
+            "status" : "enabled",
+            "algo" : ["1.2.840.10045.2.1"],
+            "len" : 256
+          }
+        },
+        {
+          "credentialID" : "cred-2",
+          "cert" : {
+            "serialNumber" : "222",
+            "certificates" : ["cert2"],
+            "validFrom" : "20240101000000Z",
+            "validTo" : "20251231235959Z",
+            "subjectDN" : "C=US, CN=User 2",
+            "status" : "valid",
+            "issuerDN" : "C=US, O=CA 2"
+          },
+          "signatureQualifier" : "eu_eidas_ades",
+          "multisign" : 3,
+          "key" : {
+            "status" : "enabled",
+            "algo" : ["1.2.840.10045.2.1", "1.2.840.10045.4.3.2"],
+            "len" : 256
+          }
+        }
+      ],
+      "onlyValid" : true,
+      "credentialIDs" : ["cred-1", "cred-2"]
+    }
+    """
+    
+    static let minimalCredentialsListResponse = """
+    {
+      "credentialInfos" : [
+        {
+          "credentialID" : "minimal-cred",
+          "cert" : {
+            "serialNumber" : "999",
+            "certificates" : [],
+            "validFrom" : "20240101000000Z",
+            "validTo" : "20251231235959Z",
+            "subjectDN" : "C=US, CN=Minimal User",
+            "status" : "valid",
+            "issuerDN" : "C=US, O=Minimal CA"
+          },
+          "key" : {
+            "status" : "enabled",
+            "algo" : ["1.2.840.10045.2.1"],
+            "len" : 256
+          }
+        }
+      ],
+      "credentialIDs" : ["minimal-cred"]
+    }
+    """
+    
+    static let nullCredentialInfosResponse = """
+    {
+      "credentialInfos" : null,
+      "onlyValid" : false,
+      "credentialIDs" : ["id-without-info"]
+    }
+    """
+
+    static let invalidCredentialsListJsons = [
+        """
+        {
+          "credentialInfos" : [],
+          "onlyValid" : false
+        }
+        """,
+        """
+        {
+          "credentialInfos" : [
+            {
+              "credentialID" : "invalid-cred",
+              "key" : {
+                "status" : "enabled",
+                "algo" : ["1.2.840.10045.2.1"],
+                "len" : 256
+              }
+            }
+          ],
+          "credentialIDs" : ["invalid-cred"]
+        }
+        """,
+        """
+        {
+          "credentialInfos" : [
+            {
+              "credentialID" : "invalid-cred",
+              "cert" : {
+                "serialNumber" : "999",
+                "certificates" : [],
+                "validFrom" : "20240101000000Z",
+                "validTo" : "20251231235959Z",
+                "subjectDN" : "C=US, CN=User",
+                "status" : "valid",
+                "issuerDN" : "C=US, O=CA"
+              }
+            }
+          ],
+          "credentialIDs" : ["invalid-cred"]
+        }
+        """
+    ]
+
+    static let emptyCredentialsListResponseForService = """
+    {
+      "credentialInfos": [],
+      "onlyValid": true,
+      "credentialIDs": []
+    }
+    """
+    
+    static let multipleCredentialsResponseForService = """
+    {
+      "credentialInfos" : [
+        {
+          "credentialID" : "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85",
+          "cert" : {
+            "serialNumber" : "184966370757515800362535864175063713398032096472",
+            "certificates" : ["cert1"],
+            "validFrom" : "20250321220513Z",
+            "validTo" : "20270321220512Z",
+            "subjectDN" : "C=FC, CN=First User",
+            "status" : "valid",
+            "issuerDN" : "C=UT, O=Test CA"
+          },
+          "signatureQualifier" : "eu_eidas_qes",
+          "description" : "First credential",
+          "multisign" : 1,
+          "key" : {
+            "status" : "enabled",
+            "curve" : "1.2.840.10045.3.1.7",
+            "algo" : ["1.2.840.10045.2.1"],
+            "len" : 256
+          },
+          "lang" : "en-US"
+        },
+        {
+          "credentialID" : "another-credential-id",
+          "cert" : {
+            "serialNumber" : "987654321",
+            "certificates" : ["cert2"],
+            "validFrom" : "20240101000000Z",
+            "validTo" : "20250101000000Z",
+            "subjectDN" : "C=ES, CN=Second User",
+            "status" : "valid",
+            "issuerDN" : "C=ES, O=Another CA"
+          },
+          "signatureQualifier" : "eu_eidas_ades",
+          "description" : "Second credential",
+          "multisign" : 5,
+          "key" : {
+            "status" : "enabled",
+            "curve" : "1.2.840.10045.3.1.7",
+            "algo" : ["1.2.840.10045.2.1", "1.2.840.10045.4.3.2"],
+            "len" : 256
+          },
+          "lang" : "es-ES"
+        }
+      ],
+      "onlyValid" : false,
+      "credentialIDs" : [
+        "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85",
+        "another-credential-id"
+      ]
+    }
+    """
+
+    static func credentialsListResponseWithSignatureQualifier(_ qualifier: String) -> String {
+        return """
+        {
+          "credentialInfos" : [
+            {
+              "credentialID" : "test-cred",
+              "cert" : {
+                "serialNumber" : "123",
+                "certificates" : [],
+                "validFrom" : "20240101000000Z",
+                "validTo" : "20251231235959Z",
+                "subjectDN" : "C=US, CN=User",
+                "status" : "valid",
+                "issuerDN" : "C=US, O=CA"
+              },
+              "signatureQualifier" : "\(qualifier)",
+              "key" : {
+                "status" : "enabled",
+                "algo" : ["1.2.840.10045.2.1"],
+                "len" : 256
+              }
+            }
+          ],
+          "credentialIDs" : ["test-cred"]
+        }
+        """
     }
 } 

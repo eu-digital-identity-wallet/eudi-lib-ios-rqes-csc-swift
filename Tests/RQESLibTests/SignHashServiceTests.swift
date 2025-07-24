@@ -72,8 +72,7 @@ final class SignHashServiceTests: XCTestCase {
     func testSignHashWithValidationErrors() async {
         let accessToken = SignHashTestConstants.AccessTokens.validAccessToken
         let rsspUrl = SignHashTestConstants.URLs.rsspUrl
-        
-        // Test missing credential ID
+
         let missingCredentialIDRequest = SignHashRequest(
             credentialID: "",
             hashes: ["hash"],

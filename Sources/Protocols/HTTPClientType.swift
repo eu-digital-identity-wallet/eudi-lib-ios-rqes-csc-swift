@@ -20,4 +20,5 @@ public protocol HTTPClientType: Sendable {
     func getData(from url: URL) async throws -> (Data, HTTPURLResponse)
     func postData(_ data: Data, to url: URL, contentType: String, accept: String?) async throws -> (Data, HTTPURLResponse)
     func upload(for request: URLRequest, from data: Data) async throws -> (Data, URLResponse)
+    func send(_ request: URLRequest) async throws -> (Data, URLResponse)
 } 

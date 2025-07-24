@@ -16,8 +16,13 @@
 import Foundation
 
 final actor CredentialsInfoClient {
+    private let httpClient: HTTPClientType
+    
+    init(httpClient: HTTPClientType = HTTPService()) {
+        self.httpClient = httpClient
+    }
 
-    static func makeRequest(for request: CredentialsInfoRequest, accessToken: String, rsspUrl: String) async throws -> Result<CredentialInfo, ClientError> {
+    func makeRequest(for request: CredentialsInfoRequest, accessToken: String, rsspUrl: String) async throws -> Result<CredentialInfo, ClientError> {
         let url = try rsspUrl.appendingEndpoint("/credentials/info").get()
         
         var urlRequest = URLRequest(url: url)
@@ -32,7 +37,7 @@ final actor CredentialsInfoClient {
             return .failure(ClientError.encodingFailed)
         }
 
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        let (data, response) = try await httpClient.send(urlRequest)
         
         guard response is HTTPURLResponse else {
             return .failure(ClientError.invalidResponse)

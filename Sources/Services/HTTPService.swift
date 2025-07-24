@@ -52,4 +52,8 @@ public final actor HTTPService: HTTPClientType, Sendable {
     public func upload(for request: URLRequest, from data: Data) async throws -> (Data, URLResponse) {
         return try await URLSession.shared.upload(for: request, from: data)
     }
+
+    public func send(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        return try await URLSession.shared.data(for: request)
+    }
 } 
