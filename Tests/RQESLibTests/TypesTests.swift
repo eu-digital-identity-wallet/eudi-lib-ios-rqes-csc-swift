@@ -24,21 +24,11 @@ class TypesTests: XCTestCase {
         XCTAssertEqual(ASICContainer.ASIC_E.rawValue, "ASIC_E")
     }
 
-    func testASICContainerInitializers() {
-        let container1 = ASICContainer(rawValue: "CUSTOM")
-        XCTAssertEqual(container1.rawValue, "CUSTOM")
-        
-        let container2 = ASICContainer("ANOTHER")
-        XCTAssertEqual(container2.rawValue, "ANOTHER")
-        
-        let container3: ASICContainer = "STRING_LITERAL"
-        XCTAssertEqual(container3.rawValue, "STRING_LITERAL")
-    }
-
-    func testASICContainerDescription() {
-        let container = ASICContainer.ASIC_S
-        XCTAssertEqual(container.description, "ASIC_S")
-        XCTAssertEqual("\(container)", "ASIC_S")
+    func testASICContainerCodable() throws {
+        let original = ASICContainer.ASIC_E
+        let jsonData = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(ASICContainer.self, from: jsonData)
+        XCTAssertEqual(decoded, original)
     }
 
     func testConformanceLevelStaticConstants() {
@@ -48,29 +38,12 @@ class TypesTests: XCTestCase {
         XCTAssertEqual(ConformanceLevel.ADES_B_LTA.rawValue, "ADES_B_LTA")
     }
 
-    func testConformanceLevelInitializers() {
-        let level1 = ConformanceLevel(rawValue: "CUSTOM_LEVEL")
-        XCTAssertEqual(level1.rawValue, "CUSTOM_LEVEL")
-        
-        let level2 = ConformanceLevel("ANOTHER_LEVEL")
-        XCTAssertEqual(level2.rawValue, "ANOTHER_LEVEL")
-        
-        let level3: ConformanceLevel = "STRING_LITERAL_LEVEL"
-        XCTAssertEqual(level3.rawValue, "STRING_LITERAL_LEVEL")
-    }
-
-    func testConformanceLevelDescription() {
-        let level = ConformanceLevel.ADES_B_LT
-        XCTAssertEqual(level.description, "ADES_B_LT")
-        XCTAssertEqual("\(level)", "ADES_B_LT")
-    }
-
     func testConformanceLevelCodable() throws {
         let originalLevel = ConformanceLevel.ADES_B_T
         let jsonData = try JSONEncoder().encode(originalLevel)
         let decodedLevel = try JSONDecoder().decode(ConformanceLevel.self, from: jsonData)
         
-        XCTAssertEqual(decodedLevel.rawValue, originalLevel.rawValue)
+        XCTAssertEqual(decodedLevel, originalLevel)
     }
 
     func testHashAlgorithmOIDStaticConstants() {
@@ -86,21 +59,11 @@ class TypesTests: XCTestCase {
         XCTAssertEqual(HashAlgorithmOID.MD5.rawValue, "1.2.840.113549.2.5")
     }
 
-    func testHashAlgorithmOIDInitializers() {
-        let oid1 = HashAlgorithmOID(rawValue: "1.2.3.4.5")
-        XCTAssertEqual(oid1.rawValue, "1.2.3.4.5")
-        
-        let oid2 = HashAlgorithmOID("2.3.4.5.6")
-        XCTAssertEqual(oid2.rawValue, "2.3.4.5.6")
-        
-        let oid3: HashAlgorithmOID = "3.4.5.6.7"
-        XCTAssertEqual(oid3.rawValue, "3.4.5.6.7")
-    }
-
-    func testHashAlgorithmOIDDescription() {
-        let oid = HashAlgorithmOID.SHA256
-        XCTAssertEqual(oid.description, "2.16.840.1.101.3.4.2.1")
-        XCTAssertEqual("\(oid)", "2.16.840.1.101.3.4.2.1")
+    func testHashAlgorithmOIDCodable() throws {
+        let original = HashAlgorithmOID.SHA256
+        let jsonData = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(HashAlgorithmOID.self, from: jsonData)
+        XCTAssertEqual(decoded, original)
     }
 
     func testSignatureFormatStaticConstants() {
@@ -110,29 +73,12 @@ class TypesTests: XCTestCase {
         XCTAssertEqual(SignatureFormat.J.rawValue, "J")
     }
 
-    func testSignatureFormatInitializers() {
-        let format1 = SignatureFormat(rawValue: "CUSTOM")
-        XCTAssertEqual(format1.rawValue, "CUSTOM")
-        
-        let format2 = SignatureFormat("ANOTHER")
-        XCTAssertEqual(format2.rawValue, "ANOTHER")
-        
-        let format3: SignatureFormat = "LITERAL"
-        XCTAssertEqual(format3.rawValue, "LITERAL")
-    }
-
-    func testSignatureFormatDescription() {
-        let format = SignatureFormat.P
-        XCTAssertEqual(format.description, "P")
-        XCTAssertEqual("\(format)", "P")
-    }
-
     func testSignatureFormatCodable() throws {
         let originalFormat = SignatureFormat.X
         let jsonData = try JSONEncoder().encode(originalFormat)
         let decodedFormat = try JSONDecoder().decode(SignatureFormat.self, from: jsonData)
         
-        XCTAssertEqual(decodedFormat.rawValue, originalFormat.rawValue)
+        XCTAssertEqual(decodedFormat, originalFormat)
     }
 
     func testSignatureQualifierStaticConstants() {
@@ -146,29 +92,12 @@ class TypesTests: XCTestCase {
         XCTAssertEqual(SignatureQualifier.ZA_ECTA_OES.rawValue, "za_ecta_oes")
     }
 
-    func testSignatureQualifierInitializers() {
-        let qualifier1 = SignatureQualifier(rawValue: "custom_qualifier")
-        XCTAssertEqual(qualifier1.rawValue, "custom_qualifier")
-        
-        let qualifier2 = SignatureQualifier("another_qualifier")
-        XCTAssertEqual(qualifier2.rawValue, "another_qualifier")
-        
-        let qualifier3: SignatureQualifier = "literal_qualifier"
-        XCTAssertEqual(qualifier3.rawValue, "literal_qualifier")
-    }
-
-    func testSignatureQualifierDescription() {
-        let qualifier = SignatureQualifier.EU_EIDAS_QES
-        XCTAssertEqual(qualifier.description, "eu_eidas_qes")
-        XCTAssertEqual("\(qualifier)", "eu_eidas_qes")
-    }
-
     func testSignatureQualifierCodable() throws {
         let originalQualifier = SignatureQualifier.EU_EIDAS_AESEAL
         let jsonData = try JSONEncoder().encode(originalQualifier)
         let decodedQualifier = try JSONDecoder().decode(SignatureQualifier.self, from: jsonData)
         
-        XCTAssertEqual(decodedQualifier.rawValue, originalQualifier.rawValue)
+        XCTAssertEqual(decodedQualifier, originalQualifier)
     }
 
     func testSignedEnvelopePropertyStaticConstants() {
@@ -178,29 +107,12 @@ class TypesTests: XCTestCase {
         XCTAssertEqual(SignedEnvelopeProperty.INTERNALLY_DETACHED.rawValue, "INTERNALLY_DETACHED")
     }
 
-    func testSignedEnvelopePropertyInitializers() {
-        let property1 = SignedEnvelopeProperty(rawValue: "CUSTOM_PROPERTY")
-        XCTAssertEqual(property1.rawValue, "CUSTOM_PROPERTY")
-        
-        let property2 = SignedEnvelopeProperty("ANOTHER_PROPERTY")
-        XCTAssertEqual(property2.rawValue, "ANOTHER_PROPERTY")
-        
-        let property3: SignedEnvelopeProperty = "LITERAL_PROPERTY"
-        XCTAssertEqual(property3.rawValue, "LITERAL_PROPERTY")
-    }
-
-    func testSignedEnvelopePropertyDescription() {
-        let property = SignedEnvelopeProperty.INTERNALLY_DETACHED
-        XCTAssertEqual(property.description, "INTERNALLY_DETACHED")
-        XCTAssertEqual("\(property)", "INTERNALLY_DETACHED")
-    }
-
     func testSignedEnvelopePropertyCodable() throws {
         let originalProperty = SignedEnvelopeProperty.ENVELOPING
         let jsonData = try JSONEncoder().encode(originalProperty)
         let decodedProperty = try JSONDecoder().decode(SignedEnvelopeProperty.self, from: jsonData)
         
-        XCTAssertEqual(decodedProperty.rawValue, originalProperty.rawValue)
+        XCTAssertEqual(decodedProperty, originalProperty)
     }
 
     func testSigningAlgorithmOIDStaticConstants() {
@@ -217,29 +129,24 @@ class TypesTests: XCTestCase {
         XCTAssertEqual(SigningAlgorithmOID.X448.rawValue, "1.3.101.111")
     }
 
-    func testSigningAlgorithmOIDInitializers() {
-        let oid1 = SigningAlgorithmOID(rawValue: "1.2.3.4.5")
-        XCTAssertEqual(oid1.rawValue, "1.2.3.4.5")
-        
-        let oid2 = SigningAlgorithmOID("2.3.4.5.6")
-        XCTAssertEqual(oid2.rawValue, "2.3.4.5.6")
-        
-        let oid3: SigningAlgorithmOID = "3.4.5.6.7"
-        XCTAssertEqual(oid3.rawValue, "3.4.5.6.7")
-    }
-
-    func testSigningAlgorithmOIDDescription() {
-        let oid = SigningAlgorithmOID.ECDSA
-        XCTAssertEqual(oid.description, "1.2.840.10045.2.1")
-        XCTAssertEqual("\(oid)", "1.2.840.10045.2.1")
-    }
-
     func testSigningAlgorithmOIDCodable() throws {
         let originalOID = SigningAlgorithmOID.SHA256WithECDSA
         let jsonData = try JSONEncoder().encode(originalOID)
         let decodedOID = try JSONDecoder().decode(SigningAlgorithmOID.self, from: jsonData)
         
-        XCTAssertEqual(decodedOID.rawValue, originalOID.rawValue)
+        XCTAssertEqual(decodedOID, originalOID)
+    }
+
+    func testScopeStaticConstants() {
+        XCTAssertEqual(Scope.SERVICE.rawValue, "service")
+        XCTAssertEqual(Scope.CREDENTIAL.rawValue, "credential")
+    }
+
+    func testScopeCodable() throws {
+        let original = Scope.CREDENTIAL
+        let jsonData = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(Scope.self, from: jsonData)
+        XCTAssertEqual(decoded, original)
     }
 
     func testAllTypesImplementRequiredProtocols() {
@@ -250,6 +157,7 @@ class TypesTests: XCTestCase {
         XCTAssertFalse(SignatureQualifier.EU_EIDAS_QES.rawValue.isEmpty)
         XCTAssertFalse(SignedEnvelopeProperty.ENVELOPED.rawValue.isEmpty)
         XCTAssertFalse(SigningAlgorithmOID.RSA.rawValue.isEmpty)
+        XCTAssertFalse(Scope.SERVICE.rawValue.isEmpty)
 
         XCTAssertFalse(ASICContainer.ASIC_S.description.isEmpty)
         XCTAssertFalse(ConformanceLevel.ADES_B_T.description.isEmpty)
@@ -258,35 +166,19 @@ class TypesTests: XCTestCase {
         XCTAssertFalse(SignatureQualifier.EU_EIDAS_AES.description.isEmpty)
         XCTAssertFalse(SignedEnvelopeProperty.DETACHED.description.isEmpty)
         XCTAssertFalse(SigningAlgorithmOID.ECDSA.description.isEmpty)
-    }
-
-    func testStringLiteralConformance() {
-        let container: ASICContainer = "TEST_CONTAINER"
-        let level: ConformanceLevel = "TEST_LEVEL"
-        let hashOID: HashAlgorithmOID = "1.2.3.4.5"
-        let format: SignatureFormat = "TEST_FORMAT"
-        let qualifier: SignatureQualifier = "test_qualifier"
-        let property: SignedEnvelopeProperty = "TEST_PROPERTY"
-        let signingOID: SigningAlgorithmOID = "1.2.3.4.5"
-        
-        XCTAssertEqual(container.rawValue, "TEST_CONTAINER")
-        XCTAssertEqual(level.rawValue, "TEST_LEVEL")
-        XCTAssertEqual(hashOID.rawValue, "1.2.3.4.5")
-        XCTAssertEqual(format.rawValue, "TEST_FORMAT")
-        XCTAssertEqual(qualifier.rawValue, "test_qualifier")
-        XCTAssertEqual(property.rawValue, "TEST_PROPERTY")
-        XCTAssertEqual(signingOID.rawValue, "1.2.3.4.5")
+        XCTAssertFalse(Scope.CREDENTIAL.description.isEmpty)
     }
 
     func testJSONEncodingDecoding() throws {
-        let testData: [(String, any Codable)] = [
+        let testData: [(String, any Codable & RawRepresentable)] = [
             ("ASICContainer", ASICContainer.ASIC_E),
             ("ConformanceLevel", ConformanceLevel.ADES_B_LTA),
             ("HashAlgorithmOID", HashAlgorithmOID.SHA3_256),
             ("SignatureFormat", SignatureFormat.J),
             ("SignatureQualifier", SignatureQualifier.EU_EIDAS_QESEAL),
             ("SignedEnvelopeProperty", SignedEnvelopeProperty.INTERNALLY_DETACHED),
-            ("SigningAlgorithmOID", SigningAlgorithmOID.SHA384WithECDSA)
+            ("SigningAlgorithmOID", SigningAlgorithmOID.SHA384WithECDSA),
+            ("Scope", Scope.SERVICE)
         ]
         
         for (typeName, value) in testData {
@@ -295,7 +187,128 @@ class TypesTests: XCTestCase {
 
             let jsonString = String(data: jsonData, encoding: .utf8)
             XCTAssertNotNil(jsonString, "\(typeName) should produce valid UTF-8 JSON")
-            XCTAssertTrue(jsonString?.contains("\"") == true, "\(typeName) JSON should contain quotes")
+            
+            if let rawValue = value.rawValue as? String {
+                let expectedJsonString = "\"\(rawValue)\""
+                XCTAssertEqual(jsonString, expectedJsonString, "JSON string for \(typeName) is incorrect")
+            } else {
+                XCTFail("Could not get rawValue as String for \(typeName)")
+            }
         }
+    }
+
+    func testRawValueInitializers() {
+        let testStrings = ["", "123-ABC", "!@#$%^&*()", "a long string with spaces"]
+
+        for testString in testStrings {
+            let container = ASICContainer(rawValue: testString)
+            XCTAssertEqual(container.rawValue, testString)
+
+            let level = ConformanceLevel(rawValue: testString)
+            XCTAssertEqual(level.rawValue, testString)
+
+            let hashOid = HashAlgorithmOID(rawValue: testString)
+            XCTAssertEqual(hashOid.rawValue, testString)
+
+            let format = SignatureFormat(rawValue: testString)
+            XCTAssertEqual(format.rawValue, testString)
+
+            let qualifier = SignatureQualifier(rawValue: testString)
+            XCTAssertEqual(qualifier.rawValue, testString)
+
+            let property = SignedEnvelopeProperty(rawValue: testString)
+            XCTAssertEqual(property.rawValue, testString)
+
+            let signingOid = SigningAlgorithmOID(rawValue: testString)
+            XCTAssertEqual(signingOid.rawValue, testString)
+        }
+    }
+
+    func testConvenienceInitializersAndDescription() {
+        let testValue = "TEST"
+
+        let containerFromValue = ASICContainer(testValue)
+        XCTAssertEqual(containerFromValue.rawValue, testValue)
+        let containerFromStringLiteral: ASICContainer = "TEST"
+        XCTAssertEqual(containerFromStringLiteral.rawValue, testValue)
+        XCTAssertEqual(containerFromValue.description, testValue)
+        XCTAssertEqual("\(containerFromValue)", testValue)
+
+        let levelFromValue = ConformanceLevel(testValue)
+        XCTAssertEqual(levelFromValue.rawValue, testValue)
+        let levelFromStringLiteral: ConformanceLevel = "TEST"
+        XCTAssertEqual(levelFromStringLiteral.rawValue, testValue)
+        XCTAssertEqual(levelFromValue.description, testValue)
+        XCTAssertEqual("\(levelFromValue)", testValue)
+
+        let hashFromValue = HashAlgorithmOID(testValue)
+        XCTAssertEqual(hashFromValue.rawValue, testValue)
+        let hashFromStringLiteral: HashAlgorithmOID = "TEST"
+        XCTAssertEqual(hashFromStringLiteral.rawValue, testValue)
+        XCTAssertEqual(hashFromValue.description, testValue)
+        XCTAssertEqual("\(hashFromValue)", testValue)
+
+        let formatFromValue = SignatureFormat(testValue)
+        XCTAssertEqual(formatFromValue.rawValue, testValue)
+        let formatFromStringLiteral: SignatureFormat = "TEST"
+        XCTAssertEqual(formatFromStringLiteral.rawValue, testValue)
+        XCTAssertEqual(formatFromValue.description, testValue)
+        XCTAssertEqual("\(formatFromValue)", testValue)
+
+        let qualifierFromValue = SignatureQualifier(testValue)
+        XCTAssertEqual(qualifierFromValue.rawValue, testValue)
+        let qualifierFromStringLiteral: SignatureQualifier = "TEST"
+        XCTAssertEqual(qualifierFromStringLiteral.rawValue, testValue)
+        XCTAssertEqual(qualifierFromValue.description, testValue)
+        XCTAssertEqual("\(qualifierFromValue)", testValue)
+
+        let propertyFromValue = SignedEnvelopeProperty(testValue)
+        XCTAssertEqual(propertyFromValue.rawValue, testValue)
+        let propertyFromStringLiteral: SignedEnvelopeProperty = "TEST"
+        XCTAssertEqual(propertyFromStringLiteral.rawValue, testValue)
+        XCTAssertEqual(propertyFromValue.description, testValue)
+        XCTAssertEqual("\(propertyFromValue)", testValue)
+
+        let signingOidFromValue = SigningAlgorithmOID(testValue)
+        XCTAssertEqual(signingOidFromValue.rawValue, testValue)
+        let signingOidFromStringLiteral: SigningAlgorithmOID = "TEST"
+        XCTAssertEqual(signingOidFromStringLiteral.rawValue, testValue)
+        XCTAssertEqual(signingOidFromValue.description, testValue)
+        XCTAssertEqual("\(signingOidFromValue)", testValue)
+
+        let scopeFromValue = Scope(testValue)
+        XCTAssertEqual(scopeFromValue.rawValue, testValue)
+        let scopeFromStringLiteral: Scope = "TEST"
+        XCTAssertEqual(scopeFromStringLiteral.rawValue, testValue)
+        XCTAssertEqual(scopeFromValue.description, testValue)
+        XCTAssertEqual("\(scopeFromValue)", testValue)
+    }
+
+    func testHashableConformance() {
+        let containerSet: Set<ASICContainer> = [.NONE, .ASIC_S, .ASIC_E, .NONE]
+        XCTAssertEqual(containerSet.count, 3)
+
+        let levelSet: Set<ConformanceLevel> = [.ADES_B_B, .ADES_B_T, .ADES_B_LT, .ADES_B_LTA, .ADES_B_T]
+        XCTAssertEqual(levelSet.count, 4)
+
+        var hashOidSet: Set<HashAlgorithmOID> = [.SHA256, .SHA512]
+        hashOidSet.insert(.SHA256)
+        XCTAssertEqual(hashOidSet.count, 2)
+
+        let formatSet: Set<SignatureFormat> = [.P, .X, .C, .J, .P]
+        XCTAssertEqual(formatSet.count, 4)
+
+        let qualifierSet: Set<SignatureQualifier> = [.EU_EIDAS_QES, .EU_EIDAS_AES, .EU_EIDAS_QES]
+        XCTAssertEqual(qualifierSet.count, 2)
+
+        let propertySet: Set<SignedEnvelopeProperty> = [.ENVELOPED, .DETACHED, .ENVELOPED]
+        XCTAssertEqual(propertySet.count, 2)
+
+        var signingOidSet: Set<SigningAlgorithmOID> = [.RSA, .ECDSA]
+        signingOidSet.insert(.RSA)
+        XCTAssertEqual(signingOidSet.count, 2)
+
+        let scopeSet: Set<Scope> = [.SERVICE, .CREDENTIAL, .SERVICE]
+        XCTAssertEqual(scopeSet.count, 2)
     }
 } 

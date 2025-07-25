@@ -84,7 +84,8 @@ final class SignHashServiceTests: XCTestCase {
         do {
             _ = try await signHashService.signHash(request: missingCredentialIDRequest, accessToken: accessToken, rsspUrl: rsspUrl)
             XCTFail("Should throw validation error for missing credential ID")
-        } catch SignHashError.missingCredentialID {
+        } catch let error as SignHashError where error == .missingCredentialID {
+            XCTAssertEqual(error.localizedDescription, "Missing 'credentialID' parameter. The 'credentialID' parameter is required.")
         } catch {
             XCTFail("Should throw SignHashError.missingCredentialID, got \(error)")
         }
@@ -100,7 +101,8 @@ final class SignHashServiceTests: XCTestCase {
         do {
             _ = try await signHashService.signHash(request: missingHashesRequest, accessToken: accessToken, rsspUrl: rsspUrl)
             XCTFail("Should throw validation error for missing hashes")
-        } catch SignHashError.missingHashes {
+        } catch let error as SignHashError where error == .missingHashes {
+            XCTAssertEqual(error.localizedDescription, "Missing or invalid 'hashes' parameter. At least one hash value is required.")
         } catch {
             XCTFail("Should throw SignHashError.missingHashes, got \(error)")
         }
@@ -187,7 +189,8 @@ final class SignHashServiceTests: XCTestCase {
         do {
             _ = try await signHashService.signHash(request: invalidRequest, accessToken: accessToken, rsspUrl: rsspUrl)
             XCTFail("Should throw validation error before making HTTP call")
-        } catch SignHashError.missingCredentialID {
+        } catch let error as SignHashError where error == .missingCredentialID {
+            XCTAssertEqual(error.localizedDescription, "Missing 'credentialID' parameter. The 'credentialID' parameter is required.")
         } catch {
             XCTFail("Should throw SignHashError.missingCredentialID for validation, got \(error)")
         }
@@ -298,7 +301,8 @@ final class SignHashServiceTests: XCTestCase {
         do {
             _ = try await signHashService.signHash(request: missingHashesRequest, accessToken: accessToken, rsspUrl: rsspUrl)
             XCTFail("Should throw validation error for missing hashes")
-        } catch SignHashError.missingHashes {
+        } catch let error as SignHashError where error == .missingHashes {
+            XCTAssertEqual(error.localizedDescription, "Missing or invalid 'hashes' parameter. At least one hash value is required.")
         } catch {
             XCTFail("Should throw SignHashError.missingHashes for empty hashes, got \(error)")
         }
@@ -314,7 +318,8 @@ final class SignHashServiceTests: XCTestCase {
         do {
             _ = try await signHashService.signHash(request: missingCredentialIDRequest, accessToken: accessToken, rsspUrl: rsspUrl)
             XCTFail("Should throw validation error for missing credential ID")
-        } catch SignHashError.missingCredentialID {
+        } catch let error as SignHashError where error == .missingCredentialID {
+            XCTAssertEqual(error.localizedDescription, "Missing 'credentialID' parameter. The 'credentialID' parameter is required.")
         } catch {
             XCTFail("Should throw SignHashError.missingCredentialID for empty credential ID, got \(error)")
         }

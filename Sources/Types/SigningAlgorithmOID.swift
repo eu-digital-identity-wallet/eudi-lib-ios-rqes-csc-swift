@@ -15,13 +15,10 @@
  */
 import Foundation
 
-public struct SigningAlgorithmOID: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible {
+public struct SigningAlgorithmOID: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible, Equatable, Hashable {
     public let rawValue: String
 
     public init(rawValue: String) {
-        guard !rawValue.isEmpty else {
-            fatalError("SigningAlgorithmOID must not be blank")
-        }
         self.rawValue = rawValue
     }
   

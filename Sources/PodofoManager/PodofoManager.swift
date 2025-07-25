@@ -179,7 +179,7 @@ public actor PodofoManager {
         try sessionWrapper.session.finishSigningLTA(withTSR: tsLtaResponse.base64Tsr)
     }
     
-    private func requestTimestamp(hash: String, tsaUrl: String) async throws -> TimestampResponse {
+    internal func requestTimestamp(hash: String, tsaUrl: String) async throws -> TimestampResponse {
         let tsService = TimestampService()
         let tsRequest = TimestampRequest(
             hashToTimestamp: hash,
@@ -188,11 +188,11 @@ public actor PodofoManager {
         return try await tsService.requestTimestamp(request: tsRequest)
     }
     
-    private func prepareValidationCertificates(sessionWrapper: PodofoSession, timestampResponse: String) -> [String] {
+    internal func prepareValidationCertificates(sessionWrapper: PodofoSession, timestampResponse: String) -> [String] {
         return [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates + [timestampResponse]
     }
     
-    private func fetchCrlDataFromUrls(crlUrls: [String]) async throws -> [String] {
+    internal func fetchCrlDataFromUrls(crlUrls: [String]) async throws -> [String] {
         var validationCrlResponses: [String] = []
         let revocationService = RevocationService()
         
@@ -206,7 +206,7 @@ public actor PodofoManager {
         return validationCrlResponses
     }
 
-    private func validateTsaUrlRequirement(
+    internal func validateTsaUrlRequirement(
         for docs: [CalculateHashRequest.Document], tsaUrl: String
     ) throws {
         for doc in docs {

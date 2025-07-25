@@ -300,4 +300,37 @@ final class TimestampUtilsTests: XCTestCase {
         XCTAssertNotNil(decodedTSQ, "Encoded TSQ should decode back")
         XCTAssertEqual(decodedTSQ, tsqData, "Round trip should preserve data")
     }
+
+    func testTLVEncodingShortForm() {
+        let tag: UInt8 = 0x30
+        let value = Data(repeating: 0x01, count: 10)
+        let expectedTLV = Data([0x30, 0x0a]) + value
+        let tlvData = Data.tlv(tag, value)
+        XCTAssertEqual(tlvData, expectedTLV, "TLV short form encoding failed")
+    }
+
+    func testTLVEncodingLongFormSingleByteLength() {
+        let tag: UInt8 = 0x30
+        let value = Data(repeating: 0x02, count: 130)
+        let expectedTLV = Data([0x30, 0x81, 0x82]) + value
+        let tlvData = Data.tlv(tag, value)
+        XCTAssertEqual(tlvData, expectedTLV, "TLV long form single-byte length encoding failed")
+    }
+
+    func testTLVEncodingLongFormMultiByteLength() {
+        let tag: UInt8 = 0x30
+        let value = Data(repeating: 0x03, count: 300)
+        let expectedLengthBytes = Data([0x82, 0x01, 0x2c])
+        let expectedTLV = Data([tag]) + expectedLengthBytes + value
+        let tlvData = Data.tlv(tag, value)
+        XCTAssertEqual(tlvData, expectedTLV, "TLV long form multi-byte length encoding failed")
+    }
+    
+    func testTLVEncodingWithEmptyValue() {
+        let tag: UInt8 = 0x04
+        let value = Data()
+        let expectedTLV = Data([0x04, 0x00])
+        let tlvData = Data.tlv(tag, value)
+        XCTAssertEqual(tlvData, expectedTLV, "TLV encoding with empty value failed")
+    }
 } 

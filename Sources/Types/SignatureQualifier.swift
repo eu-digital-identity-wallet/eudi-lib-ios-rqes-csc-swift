@@ -15,13 +15,10 @@
  */
 import Foundation
 
-public struct SignatureQualifier: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible {
+public struct SignatureQualifier: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible, Equatable, Hashable {
     public let rawValue: String
 
     public init(rawValue: String) {
-        guard !rawValue.isEmpty else {
-            fatalError("SignatureQualifier must not be blank")
-        }
         self.rawValue = rawValue
     }
     
