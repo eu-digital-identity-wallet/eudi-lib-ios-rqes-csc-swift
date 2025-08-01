@@ -20,55 +20,60 @@ import XCTest
 final class TimestampClientTests: XCTestCase {
     
     var timestampClient: TimestampClient!
+    var mockHTTPClient: MockHTTPClient!
     
     override func setUp() {
         super.setUp()
-        timestampClient = TimestampClient()
+        mockHTTPClient = MockHTTPClient()
+        timestampClient = TimestampClient(httpClient: mockHTTPClient)
     }
     
     override func tearDown() {
+        mockHTTPClient = nil
         timestampClient = nil
         super.tearDown()
     }
-    
-    // MARK: - Success Tests
     
     func testMakeRequestWithValidDataAndURL() async {
         let tsqData = "Test timestamp query data".data(using: .utf8)!
         let tsaUrl = TimestampTestConstants.URLs.tsaUrl
 
-        let result = await TimestampClient.makeRequest(for: tsqData, tsaUrl: tsaUrl)
+        mockHTTPClient.setMockResponse(for: tsaUrl, data: TimestampTestConstants.MockResponses.validTimestampResponse)
+
+        let result = await timestampClient.makeRequest(for: tsqData, tsaUrl: tsaUrl)
 
         switch result {
         case .success(let data):
             XCTAssertNotNil(data, "Response data should not be nil")
             XCTAssertFalse(data.isEmpty, "Response data should not be empty")
+            XCTAssertEqual(data, TimestampTestConstants.MockResponses.validTimestampResponse, "Should return exact mocked TSA response - proves MockHTTPClient is used")
         case .failure(let error):
-            break
+            XCTFail("Should succeed with mocked response: \(error)")
         }
     }
     
     func testMakeRequestWithLargeData() async {
-        let largeData = Data(repeating: 0x42, count: TimestampTestConstants.Data.largeDataSize)
+        let largeData = Data(repeating: 0x42, count: TimestampTestConstants.TestData.largeDataSize)
         let tsaUrl = TimestampTestConstants.URLs.tsaUrl
 
-        let result = await TimestampClient.makeRequest(for: largeData, tsaUrl: tsaUrl)
+        mockHTTPClient.setMockResponse(for: tsaUrl, data: TimestampTestConstants.MockResponses.largeTimestampResponse)
+
+        let result = await timestampClient.makeRequest(for: largeData, tsaUrl: tsaUrl)
 
         switch result {
         case .success(let data):
             XCTAssertNotNil(data, "Response data should not be nil for large request")
+            XCTAssertEqual(data, TimestampTestConstants.MockResponses.largeTimestampResponse, "Should return exact mocked large TSA response")
         case .failure(let error):
-            break
+            XCTFail("Should succeed with mocked response: \(error)")
         }
     }
 
-    // MARK: - Error Tests
-    
     func testMakeRequestWithEmptyURL() async {
         let tsqData = "Test data".data(using: .utf8)!
         let emptyUrl = ""
 
-        let result = await TimestampClient.makeRequest(for: tsqData, tsaUrl: emptyUrl)
+        let result = await timestampClient.makeRequest(for: tsqData, tsaUrl: emptyUrl)
 
         switch result {
         case .success:
@@ -77,19 +82,18 @@ final class TimestampClientTests: XCTestCase {
             XCTAssertEqual(error, ClientError.invalidRequestURL, "Should return invalidRequestURL error")
         }
     }
-
     
     func testMakeRequestWithUnreachableURL() async {
         let tsqData = "Test data".data(using: .utf8)!
         let unreachableUrl = TimestampTestConstants.URLs.unreachableTsaUrl
 
-        let result = await TimestampClient.makeRequest(for: tsqData, tsaUrl: unreachableUrl)
+        let result = await timestampClient.makeRequest(for: tsqData, tsaUrl: unreachableUrl)
 
         switch result {
         case .success:
             XCTFail("Should fail with unreachable URL")
         case .failure(let error):
-            XCTAssertEqual(error, ClientError.noData, "Should return noData error for unreachable URL")
+            XCTAssertEqual(error, ClientError.noData, "Should return noData when MockHTTPClient has no response configured")
         }
     }
     
@@ -97,54 +101,56 @@ final class TimestampClientTests: XCTestCase {
         let emptyData = Data()
         let tsaUrl = TimestampTestConstants.URLs.tsaUrl
 
-        let result = await TimestampClient.makeRequest(for: emptyData, tsaUrl: tsaUrl)
+        mockHTTPClient.setMockResponse(for: tsaUrl, data: TimestampTestConstants.MockResponses.emptyTimestampResponse)
+
+        let result = await timestampClient.makeRequest(for: emptyData, tsaUrl: tsaUrl)
 
         switch result {
         case .success(let data):
             XCTAssertNotNil(data, "Response should not be nil even with empty request data")
+            XCTAssertEqual(data, TimestampTestConstants.MockResponses.emptyTimestampResponse, "Should return exact mocked empty TSA response")
         case .failure(let error):
-            break
+            XCTFail("Should succeed with mocked response: \(error)")
         }
     }
-    
-    // MARK: - HTTP Response Tests
     
     func testMakeRequestHandlesHTTPErrorStatusCodes() async {
         let tsqData = "Test data".data(using: .utf8)!
         let tsaUrl = TimestampTestConstants.URLs.tsaUrl
 
-        let result = await TimestampClient.makeRequest(for: tsqData, tsaUrl: tsaUrl)
+        mockHTTPClient.setMockResponse(for: tsaUrl, data: Data("Server Error".utf8), statusCode: 500)
+
+        let result = await timestampClient.makeRequest(for: tsqData, tsaUrl: tsaUrl)
 
         switch result {
         case .success:
-            break
+            XCTFail("Should fail with 500 status code")
         case .failure(let error):
             if case .httpError(let statusCode) = error {
-                XCTAssertNotEqual(statusCode, 200, "Should not be 200 status code")
-                XCTAssertTrue(statusCode >= 400, "Should be an error status code")
+                XCTAssertEqual(statusCode, 500, "Should return exact mock 500 status code")
             } else {
-                break
+                XCTFail("Should return httpError with 500 status")
             }
         }
     }
-    
-    // MARK: - Integration Tests
     
     func testMakeRequestIntegrationWithTimestampUtils() async {
         let testData = "Integration test data".data(using: .utf8)!
         let tsaUrl = TimestampTestConstants.URLs.tsaUrl
 
-        let result = await TimestampClient.makeRequest(for: testData, tsaUrl: tsaUrl)
+        mockHTTPClient.setMockResponse(for: tsaUrl, data: TimestampTestConstants.MockResponses.validTimestampResponse)
+
+        let result = await timestampClient.makeRequest(for: testData, tsaUrl: tsaUrl)
 
         switch result {
         case .success(let data):
             XCTAssertNotNil(data, "Response data should not be nil")
             XCTAssertFalse(data.isEmpty, "Response data should not be empty")
             XCTAssertTrue(data.count > 0, "Response should have content")
+            XCTAssertEqual(data, TimestampTestConstants.MockResponses.validTimestampResponse, "Should return exact mocked TSA response - proves MockHTTPClient is used for POST")
             
         case .failure(let error):
-            break
+            XCTFail("Should succeed with mocked response: \(error)")
         }
     }
-
 } 

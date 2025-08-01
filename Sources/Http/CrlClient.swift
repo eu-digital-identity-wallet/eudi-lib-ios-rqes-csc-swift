@@ -13,43 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import Foundation
 
-public final actor TimestampClient {
+final actor CrlClient {
     private let httpClient: HTTPClientType
     
-    public init(httpClient: HTTPClientType = HTTPService()) {
+    init(httpClient: HTTPClientType = HTTPService()) {
         self.httpClient = httpClient
     }
-
-    public func makeRequest(
-        for tsqData: Data,
-        tsaUrl: String
-    ) async -> Result<Data, ClientError> {
-        guard let url = URL(string: tsaUrl) else {
+    
+    func makeRequest(for request: CrlRequest) async throws -> Result<Data, ClientError> {
+        guard let url = URL(string: request.crlUrl) else {
             return .failure(.invalidRequestURL)
         }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/timestamp-query", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/timestamp-reply", forHTTPHeaderField: "Accept")
-
+        
         do {
-
-            let (data, response) = try await httpClient.upload(for: request, from: tsqData)
-
-            guard let http = response as? HTTPURLResponse else {
-                return .failure(.noData)
+            let (data, httpResponse) = try await httpClient.getData(from: url)
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorMessage = String(data: data, encoding: .utf8) ?? "CRL request failed"
+                return .failure(.clientError(message: errorMessage, statusCode: httpResponse.statusCode))
             }
-
-            guard http.statusCode == 200 else {
-                return .failure(.httpError(statusCode: http.statusCode))
-            }
-
+            
             return .success(data)
-
         } catch {
             return .failure(.noData)
         }

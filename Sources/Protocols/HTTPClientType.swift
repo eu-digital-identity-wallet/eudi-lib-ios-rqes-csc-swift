@@ -13,21 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import Foundation
 
-final actor SignHashService: SignHashServiceType {
-    private let signHashClient: SignHashClient
-    
-    init(signHashClient: SignHashClient = SignHashClient()) {
-        self.signHashClient = signHashClient
-    }
-
-    func signHash(request: SignHashRequest, accessToken: String, rsspUrl: String) async throws -> SignHashResponse {
-
-        try SignHashValidator.validate(request)
-
-        let result = try await signHashClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
-
-        return try result.get()
-    }
-}
+public protocol HTTPClientType: Sendable {
+    func getData(from url: URL) async throws -> (Data, HTTPURLResponse)
+    func postData(_ data: Data, to url: URL, contentType: String, accept: String?) async throws -> (Data, HTTPURLResponse)
+    func upload(for request: URLRequest, from data: Data) async throws -> (Data, URLResponse)
+    func send(_ request: URLRequest) async throws -> (Data, URLResponse)
+} 

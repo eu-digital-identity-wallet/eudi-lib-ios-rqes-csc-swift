@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import Foundation
 
-final actor CredentialsInfoService: CredentialsInfoServiceType {
-    private let credentialsInfoClient: CredentialsInfoClient
+final actor RevocationService: RevocationServiceType {
+    private let crlClient: CrlClient
     
-    init(credentialsInfoClient: CredentialsInfoClient = CredentialsInfoClient()) {
-        self.credentialsInfoClient = credentialsInfoClient
+    init(crlClient: CrlClient = CrlClient()) {
+        self.crlClient = crlClient
     }
-    
-    func getCredentialsInfo(request: CredentialsInfoRequest, accessToken: String, rsspUrl: String) async throws -> CredentialInfo {
 
-        try CredentialsInfoValidator.validate(request)
-        let result = try await credentialsInfoClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
+    func getCrlData(request: CrlRequest) async throws -> CrlResponse {
+        let result = try await crlClient.makeRequest(for: request).get()
 
-        return try result.get()
+        let base64String = result.base64EncodedString()
+        
+        return CrlResponse(crlInfoBase64: base64String)
     }
 }
+

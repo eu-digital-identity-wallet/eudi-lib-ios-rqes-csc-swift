@@ -16,27 +16,35 @@
 import Foundation
 
 final actor SignHashClient {
+    private let httpClient: HTTPClientType
     
-    static func makeRequest(for request: SignHashRequest, accessToken: String, rsspUrl: String) async throws -> Result<SignHashResponse, ClientError> {
-        let url = try rsspUrl.appendingEndpoint("/signatures/signHash").get()
+    init(httpClient: HTTPClientType = HTTPService()) {
+        self.httpClient = httpClient
+    }
+    
+    func makeRequest(for request: SignHashRequest, accessToken: String, rsspUrl: String) async throws -> Result<SignHashResponse, ClientError> {
+        guard let url = try? rsspUrl.appendingEndpoint("/signatures/signHash").get() else {
+            return .failure(ClientError.invalidRequestURL)
+        }
 
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = "POST"
-        urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
+        let jsonData: Data
         do {
-            let jsonData = try JSONEncoder().encode(request)
-            urlRequest.httpBody = jsonData
+            jsonData = try JSONEncoder().encode(request)
         } catch {
             return .failure(ClientError.encodingFailed)
         }
         
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
         
-        guard let httpResponse = response as? HTTPURLResponse else {
-            return .failure(ClientError.invalidResponse)
+        do {
+            let (data, response) = try await httpClient.upload(for: urlRequest, from: jsonData)
+            return handleResponse(data, response, ofType: SignHashResponse.self)
+        } catch {
+            return .failure(ClientError.noData)
         }
-        return handleResponse(data, response, ofType: SignHashResponse.self)
     }
 }

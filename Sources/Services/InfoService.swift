@@ -16,19 +16,14 @@
 import Foundation
 
 final actor InfoService: InfoServiceType {
+    private let infoClient: InfoClient
     
-    init() {}
-
-    func getInfo(request: InfoServiceRequest? = nil, rsspUrl: String) async throws -> InfoServiceResponse {
-        
-        let req = request ?? InfoServiceRequest(lang: "en-US")
-
-        guard let lang = req.lang else {
-            throw InfoServiceError.invalidLanguage
-        }
-
-        return try await InfoClient.makeRequest(for: req, rsspUrl: rsspUrl).get()
+    init(infoClient: InfoClient = InfoClient()) {
+        self.infoClient = infoClient
     }
 
-    
+    func getInfo(request: InfoServiceRequest? = nil, rsspUrl: String) async throws -> InfoServiceResponse {
+        let req = request ?? InfoServiceRequest(lang: "en-US")
+        return try await infoClient.makeRequest(for: req, rsspUrl: rsspUrl).get()
+    }
 }

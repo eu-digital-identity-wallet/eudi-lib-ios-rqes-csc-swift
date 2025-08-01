@@ -20,74 +20,90 @@ import XCTest
 final class TimestampServiceTests: XCTestCase {
     
     var timestampService: TimestampService!
+    var mockHTTPClient: MockHTTPClient!
+    var timestampClient: TimestampClient!
     
     override func setUp() {
         super.setUp()
-        timestampService = TimestampService()
+        mockHTTPClient = MockHTTPClient()
+        timestampClient = TimestampClient(httpClient: mockHTTPClient)
+        timestampService = TimestampService(timestampClient: timestampClient)
     }
     
     override func tearDown() {
+        mockHTTPClient = nil
+        timestampClient = nil
         timestampService = nil
         super.tearDown()
     }
     
-    // MARK: - Success Tests
-    
     func testRequestTimestampWithValidRequest() async throws {
         let request = createValidTimestampRequest()
+        
+        let expectedBase64 = TimestampUtils.encodeTSRToBase64(TimestampTestConstants.MockResponses.validTimestampResponse)
 
         let response = try await timestampService.requestTimestamp(request: request)
 
         XCTAssertNotNil(response, "Response should not be nil")
         XCTAssertFalse(response.base64Tsr.isEmpty, "Base64 TSR should not be empty")
-        XCTAssertTrue(response.base64Tsr.count > 0, "Base64 TSR should have content")
+        
+        XCTAssertEqual(response.base64Tsr, expectedBase64, "Response should contain properly encoded mock TSR data")
 
         let decodedData = Data(base64Encoded: response.base64Tsr)
         XCTAssertNotNil(decodedData, "Base64 TSR should be valid and decodable")
+        XCTAssertEqual(decodedData, TimestampTestConstants.MockResponses.validTimestampResponse, "Decoded data should match original mock data")
     }
     
     func testRequestTimestampWithDifferentValidHashes() async throws {
         let testCases = TimestampTestConstants.Hashes.testCases
+        let expectedBase64 = TimestampUtils.encodeTSRToBase64(TimestampTestConstants.MockResponses.validTimestampResponse)
         
         for testCase in testCases {
             let request = TimestampRequest(
-                signedHash: testCase,
+                hashToTimestamp: testCase,
                 tsaUrl: TimestampTestConstants.URLs.tsaUrl
             )
+            
+            mockHTTPClient.setMockResponse(for: TimestampTestConstants.URLs.tsaUrl, data: TimestampTestConstants.MockResponses.validTimestampResponse)
             
             let response = try await timestampService.requestTimestamp(request: request)
             
             XCTAssertNotNil(response, "Response should not be nil for hash: \(testCase)")
             XCTAssertFalse(response.base64Tsr.isEmpty, "Base64 TSR should not be empty for hash: \(testCase)")
             
+            XCTAssertEqual(response.base64Tsr, expectedBase64, "Response should contain properly encoded mock TSR data for hash: \(testCase)")
+            
             let decodedData = Data(base64Encoded: response.base64Tsr)
             XCTAssertNotNil(decodedData, "Base64 TSR should be valid and decodable for hash: \(testCase)")
+            XCTAssertEqual(decodedData, TimestampTestConstants.MockResponses.validTimestampResponse, "Decoded data should match original mock data")
         }
     }
     
     func testRequestTimestampWithLargeHash() async throws {
-
-        let largeHash = String(repeating: "A", count: TimestampTestConstants.Data.largeDataSize).data(using: .utf8)!.base64EncodedString()
+        let largeHash = String(repeating: "A", count: TimestampTestConstants.TestData.largeDataSize).data(using: .utf8)!.base64EncodedString()
         let request = TimestampRequest(
-            signedHash: largeHash,
+            hashToTimestamp: largeHash,
             tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
+
+        mockHTTPClient.setMockResponse(for: TimestampTestConstants.URLs.tsaUrl, data: TimestampTestConstants.MockResponses.largeTimestampResponse)
+        let expectedBase64 = TimestampUtils.encodeTSRToBase64(TimestampTestConstants.MockResponses.largeTimestampResponse)
 
         let response = try await timestampService.requestTimestamp(request: request)
 
         XCTAssertNotNil(response, "Response should not be nil for large hash")
         XCTAssertFalse(response.base64Tsr.isEmpty, "Base64 TSR should not be empty for large hash")
         
+        XCTAssertEqual(response.base64Tsr, expectedBase64, "Response should contain properly encoded large mock TSR data")
+        
         let decodedData = Data(base64Encoded: response.base64Tsr)
         XCTAssertNotNil(decodedData, "Base64 TSR should be valid and decodable for large hash")
+        XCTAssertEqual(decodedData, TimestampTestConstants.MockResponses.largeTimestampResponse, "Decoded data should match original large mock data")
     }
     
-    // MARK: - Error Tests
-    
     func testRequestTimestampWithInvalidBase64Hash() async {
-
         let request = TimestampRequest(
-            signedHash: TimestampTestConstants.Hashes.invalidSignedHash,
+            hashToTimestamp: TimestampTestConstants.Hashes.invalidSignedHash,
             tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
 
@@ -100,9 +116,8 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithEmptyHash() async {
-
         let request = TimestampRequest(
-            signedHash: "",
+            hashToTimestamp: "",
             tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
 
@@ -115,9 +130,8 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithInvalidTsaUrl() async {
-
         let request = TimestampRequest(
-            signedHash: TimestampTestConstants.Hashes.validSignedHash,
+            hashToTimestamp: TimestampTestConstants.Hashes.validSignedHash,
             tsaUrl: TimestampTestConstants.URLs.invalidTsaUrl
         )
 
@@ -130,9 +144,8 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithEmptyTsaUrl() async {
-
         let request = TimestampRequest(
-            signedHash: TimestampTestConstants.Hashes.validSignedHash,
+            hashToTimestamp: TimestampTestConstants.Hashes.validSignedHash,
             tsaUrl: ""
         )
 
@@ -145,9 +158,8 @@ final class TimestampServiceTests: XCTestCase {
     }
     
     func testRequestTimestampWithUnreachableTsaUrl() async {
-
         let request = TimestampRequest(
-            signedHash: TimestampTestConstants.Hashes.validSignedHash,
+            hashToTimestamp: TimestampTestConstants.Hashes.validSignedHash,
             tsaUrl: TimestampTestConstants.URLs.unreachableTsaUrl
         )
 
@@ -159,11 +171,9 @@ final class TimestampServiceTests: XCTestCase {
         }
     }
     
-    // MARK: - Integration Tests
-    
     func testTimestampServiceIntegrationWithTimestampUtils() async throws {
-
         let request = createValidTimestampRequest()
+        let expectedBase64 = TimestampUtils.encodeTSRToBase64(TimestampTestConstants.MockResponses.validTimestampResponse)
 
         let response = try await timestampService.requestTimestamp(request: request)
 
@@ -171,32 +181,40 @@ final class TimestampServiceTests: XCTestCase {
 
         let decodedData = Data(base64Encoded: response.base64Tsr)
         XCTAssertNotNil(decodedData, "Response should be valid base64")
+        XCTAssertEqual(decodedData, TimestampTestConstants.MockResponses.validTimestampResponse, "Decoded data should match mock data")
 
         let reEncoded = TimestampUtils.encodeTSRToBase64(decodedData!)
         XCTAssertEqual(reEncoded, response.base64Tsr, "Re-encoded TSR should match original")
+        XCTAssertEqual(response.base64Tsr, expectedBase64, "Response should match expected encoding")
     }
     
     func testTimestampServiceWithRealisticSignedHash() async throws {
         let realisticSignedHash = TimestampTestConstants.Hashes.realisticSignedHash
         let request = TimestampRequest(
-            signedHash: realisticSignedHash,
+            hashToTimestamp: realisticSignedHash,
             tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
+
+        mockHTTPClient.setMockResponse(for: TimestampTestConstants.URLs.tsaUrl, data: TimestampTestConstants.MockResponses.validTimestampResponse)
+        let expectedBase64 = TimestampUtils.encodeTSRToBase64(TimestampTestConstants.MockResponses.validTimestampResponse)
 
         let response = try await timestampService.requestTimestamp(request: request)
 
         XCTAssertNotNil(response, "Response should not be nil for realistic signed hash")
         XCTAssertFalse(response.base64Tsr.isEmpty, "Base64 TSR should not be empty")
         
+        XCTAssertEqual(response.base64Tsr, expectedBase64, "Response should contain properly encoded mock TSR data")
+        
         let decodedData = Data(base64Encoded: response.base64Tsr)
         XCTAssertNotNil(decodedData, "Base64 TSR should be valid and decodable")
+        XCTAssertEqual(decodedData, TimestampTestConstants.MockResponses.validTimestampResponse, "Decoded data should match original mock data")
     }
         
-    // MARK: - Helper Methods
-    
     private func createValidTimestampRequest() -> TimestampRequest {
+        mockHTTPClient.setMockResponse(for: TimestampTestConstants.URLs.tsaUrl, data: TimestampTestConstants.MockResponses.validTimestampResponse)
+        
         return TimestampRequest(
-            signedHash: TimestampTestConstants.Hashes.validSignedHash,
+            hashToTimestamp: TimestampTestConstants.Hashes.validSignedHash,
             tsaUrl: TimestampTestConstants.URLs.tsaUrl
         )
     }

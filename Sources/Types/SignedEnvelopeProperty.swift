@@ -15,13 +15,10 @@
  */
 import Foundation
 
-public struct SignedEnvelopeProperty: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible {
+public struct SignedEnvelopeProperty: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible, Equatable, Hashable {
     public let rawValue: String
 
     public init(rawValue: String) {
-        guard !rawValue.isEmpty else {
-            fatalError("SignedEnvelopeProperty value cannot be empty")
-        }
         self.rawValue = rawValue
     }
     

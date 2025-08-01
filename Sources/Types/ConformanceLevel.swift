@@ -15,13 +15,10 @@
  */
 import Foundation
 
-public struct ConformanceLevel: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible {
+public struct ConformanceLevel: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible, Equatable, Hashable {
     public let rawValue: String
 
     public init(rawValue: String) {
-        guard !rawValue.isEmpty else {
-            fatalError("ConformanceLevel value cannot be empty")
-        }
         self.rawValue = rawValue
     }
     

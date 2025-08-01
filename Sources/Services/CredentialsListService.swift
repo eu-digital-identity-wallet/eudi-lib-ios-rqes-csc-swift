@@ -16,10 +16,14 @@
 import Foundation
 
 final actor CredentialsListService: CredentialsListServiceType {
+    private let credentialsListClient: CredentialsListClient
     
-    init() {}
+    init(credentialsListClient: CredentialsListClient = CredentialsListClient()) {
+        self.credentialsListClient = credentialsListClient
+    }
+
     func getCredentialsList(request: CredentialsListRequest, accessToken: String, rsspUrl: String) async throws -> CredentialsListResponse {
-        let result = try await CredentialsListClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
+        let result = try await credentialsListClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
         return try result.get()
     }
 }

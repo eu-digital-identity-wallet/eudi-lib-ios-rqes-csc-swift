@@ -15,7 +15,6 @@
  */
 import Foundation
 
-public enum InfoServiceError: Error {
-    case decodingFailed
-    case invalidLanguage
+public protocol RevocationServiceType {
+    func getCrlData(request: CrlRequest) async throws -> CrlResponse
 }

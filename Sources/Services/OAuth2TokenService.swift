@@ -17,7 +17,11 @@ import Foundation
 
 final actor OAuth2TokenService: OAuth2TokenServiceType {
 
-    init() {}
+    private let client: OAuth2TokenClient
+    
+    init(client: OAuth2TokenClient = .init()) {
+        self.client = client
+    }
 
     func getToken(request: AccessTokenRequest, cscClientConfig: CSCClientConfig, issuerURL: String) async throws -> AccessTokenResponse {
         
@@ -39,9 +43,9 @@ final actor OAuth2TokenService: OAuth2TokenServiceType {
             authorizationDetails: request.authorizationDetails ?? nil
         )
         
-        let result = try await OAuth2TokenClient.makeRequest(for: tokenRequest, issuerURL: issuerURL)
+        let result = try await client.makeRequest(for: tokenRequest, issuerURL: issuerURL)
         
-        try await PKCEState.shared.reset()
+        await PKCEState.shared.reset()
         
         return try result.get()
     }

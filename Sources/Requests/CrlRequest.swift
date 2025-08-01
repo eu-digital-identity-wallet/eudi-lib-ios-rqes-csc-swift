@@ -15,18 +15,10 @@
  */
 import Foundation
 
-final actor CredentialsInfoService: CredentialsInfoServiceType {
-    private let credentialsInfoClient: CredentialsInfoClient
-    
-    init(credentialsInfoClient: CredentialsInfoClient = CredentialsInfoClient()) {
-        self.credentialsInfoClient = credentialsInfoClient
-    }
-    
-    func getCredentialsInfo(request: CredentialsInfoRequest, accessToken: String, rsspUrl: String) async throws -> CredentialInfo {
+public struct CrlRequest: Codable, Sendable {
+    public let crlUrl: String
 
-        try CredentialsInfoValidator.validate(request)
-        let result = try await credentialsInfoClient.makeRequest(for: request, accessToken: accessToken, rsspUrl: rsspUrl)
-
-        return try result.get()
+    public init(crlUrl: String) {
+        self.crlUrl = crlUrl
     }
 }

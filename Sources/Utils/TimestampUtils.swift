@@ -57,7 +57,7 @@ public struct TimestampUtils {
     }
 }
 
-private extension Data {
+internal extension Data {
     static func tlv(_ tag: UInt8, _ value: Data) -> Data {
         let length = value.count
         let lengthBytes: Data = {

@@ -17,14 +17,14 @@
 import Foundation
 
 public struct TimestampRequest: Codable, Sendable {
-    public let signedHash: String
+    public let hashToTimestamp: String
     public let tsaUrl: String
 
     public init(
-        signedHash: String,
+        hashToTimestamp: String,
         tsaUrl: String
     ) {
-        self.signedHash = signedHash
+        self.hashToTimestamp = hashToTimestamp
         self.tsaUrl = tsaUrl
     }
 }

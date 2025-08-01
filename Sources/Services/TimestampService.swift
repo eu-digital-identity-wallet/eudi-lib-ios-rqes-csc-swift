@@ -17,17 +17,17 @@
 import Foundation
 
 public final actor TimestampService: TimestampServiceType {
-    public init() { }
+    private let timestampClient: TimestampClient
+    
+    public init(timestampClient: TimestampClient = TimestampClient()) {
+        self.timestampClient = timestampClient
+    }
 
     public func requestTimestamp(request: TimestampRequest) async throws -> TimestampResponse  {
 
-        let tsq = try TimestampUtils.buildTSQ(from: request.signedHash)
+        let tsq = try TimestampUtils.buildTSQ(from: request.hashToTimestamp)
 
-        let tsqHex = tsq.map { String(format: "%02x", $0) }.joined()
-
-        let tsqB64 = tsq.base64EncodedString()
-
-        let result = await TimestampClient.makeRequest(for: tsq, tsaUrl: request.tsaUrl)
+        let result = await timestampClient.makeRequest(for: tsq, tsaUrl: request.tsaUrl)
         let tsrData = try result.get()
 
         let base64 = TimestampUtils.encodeTSRToBase64(tsrData)

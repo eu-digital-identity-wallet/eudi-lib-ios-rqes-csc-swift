@@ -15,25 +15,6 @@
  */
 import Foundation
 
-public struct Scope: RawRepresentable, Codable, Sendable, ExpressibleByStringLiteral, CustomStringConvertible, Equatable, Hashable {
-    public let rawValue: String
-
-    public init(rawValue: String) {
-        self.rawValue = rawValue
-    }
-    
-    public init(_ value: String) {
-        self.init(rawValue: value)
-    }
-
-    public init(stringLiteral value: String) {
-        self.init(rawValue: value)
-    }
-
-    public var description: String {
-        return rawValue
-    }
-
-    public static let SERVICE = Scope(rawValue: "service")
-    public static let CREDENTIAL = Scope(rawValue: "credential")
+public struct CrlResponse: Codable, Sendable {
+    public let crlInfoBase64: String
 }

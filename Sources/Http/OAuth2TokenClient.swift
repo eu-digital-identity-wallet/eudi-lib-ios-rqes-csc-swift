@@ -17,7 +17,13 @@ import Foundation
 
 final actor OAuth2TokenClient {
     
-    static func makeRequest(for request: OAuth2TokenRequest, issuerURL: String) async throws -> Result<AccessTokenResponse, ClientError> {
+    private let httpClient: HTTPClientType
+    
+    init(httpClient: HTTPClientType = HTTPService()) {
+        self.httpClient = httpClient
+    }
+    
+    func makeRequest(for request: OAuth2TokenRequest, issuerURL: String) async throws -> Result<AccessTokenResponse, ClientError> {
         let urlResult = issuerURL.appendingEndpoint("/oauth2/token")
 
         guard case let .success(baseUrl) = urlResult else {
@@ -46,9 +52,9 @@ final actor OAuth2TokenClient {
             urlRequest.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
         }
         
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
+        let (data, response) = try await httpClient.send(urlRequest)
+
+        guard response is HTTPURLResponse else {
             throw ClientError.invalidResponse
         }
         return handleResponse(data, response, ofType: AccessTokenResponse.self)
