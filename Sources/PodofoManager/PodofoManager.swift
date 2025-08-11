@@ -137,13 +137,84 @@ public actor PodofoManager {
         }
         
         let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
+        var validationOCSPs: [String] = []
+
+        do {
+            print("Fetching OCSP for TSA Certificate...")
+            print("   - Original TSR (Base64): \(tsResponse.base64Tsr)")
+
+            var ocspUrl: String = ""
+            var base64OcspRequest: String = ""
+
+            do {
+                // First attempt: Try to extract certificates directly from TSR
+                print("   - Attempting to extract certificates from TSR...")
+                // TODO: Implement PoDoFo wrapper for extractSignerCertFromTSR
+                let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsResponse.base64Tsr)
+                // TODO: Implement PoDoFo wrapper for extractIssuerCertFromTSR
+                let tsaIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsResponse.base64Tsr)
+
+                // Get OCSP URL and build request
+                // TODO: Implement PoDoFo wrapper for getOCSPFromCertificate
+                ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+                // TODO: Implement PoDoFo wrapper for buildOCSPRequestFromCertificates
+                base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+                print("   - Successfully retrieved OCSP data without fallback")
+            } catch {
+                print("   - Primary method failed: \(error.localizedDescription)")
+                print("   - Attempting fallback method with certificate downloading...")
+
+                do {
+                    // Fallback: Extract signer cert and download issuer cert
+                    // TODO: Implement PoDoFo wrapper for extractSignerCertFromTSR
+                    let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsResponse.base64Tsr)
+                    print("   - Extracted signer certificate from TSR")
+
+                    // Get issuer URL and download issuer certificate
+                    // TODO: Implement PoDoFo wrapper for getCertificateIssuerUrlFromCertificate
+                    let issuerUrl = try sessionWrapper.session.getCertificateIssuerUrl(fromCertificate: tsaSignerCert)
+                    print("   - Found issuer URL: \(issuerUrl)")
+
+                    let tsaIssuerCert = try await fetchCertificateFromUrl(url: issuerUrl)
+                    print("   - Downloaded issuer certificate from URL")
+
+                    // Get OCSP URL and build request
+                    // TODO: Implement PoDoFo wrapper for getOCSPFromCertificate
+                    ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+                    // TODO: Implement PoDoFo wrapper for buildOCSPRequestFromCertificates
+                    base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+                    print("   - Successfully retrieved OCSP data using fallback method")
+
+                } catch let fallbackError {
+                    throw NSError(domain: "OCSPError", code: 1, userInfo: [
+                        NSLocalizedDescriptionKey: "Both primary and fallback methods failed. Primary: \(error.localizedDescription). Fallback: \(fallbackError.localizedDescription)"
+                    ])
+                }
+            }
+
+            print("   - Retrieved OCSP URL: \(ocspUrl)")
+            print("   - Built OCSP request (Base64): \(base64OcspRequest)")
+
+            // Step 2: Make HTTP POST request to OCSP responder (returns base64)
+            print("   - Making HTTP POST request to OCSP responder...")
+            let base64OcspResponse = try await makeOcspHttpPostRequest(url: ocspUrl, request: base64OcspRequest)
+
+            validationOCSPs.append(base64OcspResponse)
+
+            print("Fetched OCSP Response (Base64): \(base64OcspResponse)")
+            print("Successfully added TSA OCSP response to validation data.")
+
+        } catch {
+            print("Could not get OCSP for TSA certificate: \(error.localizedDescription)")
+            // Not re-throwing for now, as the original C++ code just logs it.
+        }
         
         sessionWrapper.session.finalizeSigning(
             withSignedHash: signedHash,
             tsr: tsResponse.base64Tsr,
             validationCertificates: validationCertificates,
             validationCRLs: validationCrls,
-            validationOCSPs: []
+            validationOCSPs: validationOCSPs
         )
     }
     
@@ -176,7 +247,10 @@ public actor PodofoManager {
 
         let ltaRawHash = try sessionWrapper.session.beginSigningLTA()
         let tsLtaResponse = try await requestTimestamp(hash: ltaRawHash, tsaUrl: tsaUrl)
-        try sessionWrapper.session.finishSigningLTA(withTSR: tsLtaResponse.base64Tsr)
+        try sessionWrapper.session.finishSigningLTA(withTSR: tsLtaResponse.base64Tsr,
+                                                    validationCertificates: validationCertificates,
+                                                    validationCRLs: validationCrls,
+                                                    validationOCSPs: [])
     }
     
     internal func requestTimestamp(hash: String, tsaUrl: String) async throws -> TimestampResponse {
@@ -215,5 +289,21 @@ public actor PodofoManager {
                     conformanceLevel: doc.conformanceLevel.rawValue)
             }
         }
+    }
+    
+    // MARK: - OCSP Helper Methods (Placeholders)
+
+    internal func fetchCertificateFromUrl(url: String) async throws -> String {
+        let revocationService = RevocationService()
+        let request = CertificateRequest(certificateUrl: url)
+        let response = try await revocationService.getCertificateData(request: request)
+        return response.certificateBase64
+    }
+
+    internal func makeOcspHttpPostRequest(url: String, request: String) async throws -> String {
+        let revocationService = RevocationService()
+        let request = OcspRequest(ocspUrl: url, ocspRequest: request)
+        let response = try await revocationService.getOcspData(request: request)
+        return response.ocspInfoBase64
     }
 }

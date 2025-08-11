@@ -28,14 +28,15 @@ let package = Package(
       targets: ["RQESLib"]
     )
   ],
-  dependencies: [
-    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.2.0")
-  ],
   targets: [
+    .binaryTarget(
+      name: "PoDoFo",
+      path: "Frameworks/PoDoFo.xcframework"
+    ),
     .target(
       name: "RQESLib",
       dependencies: [
-        .product(name: "PoDoFo", package: "eudi-lib-podofo")
+        "PoDoFo"
       ],
       path: "Sources",
       resources: [
