@@ -83,8 +83,6 @@ final class RevocationServiceTests: XCTestCase {
         
         let request = CrlRequest(crlUrl: crlUrl)
         let response = try await revocationService.getCrlData(request: request)
-        print("RESPONSE: ")
-        print(response)
         XCTAssertNotNil(response, "Response should not be nil for HTTPS URL")
         XCTAssertFalse(response.crlInfoBase64.isEmpty, "Base64 CRL should not be empty")
         

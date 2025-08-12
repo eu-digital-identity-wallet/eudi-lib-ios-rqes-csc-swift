@@ -82,7 +82,6 @@ public actor PodofoManager {
         for i in 0..<podofoSessions.count {
             let sessionWrapper = podofoSessions[i]
             let signedHash = signatures[i]
-            sessionWrapper.session.printState()
 
             if sessionWrapper.conformanceLevel.rawValue == ConformanceLevel.ADES_B_B.rawValue {
                 try await handleAdesB_B(sessionWrapper: sessionWrapper, signedHash: signedHash)
@@ -107,7 +106,6 @@ public actor PodofoManager {
     }
     
     private func handleAdesB_T(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
-        print("Handling ADES-B-T...")
         let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
         
         sessionWrapper.session.finalizeSigning(
@@ -177,7 +175,7 @@ public actor PodofoManager {
             validationLTACrls.append(contentsOf: crls)
 
         } catch {
-            print("Could not get OCSP for TSA certificate: \(error.localizedDescription)")
+            print("No OCSPs were found")
         }
         try sessionWrapper.session.finishSigningLTA(withTSR: tsLtaResponse.base64Tsr,
                                                     validationCertificates: validationLTACertificates,
@@ -199,7 +197,6 @@ public actor PodofoManager {
         for certificate in certificatesForCrlExtraction {
             let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
             crlUrls.insert(crlUrl)
-            print("CRL URL: \(crlUrl)")
         }
         
         let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
@@ -212,7 +209,7 @@ public actor PodofoManager {
             )
             validationOCSPs.append(ocspResponse)
         } catch {
-            print("Could not get OCSP for TSA certificate: \(error.localizedDescription)")
+            print("No OCSPs were found")
         }
         
         return (tsResponse, validationCertificates, validationCrls, validationOCSPs)
@@ -235,9 +232,7 @@ public actor PodofoManager {
                 ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
                 base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
             } catch let fallbackError {
-                throw NSError(domain: "OCSPError", code: 1, userInfo: [
-                    NSLocalizedDescriptionKey: "Both primary and fallback methods failed. Primary: \(error.localizedDescription). Fallback: \(fallbackError.localizedDescription)"
-                ])
+                throw OCSPError.bothMethodsFailed(primaryError: error.localizedDescription, fallbackError: fallbackError.localizedDescription)
             }
         }
         
@@ -273,7 +268,6 @@ public actor PodofoManager {
         for crlUrl in crlUrls {
             let crlRequest = CrlRequest(crlUrl: crlUrl)
             let crlInfo = try await revocationService.getCrlData(request: crlRequest)
-            print("CRL Info Base64: \(crlInfo.crlInfoBase64)")
             validationCrlResponses.append(crlInfo.crlInfoBase64)
         }
         
