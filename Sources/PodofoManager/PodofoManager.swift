@@ -120,116 +120,27 @@ public actor PodofoManager {
     }
     
     private func handleAdesB_LT(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
-        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
-        
-        let validationCertificates = prepareValidationCertificates(
-            sessionWrapper: sessionWrapper,
-            timestampResponse: tsResponse.base64Tsr
-        )
-
-        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
-        var crlUrls: Set<String> = []
-        
-        for certificate in certificatesForCrlExtraction {
-            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
-            crlUrls.insert(crlUrl)
-            print("CRL URL: \(crlUrl)")
+            let (tsResponse, validationCertificates, validationCrls, validationOCSPs) = try await addTimestampAndRevocationInfo(
+                sessionWrapper: sessionWrapper,
+                signedHash: signedHash,
+                tsaUrl: tsaUrl
+            )
+            
+            sessionWrapper.session.finalizeSigning(
+                withSignedHash: signedHash,
+                tsr: tsResponse.base64Tsr,
+                validationCertificates: validationCertificates,
+                validationCRLs: validationCrls,
+                validationOCSPs: validationOCSPs
+            )
         }
-        
-        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
-        var validationOCSPs: [String] = []
-
-        do {
-            var ocspUrl: String = ""
-            var base64OcspRequest: String = ""
-
-            do {
-                let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsResponse.base64Tsr)
-                let tsaIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsResponse.base64Tsr)
-
-                ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
-                base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
-            } catch {
-                do {
-                    let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsResponse.base64Tsr)
-                    let issuerUrl = try sessionWrapper.session.getCertificateIssuerUrl(fromCertificate: tsaSignerCert)
-
-                    let tsaIssuerCert = try await fetchCertificateFromUrl(url: issuerUrl)
-                    ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
-                    base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
-                } catch let fallbackError {
-                    throw NSError(domain: "OCSPError", code: 1, userInfo: [
-                        NSLocalizedDescriptionKey: "Both primary and fallback methods failed. Primary: \(error.localizedDescription). Fallback: \(fallbackError.localizedDescription)"
-                    ])
-                }
-            }
-            let base64OcspResponse = try await makeOcspHttpPostRequest(url: ocspUrl, request: base64OcspRequest)
-
-            validationOCSPs.append(base64OcspResponse)
-
-        } catch {
-            print("Could not get OCSP for TSA certificate: \(error.localizedDescription)")
-        }
-        
-        sessionWrapper.session.finalizeSigning(
-            withSignedHash: signedHash,
-            tsr: tsResponse.base64Tsr,
-            validationCertificates: validationCertificates,
-            validationCRLs: validationCrls,
-            validationOCSPs: validationOCSPs
-        )
-    }
     
     private func handleAdesB_LTA(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
-        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
-        
-        let validationCertificates = prepareValidationCertificates(
+        let (tsResponse, validationCertificates, validationCrls, validationOCSPs) = try await addTimestampAndRevocationInfo(
             sessionWrapper: sessionWrapper,
-            timestampResponse: tsResponse.base64Tsr
+            signedHash: signedHash,
+            tsaUrl: tsaUrl
         )
-
-        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
-        var crlUrls: Set<String> = []
-        
-        for certificate in certificatesForCrlExtraction {
-            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
-            crlUrls.insert(crlUrl)
-            print("CRL URL: \(crlUrl)")
-        }
-        
-        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
-        var validationOCSPs: [String] = []
-
-        do {
-            var ocspUrl: String = ""
-            var base64OcspRequest: String = ""
-
-            do {
-                let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsResponse.base64Tsr)
-                let tsaIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsResponse.base64Tsr)
-
-                ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
-                base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
-            } catch {
-                do {
-                    let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsResponse.base64Tsr)
-                    let issuerUrl = try sessionWrapper.session.getCertificateIssuerUrl(fromCertificate: tsaSignerCert)
-                    let tsaIssuerCert = try await fetchCertificateFromUrl(url: issuerUrl)
-                    ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
-                    base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
-                } catch let fallbackError {
-                    throw NSError(domain: "OCSPError", code: 1, userInfo: [
-                        NSLocalizedDescriptionKey: "Both primary and fallback methods failed. Primary: \(error.localizedDescription). Fallback: \(fallbackError.localizedDescription)"
-                    ])
-                }
-            }
-
-            let base64OcspResponse = try await makeOcspHttpPostRequest(url: ocspUrl, request: base64OcspRequest)
-
-            validationOCSPs.append(base64OcspResponse)
-        } catch {
-            print("Could not get OCSP for TSA certificate: \(error.localizedDescription)")
-        }
         
         sessionWrapper.session.finalizeSigning(
             withSignedHash: signedHash,
@@ -247,33 +158,10 @@ public actor PodofoManager {
         var validationLTAOCSPs: [String] = []
         
         do {
-            var ocspLTAUrl: String = ""
-            var base64LTAOcspRequest: String = ""
-
-            do {
-                let tsaLTASignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsLtaResponse.base64Tsr)
-                let tsaLTAIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsLtaResponse.base64Tsr)
-
-                ocspLTAUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaLTASignerCert, base64IssuerCert: tsaLTAIssuerCert)
-                base64LTAOcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaLTASignerCert, base64IssuerCert: tsaLTAIssuerCert)
-            } catch {
-                do {
-                    let tsaLTASignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsResponse.base64Tsr)
-
-                    let issuerUrl = try sessionWrapper.session.getCertificateIssuerUrl(fromCertificate: tsaLTASignerCert)
-
-                    let tsaLTAIssuerCert = try await fetchCertificateFromUrl(url: issuerUrl)
-
-                    ocspLTAUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaLTASignerCert, base64IssuerCert: tsaLTAIssuerCert)
-                    base64LTAOcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaLTASignerCert, base64IssuerCert: tsaLTAIssuerCert)
-                } catch let fallbackError {
-                    throw NSError(domain: "OCSPError", code: 1, userInfo: [
-                        NSLocalizedDescriptionKey: "Both primary and fallback methods failed. Primary: \(error.localizedDescription). Fallback: \(fallbackError.localizedDescription)"
-                    ])
-                }
-            }
-            let base64LTAOcspResponse = try await makeOcspHttpPostRequest(url: ocspLTAUrl, request: base64LTAOcspRequest)
-
+            let base64LTAOcspResponse = try await fetchOcspResponse(
+                sessionWrapper: sessionWrapper,
+                tsr: tsLtaResponse.base64Tsr
+            )
             validationLTAOCSPs.append(base64LTAOcspResponse)
             
             let tsaLTASignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsLtaResponse.base64Tsr)
@@ -295,6 +183,65 @@ public actor PodofoManager {
                                                     validationCertificates: validationLTACertificates,
                                                     validationCRLs: validationLTACrls,
                                                     validationOCSPs: validationLTAOCSPs)
+    }
+    
+    private func addTimestampAndRevocationInfo(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws -> (TimestampResponse, [String], [String], [String]) {
+        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
+        
+        let validationCertificates = prepareValidationCertificates(
+            sessionWrapper: sessionWrapper,
+            timestampResponse: tsResponse.base64Tsr
+        )
+
+        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
+        var crlUrls: Set<String> = []
+        
+        for certificate in certificatesForCrlExtraction {
+            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
+            crlUrls.insert(crlUrl)
+            print("CRL URL: \(crlUrl)")
+        }
+        
+        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
+        var validationOCSPs: [String] = []
+
+        do {
+            let ocspResponse = try await fetchOcspResponse(
+                sessionWrapper: sessionWrapper,
+                tsr: tsResponse.base64Tsr
+            )
+            validationOCSPs.append(ocspResponse)
+        } catch {
+            print("Could not get OCSP for TSA certificate: \(error.localizedDescription)")
+        }
+        
+        return (tsResponse, validationCertificates, validationCrls, validationOCSPs)
+    }
+
+    private func fetchOcspResponse(sessionWrapper: PodofoSession, tsr: String) async throws -> String {
+        var ocspUrl: String = ""
+        var base64OcspRequest: String = ""
+
+        do {
+            let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsr)
+            let tsaIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsr)
+            ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+            base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+        } catch {
+            do {
+                let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsr)
+                let issuerUrl = try sessionWrapper.session.getCertificateIssuerUrl(fromCertificate: tsaSignerCert)
+                let tsaIssuerCert = try await fetchCertificateFromUrl(url: issuerUrl)
+                ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+                base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+            } catch let fallbackError {
+                throw NSError(domain: "OCSPError", code: 1, userInfo: [
+                    NSLocalizedDescriptionKey: "Both primary and fallback methods failed. Primary: \(error.localizedDescription). Fallback: \(fallbackError.localizedDescription)"
+                ])
+            }
+        }
+        
+        return try await makeOcspHttpPostRequest(url: ocspUrl, request: base64OcspRequest)
     }
     
     internal func requestTimestamp(hash: String, tsaUrl: String) async throws -> TimestampResponse {
