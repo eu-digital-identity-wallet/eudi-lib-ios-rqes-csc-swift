@@ -379,4 +379,15 @@ final class RevocationServiceTests: XCTestCase {
         mockHTTPClient.setMockResponse(for: crlUrl, data: mockCrlData)
         return CrlRequest(crlUrl: crlUrl)
     }
+    
+    func testGetOcspDataSuccess() async throws {
+        let mockHttpClient = MockHTTPClient()
+        mockHttpClient.setMockResponse(for: OcspTestConstants.URLs.ocspUrl, data: OcspTestConstants.MockData.successResponse)
+        let revocationService = RevocationService(ocspClient: OcspClient(httpClient: mockHttpClient))
+        
+        let request = OcspRequest(ocspUrl: OcspTestConstants.URLs.ocspUrl, ocspRequest: OcspTestConstants.MockData.request)
+        let response = try await revocationService.getOcspData(request: request)
+        
+        XCTAssertEqual(response.ocspInfoBase64, OcspTestConstants.MockData.successResponse.base64EncodedString())
+    }
 } 

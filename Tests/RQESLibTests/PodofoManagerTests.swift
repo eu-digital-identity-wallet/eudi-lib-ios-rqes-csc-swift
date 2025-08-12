@@ -682,11 +682,6 @@ final class PodofoManagerTests: XCTestCase {
         }
     }
 
-    func testPrepareValidationCertificates_BasicFunctionality() {
-        let expectedCertCount = 1 + TestConstants.mockChainCertificates.count + 1
-        XCTAssertEqual(expectedCertCount, 5, "Expected total cert count should be 5")
-    }
-
     func testRequestTimestamp_CallsTimestampService() async throws {
         
         do {
@@ -879,6 +874,31 @@ final class PodofoManagerTests: XCTestCase {
         
         for levelValue in tsaRequiredValues {
             XCTAssertTrue(tsaRequiredValues.contains(levelValue), "These levels should require TSA URL")
+        }
+    }
+
+    func testCreateSignedDocuments_WithNoSessionsAndNoSignatures_Succeeds() async {
+        await XCTAssertNoThrowAsync(
+            try await podofoManager.createSignedDocuments(signatures: [], tsaUrl: "some-url"),
+            "Should succeed when no sessions and no signatures are provided."
+        )
+    }
+
+    func testFetchCertificateFromUrl_FailsWithRealServiceCall() async {
+        do {
+            _ = try await podofoManager.fetchCertificateFromUrl(url: "https://example.com/cert.crt")
+            XCTFail("Should fail due to real RevocationService call")
+        } catch {
+            XCTAssertFalse(error.localizedDescription.isEmpty, "Should attempt RevocationService call and fail as expected")
+        }
+    }
+    
+    func testMakeOcspHttpPostRequest_FailsWithRealServiceCall() async {
+        do {
+            _ = try await podofoManager.makeOcspHttpPostRequest(url: "https://example.com/ocsp", request: "dummy-ocsp-request")
+            XCTFail("Should fail due to real RevocationService call")
+        } catch {
+            XCTAssertFalse(error.localizedDescription.isEmpty, "Should attempt RevocationService call and fail as expected")
         }
     }
 } 
