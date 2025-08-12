@@ -33,4 +33,15 @@ public final actor TimestampService: TimestampServiceType {
         let base64 = TimestampUtils.encodeTSRToBase64(tsrData)
         return TimestampResponse(base64Tsr: base64)
     }
+    
+    public func requestDocTimestamp(request: TimestampRequest) async throws -> TimestampResponse  {
+
+        let tsq = try TimestampUtils.buildTSQForDocTimeStamp(from: request.hashToTimestamp)
+
+        let result = await timestampClient.makeRequest(for: tsq, tsaUrl: request.tsaUrl)
+        let tsrData = try result.get()
+
+        let base64 = TimestampUtils.encodeTSRToBase64(tsrData)
+        return TimestampResponse(base64Tsr: base64)
+    }
 }

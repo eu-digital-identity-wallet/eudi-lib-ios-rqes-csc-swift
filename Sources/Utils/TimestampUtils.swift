@@ -51,6 +51,34 @@ public struct TimestampUtils {
 
         return tsqDER
     }
+    
+    public static func buildTSQForDocTimeStamp(from rawHash: String) throws -> Data {
+
+        guard !rawHash.isEmpty else {
+            throw TimestampUtilsError.emptyHash
+        }
+
+        guard let rawHash = Data(base64Encoded: rawHash) else {
+            throw TimestampUtilsError.invalidBase64Hash
+        }
+
+        //let digest = SHA256.hash(data: raw)
+        let digestData = Data(rawHash)
+
+        let oidSHA256  = Data([0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01])
+        let nullBytes  = Data([0x05, 0x00])
+        let algIDSeq   = Data.tlv(0x30, oidSHA256 + nullBytes)
+
+        let octetDigest   = Data.tlv(0x04, digestData)
+        let msgImprintSeq = Data.tlv(0x30, algIDSeq + octetDigest)
+
+        let versionBytes = Data([0x02, 0x01, 0x01])
+        let certReqBytes = Data([0x01, 0x01, 0xFF])
+        let tsReqBody    = versionBytes + msgImprintSeq + certReqBytes
+        let tsqDER       = Data.tlv(0x30, tsReqBody)
+
+        return tsqDER
+    }
 
     public static func encodeTSRToBase64(_ tsrData: Data) -> String {
         tsrData.base64EncodedString()
