@@ -209,6 +209,30 @@ final class TimestampServiceTests: XCTestCase {
         XCTAssertNotNil(decodedData, "Base64 TSR should be valid and decodable")
         XCTAssertEqual(decodedData, TimestampTestConstants.MockResponses.validTimestampResponse, "Decoded data should match original mock data")
     }
+    
+    func testRequestTimestampSuccess() async throws {
+        let mockHttpClient = MockHTTPClient()
+        mockHttpClient.setMockResponse(for: TimestampTestConstants.URLs.tsaUrl, data: TimestampTestConstants.MockResponses.validTimestampResponse)
+        let timestampClient = TimestampClient(httpClient: mockHttpClient)
+        let timestampService = TimestampService(timestampClient: timestampClient)
+        
+        let request = TimestampRequest(hashToTimestamp: TimestampTestConstants.Hashes.validSignedHash, tsaUrl: TimestampTestConstants.URLs.tsaUrl)
+        let response = try await timestampService.requestTimestamp(request: request)
+        
+        XCTAssertEqual(response.base64Tsr, TimestampTestConstants.MockResponses.validTimestampResponse.base64EncodedString())
+    }
+    
+    func testRequestDocTimestampSuccess() async throws {
+        let mockHttpClient = MockHTTPClient()
+        mockHttpClient.setMockResponse(for: TimestampTestConstants.URLs.tsaUrl, data: TimestampTestConstants.MockResponses.validTimestampResponse)
+        let timestampClient = TimestampClient(httpClient: mockHttpClient)
+        let timestampService = TimestampService(timestampClient: timestampClient)
+        
+        let request = TimestampRequest(hashToTimestamp: TimestampTestConstants.Hashes.validSignedHash, tsaUrl: TimestampTestConstants.URLs.tsaUrl)
+        let response = try await timestampService.requestDocTimestamp(request: request)
+        
+        XCTAssertEqual(response.base64Tsr, TimestampTestConstants.MockResponses.validTimestampResponse.base64EncodedString())
+    }
         
     private func createValidTimestampRequest() -> TimestampRequest {
         mockHTTPClient.setMockResponse(for: TimestampTestConstants.URLs.tsaUrl, data: TimestampTestConstants.MockResponses.validTimestampResponse)

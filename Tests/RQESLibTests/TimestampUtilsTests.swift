@@ -333,4 +333,42 @@ final class TimestampUtilsTests: XCTestCase {
         let tlvData = Data.tlv(tag, value)
         XCTAssertEqual(tlvData, expectedTLV, "TLV encoding with empty value failed")
     }
+
+    func testBuildTSQSuccess() throws {
+        let base64Hash = Data("some aribitrary data".utf8).base64EncodedString()
+        
+        let tsq = try TimestampUtils.buildTSQ(from: base64Hash)
+        XCTAssertFalse(tsq.isEmpty)
+    }
+
+    func testBuildTSQForDocTimeStampSuccess() throws {
+        let rawHash = Data("some aribitrary hash data".utf8).base64EncodedString()
+        
+        let tsq = try TimestampUtils.buildTSQForDocTimeStamp(from: rawHash)
+        XCTAssertFalse(tsq.isEmpty)
+    }
+
+    func testBuildTSQEmptyHash() {
+        XCTAssertThrowsError(try TimestampUtils.buildTSQ(from: "")) { error in
+            XCTAssertEqual(error as? TimestampUtilsError, .emptyHash)
+        }
+    }
+    
+    func testBuildTSQForDocTimeStampEmptyHash() {
+        XCTAssertThrowsError(try TimestampUtils.buildTSQForDocTimeStamp(from: "")) { error in
+            XCTAssertEqual(error as? TimestampUtilsError, .emptyHash)
+        }
+    }
+
+    func testBuildTSQInvalidBase64() {
+        XCTAssertThrowsError(try TimestampUtils.buildTSQ(from: "invalid base64")) { error in
+            XCTAssertEqual(error as? TimestampUtilsError, .invalidBase64Hash)
+        }
+    }
+
+    func testBuildTSQForDocTimeStampInvalidBase64() {
+        XCTAssertThrowsError(try TimestampUtils.buildTSQForDocTimeStamp(from: "invalid base64")) { error in
+            XCTAssertEqual(error as? TimestampUtilsError, .invalidBase64Hash)
+        }
+    }
 } 

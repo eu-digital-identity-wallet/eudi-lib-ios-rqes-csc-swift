@@ -48,6 +48,7 @@ struct TimestampTestConstants {
         static let validTimestampResponse = "MIIBhAYJKoZIhvcNAQcCoIIBdTCCAXECAQMxDzANBglghkgBZQMEAgEFADB8BgsqhkiG9w0BCRABBKB".data(using: .utf8)!
         static let largeTimestampResponse = String(repeating: "MOCK_TSA_RESPONSE_", count: 50).data(using: .utf8)!
         static let emptyTimestampResponse = Data()
+        static let errorResponse = Data("Not Found".utf8)
     }
 }
 
@@ -1108,3 +1109,17 @@ struct TestConstants {
     
     static let testCodeChallenge2 = "icwKf_6fgjKJhe0olOXYp-RcSJlYp-Xjg5MQ3O28Pi0"
 } 
+
+struct OcspTestConstants {
+    
+    struct URLs {
+        static let ocspUrl = "https://example.com/ocsp"
+        static let badUrl = "bad url"
+    }
+    
+    struct MockData {
+        static let request = Data("request".utf8).base64EncodedString()
+        static let successResponse = Data("successful response".utf8)
+        static let errorResponse = Data("Client Error".utf8)
+    }
+}

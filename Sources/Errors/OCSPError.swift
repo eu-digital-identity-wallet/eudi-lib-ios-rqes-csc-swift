@@ -3,6 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
+ * You may
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -15,8 +16,13 @@
  */
 import Foundation
 
-public protocol RevocationServiceType {
-    func getCrlData(request: CrlRequest) async throws -> CrlResponse
-    func getOcspData(request: OcspRequest) async throws -> OcspResponse
-    func getCertificateData(request: CertificateRequest) async throws -> CertificateResponse
+public enum OCSPError: LocalizedError {
+    case bothMethodsFailed(primaryError: String, fallbackError: String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .bothMethodsFailed(let primaryError, let fallbackError):
+            return "Both primary and fallback OCSP methods failed. Primary: \(primaryError). Fallback: \(fallbackError)."
+        }
+    }
 }
