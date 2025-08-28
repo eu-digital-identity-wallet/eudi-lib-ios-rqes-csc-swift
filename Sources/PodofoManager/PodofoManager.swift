@@ -82,7 +82,6 @@ public actor PodofoManager {
         for i in 0..<podofoSessions.count {
             let sessionWrapper = podofoSessions[i]
             let signedHash = signatures[i]
-            sessionWrapper.session.printState()
 
             if sessionWrapper.conformanceLevel.rawValue == ConformanceLevel.ADES_B_B.rawValue {
                 try await handleAdesB_B(sessionWrapper: sessionWrapper, signedHash: signedHash)
@@ -107,7 +106,6 @@ public actor PodofoManager {
     }
     
     private func handleAdesB_T(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
-        print("Handling ADES-B-T...")
         let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
         
         sessionWrapper.session.finalizeSigning(
@@ -120,63 +118,125 @@ public actor PodofoManager {
     }
     
     private func handleAdesB_LT(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
-        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
-        
-        let validationCertificates = prepareValidationCertificates(
-            sessionWrapper: sessionWrapper,
-            timestampResponse: tsResponse.base64Tsr
-        )
-
-        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
-        var crlUrls: Set<String> = []
-        
-        for certificate in certificatesForCrlExtraction {
-            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
-            crlUrls.insert(crlUrl)
-            print("CRL URL: \(crlUrl)")
+            let (tsResponse, validationCertificates, validationCrls, validationOCSPs) = try await addTimestampAndRevocationInfo(
+                sessionWrapper: sessionWrapper,
+                signedHash: signedHash,
+                tsaUrl: tsaUrl
+            )
+            
+            sessionWrapper.session.finalizeSigning(
+                withSignedHash: signedHash,
+                tsr: tsResponse.base64Tsr,
+                validationCertificates: validationCertificates,
+                validationCRLs: validationCrls,
+                validationOCSPs: validationOCSPs
+            )
         }
-        
-        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
-        
-        sessionWrapper.session.finalizeSigning(
-            withSignedHash: signedHash,
-            tsr: tsResponse.base64Tsr,
-            validationCertificates: validationCertificates,
-            validationCRLs: validationCrls,
-            validationOCSPs: []
-        )
-    }
     
     private func handleAdesB_LTA(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws {
-        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
-        
-        let validationCertificates = prepareValidationCertificates(
+        let (tsResponse, validationCertificates, validationCrls, validationOCSPs) = try await addTimestampAndRevocationInfo(
             sessionWrapper: sessionWrapper,
-            timestampResponse: tsResponse.base64Tsr
+            signedHash: signedHash,
+            tsaUrl: tsaUrl
         )
-
-        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
-        var crlUrls: Set<String> = []
-        
-        for certificate in certificatesForCrlExtraction {
-            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
-            crlUrls.insert(crlUrl)
-            print("CRL URL: \(crlUrl)")
-        }
-        
-        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
         
         sessionWrapper.session.finalizeSigning(
             withSignedHash: signedHash,
             tsr: tsResponse.base64Tsr,
             validationCertificates: validationCertificates,
             validationCRLs: validationCrls,
-            validationOCSPs: []
+            validationOCSPs: validationOCSPs
         )
 
         let ltaRawHash = try sessionWrapper.session.beginSigningLTA()
-        let tsLtaResponse = try await requestTimestamp(hash: ltaRawHash, tsaUrl: tsaUrl)
-        try sessionWrapper.session.finishSigningLTA(withTSR: tsLtaResponse.base64Tsr)
+        let tsLtaResponse = try await requestDocTimestamp(hash: ltaRawHash, tsaUrl: tsaUrl)
+        
+        var validationLTACertificates: [String] = []
+        var validationLTACrls : [String] = []
+        var validationLTAOCSPs: [String] = []
+        
+        do {
+            let base64LTAOcspResponse = try await fetchOcspResponse(
+                sessionWrapper: sessionWrapper,
+                tsr: tsLtaResponse.base64Tsr
+            )
+            validationLTAOCSPs.append(base64LTAOcspResponse)
+            
+            let tsaLTASignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsLtaResponse.base64Tsr)
+            validationLTACertificates.append(tsaLTASignerCert)
+        
+            let tsaLTAIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsLtaResponse.base64Tsr)
+            validationLTACertificates.append(tsaLTAIssuerCert)
+
+            var crlLTAUrls: Set<String> = []
+            let crlSignerLTAUrl = try sessionWrapper.session.getCrlFromCertificate(tsaLTASignerCert)
+            crlLTAUrls.insert(crlSignerLTAUrl)
+            let crls = try await fetchCrlDataFromUrls(crlUrls: Array(crlLTAUrls))
+            validationLTACrls.append(contentsOf: crls)
+
+        } catch {
+            print("No OCSPs were found")
+        }
+        try sessionWrapper.session.finishSigningLTA(withTSR: tsLtaResponse.base64Tsr,
+                                                    validationCertificates: validationLTACertificates,
+                                                    validationCRLs: validationLTACrls,
+                                                    validationOCSPs: validationLTAOCSPs)
+    }
+    
+    private func addTimestampAndRevocationInfo(sessionWrapper: PodofoSession, signedHash: String, tsaUrl: String) async throws -> (TimestampResponse, [String], [String], [String]) {
+        let tsResponse = try await requestTimestamp(hash: signedHash, tsaUrl: tsaUrl)
+        
+        let validationCertificates = prepareValidationCertificates(
+            sessionWrapper: sessionWrapper,
+            timestampResponse: tsResponse.base64Tsr
+        )
+
+        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
+        var crlUrls: Set<String> = []
+        
+        for certificate in certificatesForCrlExtraction {
+            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
+            crlUrls.insert(crlUrl)
+        }
+        
+        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
+        var validationOCSPs: [String] = []
+
+        do {
+            let ocspResponse = try await fetchOcspResponse(
+                sessionWrapper: sessionWrapper,
+                tsr: tsResponse.base64Tsr
+            )
+            validationOCSPs.append(ocspResponse)
+        } catch {
+            print("No OCSPs were found")
+        }
+        
+        return (tsResponse, validationCertificates, validationCrls, validationOCSPs)
+    }
+
+    private func fetchOcspResponse(sessionWrapper: PodofoSession, tsr: String) async throws -> String {
+        var ocspUrl: String = ""
+        var base64OcspRequest: String = ""
+
+        do {
+            let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsr)
+            let tsaIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsr)
+            ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+            base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+        } catch {
+            do {
+                let tsaSignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsr)
+                let issuerUrl = try sessionWrapper.session.getCertificateIssuerUrl(fromCertificate: tsaSignerCert)
+                let tsaIssuerCert = try await fetchCertificateFromUrl(url: issuerUrl)
+                ocspUrl = try sessionWrapper.session.getOCSPFromCertificate(tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+                base64OcspRequest = try sessionWrapper.session.buildOCSPRequest(fromCertificates: tsaSignerCert, base64IssuerCert: tsaIssuerCert)
+            } catch let fallbackError {
+                throw OCSPError.bothMethodsFailed(primaryError: error.localizedDescription, fallbackError: fallbackError.localizedDescription)
+            }
+        }
+        
+        return try await makeOcspHttpPostRequest(url: ocspUrl, request: base64OcspRequest)
     }
     
     internal func requestTimestamp(hash: String, tsaUrl: String) async throws -> TimestampResponse {
@@ -186,6 +246,15 @@ public actor PodofoManager {
             tsaUrl: tsaUrl
         )
         return try await tsService.requestTimestamp(request: tsRequest)
+    }
+    
+    internal func requestDocTimestamp(hash: String, tsaUrl: String) async throws -> TimestampResponse {
+        let tsService = TimestampService()
+        let tsRequest = TimestampRequest(
+            hashToTimestamp: hash,
+            tsaUrl: tsaUrl
+        )
+        return try await tsService.requestDocTimestamp(request: tsRequest)
     }
     
     internal func prepareValidationCertificates(sessionWrapper: PodofoSession, timestampResponse: String) -> [String] {
@@ -199,7 +268,6 @@ public actor PodofoManager {
         for crlUrl in crlUrls {
             let crlRequest = CrlRequest(crlUrl: crlUrl)
             let crlInfo = try await revocationService.getCrlData(request: crlRequest)
-            print("CRL Info Base64: \(crlInfo.crlInfoBase64)")
             validationCrlResponses.append(crlInfo.crlInfoBase64)
         }
         
@@ -215,5 +283,19 @@ public actor PodofoManager {
                     conformanceLevel: doc.conformanceLevel.rawValue)
             }
         }
+    }
+
+    internal func fetchCertificateFromUrl(url: String) async throws -> String {
+        let revocationService = RevocationService()
+        let request = CertificateRequest(certificateUrl: url)
+        let response = try await revocationService.getCertificateData(request: request)
+        return response.certificateBase64
+    }
+
+    internal func makeOcspHttpPostRequest(url: String, request: String) async throws -> String {
+        let revocationService = RevocationService()
+        let request = OcspRequest(ocspUrl: url, ocspRequest: request)
+        let response = try await revocationService.getOcspData(request: request)
+        return response.ocspInfoBase64
     }
 }

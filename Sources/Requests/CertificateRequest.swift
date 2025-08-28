@@ -9,14 +9,17 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
+
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 import Foundation
 
-public protocol RevocationServiceType {
-    func getCrlData(request: CrlRequest) async throws -> CrlResponse
-    func getOcspData(request: OcspRequest) async throws -> OcspResponse
-    func getCertificateData(request: CertificateRequest) async throws -> CertificateResponse
+public struct CertificateRequest: Codable, Sendable  {
+    public let certificateUrl: String
+    
+    public init(certificateUrl: String) {
+        self.certificateUrl = certificateUrl
+    }
 }

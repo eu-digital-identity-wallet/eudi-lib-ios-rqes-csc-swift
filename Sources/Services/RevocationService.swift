@@ -18,9 +18,17 @@ import Foundation
 
 final actor RevocationService: RevocationServiceType {
     private let crlClient: CrlClient
+    private let ocspClient: OcspClient
+    private let certificateClient: CertificateClient
     
-    init(crlClient: CrlClient = CrlClient()) {
+    init(
+        crlClient: CrlClient = CrlClient(),
+        ocspClient: OcspClient = OcspClient(),
+        certificateClient: CertificateClient = CertificateClient()
+    ) {
         self.crlClient = crlClient
+        self.ocspClient = ocspClient
+        self.certificateClient = certificateClient
     }
 
     func getCrlData(request: CrlRequest) async throws -> CrlResponse {
@@ -29,6 +37,22 @@ final actor RevocationService: RevocationServiceType {
         let base64String = result.base64EncodedString()
         
         return CrlResponse(crlInfoBase64: base64String)
+    }
+    
+    func getOcspData(request: OcspRequest) async throws -> OcspResponse {
+        let result = try await ocspClient.makeRequest(for: request).get()
+        
+        let base64String = result.base64EncodedString()
+        
+        return OcspResponse(ocspInfoBase64: base64String)
+    }
+    
+    func getCertificateData(request: CertificateRequest) async throws -> CertificateResponse {
+        let result = try await certificateClient.makeRequest(for: request).get()
+        
+        let base64String = result.base64EncodedString()
+        
+        return CertificateResponse(certificateBase64: base64String)
     }
 }
 

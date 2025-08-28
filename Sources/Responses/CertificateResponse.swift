@@ -15,8 +15,10 @@
  */
 import Foundation
 
-public protocol RevocationServiceType {
-    func getCrlData(request: CrlRequest) async throws -> CrlResponse
-    func getOcspData(request: OcspRequest) async throws -> OcspResponse
-    func getCertificateData(request: CertificateRequest) async throws -> CertificateResponse
+public struct CertificateResponse: Codable, Sendable  {
+    public let certificateBase64: String
+    
+    public init(certificateBase64: String) {
+        self.certificateBase64 = certificateBase64
+    }
 }

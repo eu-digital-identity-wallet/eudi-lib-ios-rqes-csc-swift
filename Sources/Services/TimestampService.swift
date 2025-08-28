@@ -22,15 +22,28 @@ public final actor TimestampService: TimestampServiceType {
     public init(timestampClient: TimestampClient = TimestampClient()) {
         self.timestampClient = timestampClient
     }
-
-    public func requestTimestamp(request: TimestampRequest) async throws -> TimestampResponse  {
-
-        let tsq = try TimestampUtils.buildTSQ(from: request.hashToTimestamp)
-
-        let result = await timestampClient.makeRequest(for: tsq, tsaUrl: request.tsaUrl)
+    
+    internal func getTimestampResponse(tsq: Data, tsaUrl: String) async throws -> TimestampResponse {
+        let result = await timestampClient.makeRequest(for: tsq, tsaUrl: tsaUrl)
         let tsrData = try result.get()
-
+        
         let base64 = TimestampUtils.encodeTSRToBase64(tsrData)
         return TimestampResponse(base64Tsr: base64)
+    }
+    
+    /**
+     Requests a timestamp for a given hash.
+     - Throws: An error if the timestamp request fails.
+     */
+    public func requestTimestamp(request: TimestampRequest) async throws -> TimestampResponse  {
+        
+        let tsq = try TimestampUtils.buildTSQ(from: request.hashToTimestamp)
+        return try await getTimestampResponse(tsq: tsq, tsaUrl: request.tsaUrl)
+    }
+    
+    public func requestDocTimestamp(request: TimestampRequest) async throws -> TimestampResponse  {
+        
+        let tsq = try TimestampUtils.buildTSQForDocTimeStamp(from: request.hashToTimestamp)
+        return try await getTimestampResponse(tsq: tsq, tsaUrl: request.tsaUrl)
     }
 }
