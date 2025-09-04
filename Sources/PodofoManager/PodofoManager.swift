@@ -19,8 +19,11 @@ import PoDoFo
 public actor PodofoManager {
     
     private var podofoSessions: [PodofoSession] = []
+    private let includeRevocationInfo: Bool
     
-    public init() {}
+    public init(includeRevocationInfo: Bool = false) {
+        self.includeRevocationInfo = includeRevocationInfo
+    }
     
     public func calculateDocumentHashes(request: CalculateHashRequest, tsaUrl: String) async throws -> DocumentDigests {
         podofoSessions.removeAll()
@@ -155,27 +158,29 @@ public actor PodofoManager {
         var validationLTACrls : [String] = []
         var validationLTAOCSPs: [String] = []
         
-        do {
-            let base64LTAOcspResponse = try await fetchOcspResponse(
-                sessionWrapper: sessionWrapper,
-                tsr: tsLtaResponse.base64Tsr
-            )
-            validationLTAOCSPs.append(base64LTAOcspResponse)
+        if includeRevocationInfo {
+            do {
+                let base64LTAOcspResponse = try await fetchOcspResponse(
+                    sessionWrapper: sessionWrapper,
+                    tsr: tsLtaResponse.base64Tsr
+                )
+                validationLTAOCSPs.append(base64LTAOcspResponse)
+                
+                let tsaLTASignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsLtaResponse.base64Tsr)
+                validationLTACertificates.append(tsaLTASignerCert)
             
-            let tsaLTASignerCert = try sessionWrapper.session.extractSignerCert(fromTSR: tsLtaResponse.base64Tsr)
-            validationLTACertificates.append(tsaLTASignerCert)
-        
-            let tsaLTAIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsLtaResponse.base64Tsr)
-            validationLTACertificates.append(tsaLTAIssuerCert)
+                let tsaLTAIssuerCert = try sessionWrapper.session.extractIssuerCert(fromTSR: tsLtaResponse.base64Tsr)
+                validationLTACertificates.append(tsaLTAIssuerCert)
 
-            var crlLTAUrls: Set<String> = []
-            let crlSignerLTAUrl = try sessionWrapper.session.getCrlFromCertificate(tsaLTASignerCert)
-            crlLTAUrls.insert(crlSignerLTAUrl)
-            let crls = try await fetchCrlDataFromUrls(crlUrls: Array(crlLTAUrls))
-            validationLTACrls.append(contentsOf: crls)
+                var crlLTAUrls: Set<String> = []
+                let crlSignerLTAUrl = try sessionWrapper.session.getCrlFromCertificate(tsaLTASignerCert)
+                crlLTAUrls.insert(crlSignerLTAUrl)
+                let crls = try await fetchCrlDataFromUrls(crlUrls: Array(crlLTAUrls))
+                validationLTACrls.append(contentsOf: crls)
 
-        } catch {
-            print("No OCSPs were found")
+            } catch {
+                print("No OCSPs were found")
+            }
         }
         try sessionWrapper.session.finishSigningLTA(withTSR: tsLtaResponse.base64Tsr,
                                                     validationCertificates: validationLTACertificates,
@@ -191,25 +196,29 @@ public actor PodofoManager {
             timestampResponse: tsResponse.base64Tsr
         )
 
-        let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
-        var crlUrls: Set<String> = []
-        
-        for certificate in certificatesForCrlExtraction {
-            let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
-            crlUrls.insert(crlUrl)
-        }
-        
-        let validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
+        var validationCrls: [String] = []
         var validationOCSPs: [String] = []
+        
+        if includeRevocationInfo {
+            let certificatesForCrlExtraction = [sessionWrapper.endCertificate] + sessionWrapper.chainCertificates
+            var crlUrls: Set<String> = []
+            
+            for certificate in certificatesForCrlExtraction {
+                let crlUrl = try sessionWrapper.session.getCrlFromCertificate(certificate)
+                crlUrls.insert(crlUrl)
+            }
+            
+            validationCrls = try await fetchCrlDataFromUrls(crlUrls: Array(crlUrls))
 
-        do {
-            let ocspResponse = try await fetchOcspResponse(
-                sessionWrapper: sessionWrapper,
-                tsr: tsResponse.base64Tsr
-            )
-            validationOCSPs.append(ocspResponse)
-        } catch {
-            print("No OCSPs were found")
+            do {
+                let ocspResponse = try await fetchOcspResponse(
+                    sessionWrapper: sessionWrapper,
+                    tsr: tsResponse.base64Tsr
+                )
+                validationOCSPs.append(ocspResponse)
+            } catch {
+                print("No OCSPs were found")
+            }
         }
         
         return (tsResponse, validationCertificates, validationCrls, validationOCSPs)

@@ -53,7 +53,7 @@ final class PodofoManagerTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        podofoManager = PodofoManager()
+        podofoManager = PodofoManager(includeRevocationInfo: false)
     }
     
     override func tearDown() {
@@ -62,7 +62,7 @@ final class PodofoManagerTests: XCTestCase {
     }
 
     func testPodofoManagerInitialization() {
-        let manager = PodofoManager()
+        let manager = PodofoManager(includeRevocationInfo: false)
         XCTAssertNotNil(manager)
     }
 
@@ -318,10 +318,10 @@ final class PodofoManagerTests: XCTestCase {
     }
 
     func testPodofoManagerInitialState() {
-        let manager = PodofoManager()
+        let manager = PodofoManager(includeRevocationInfo: false)
         XCTAssertNotNil(manager, "PodofoManager should initialize successfully")
 
-        let manager2 = PodofoManager()
+        let manager2 = PodofoManager(includeRevocationInfo: true)
         XCTAssertNotNil(manager2, "Should be able to create multiple PodofoManager instances")
     }
     

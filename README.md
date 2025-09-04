@@ -246,7 +246,8 @@ class RQESHandler {
             ),
             authFlowRedirectionURI: "https://oauthdebugger.com/debug",
             RSSPId: "https://walletcentric.signer.eudiw.dev/csc/v2",
-            tsaUrl: "http://ts.cartaodecidadao.pt/tsa/server"
+            tsaUrl: "http://ts.cartaodecidadao.pt/tsa/server",
+            includeRevocationInfo: false // Optional: set to true to include CRL and OCSP revocation information. If not set, defaults to false.
         )
         let rqes = await RQES(cscClientConfig: cscClientConfig)
        

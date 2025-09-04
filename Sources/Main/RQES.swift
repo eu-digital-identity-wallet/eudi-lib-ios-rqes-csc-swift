@@ -37,7 +37,7 @@ public class RQES {
         self.prepareAuthorizationRequestService = await ServiceLocator.shared.resolve() ?? PrepareAuthorizationRequestService()
         self.rsspId = cscClientConfig.rsspId
         self.cscClientConfig = cscClientConfig
-        self.podofoManager = PodofoManager()
+        self.podofoManager = PodofoManager(includeRevocationInfo: cscClientConfig.includeRevocationInfo)
         self.issuerURL = ""
     }
 
