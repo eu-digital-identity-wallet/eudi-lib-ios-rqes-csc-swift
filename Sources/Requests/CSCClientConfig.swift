@@ -20,12 +20,14 @@ public struct CSCClientConfig: Codable, Sendable {
     public let authFlowRedirectionURI: String
     public let rsspId: String
     public let tsaUrl: String
+    public let includeRevocationInfo: Bool
   
-    public init(OAuth2Client: OAuth2Client, authFlowRedirectionURI: String, rsspId: String, tsaUrl: String? = nil) {
+    public init(OAuth2Client: OAuth2Client, authFlowRedirectionURI: String, rsspId: String, tsaUrl: String? = nil, includeRevocationInfo: Bool = false) {
         self.OAuth2Client = OAuth2Client
         self.authFlowRedirectionURI = authFlowRedirectionURI
         self.rsspId = rsspId
         self.tsaUrl = tsaUrl ?? ""
+        self.includeRevocationInfo = includeRevocationInfo
     }
     
     public struct OAuth2Client: Codable, Sendable {

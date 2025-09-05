@@ -1,5 +1,50 @@
 # 📦 Changelog
 
+## [R5] - 2025-5-9 - Added includeRevocationInfo Configuration
+
+### 🔄 Changed
+In **R5**, a new configuration option `includeRevocationInfo` has been added to the `CSCClientConfig` to control whether revocation information (CRL and OCSP) should be included during PDF signing operations. This allows users to optimize performance by skipping revocation requests when they are not needed.
+
+The `includeRevocationInfo` parameter defaults to `false`, ensuring backward compatibility while providing the option to include revocation information when required.
+
+#### 🔁 Previous (R5)
+
+```Swift
+let cscClientConfig = CSCClientConfig(
+    OAuth2Client: CSCClientConfig.OAuth2Client(
+        clientId: "wallet-client",
+        clientSecret: "somesecret2"
+    ),
+    authFlowRedirectionURI: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
+    rsspId: "https://walletcentric.signer.eudiw.dev/csc/v2",
+    tsaUrl: "http://ts.cartaodecidadao.pt/tsa/server"
+)
+```
+
+#### ✅ Now (R5)
+
+```Swift
+let cscClientConfig = CSCClientConfig(
+    OAuth2Client: CSCClientConfig.OAuth2Client(
+        clientId: "wallet-client",
+        clientSecret: "somesecret2"
+    ),
+    authFlowRedirectionURI: "https://walletcentric.signer.eudiw.dev/tester/oauth/login/code",
+    rsspId: "https://walletcentric.signer.eudiw.dev/csc/v2",
+    tsaUrl: "http://ts.cartaodecidadao.pt/tsa/server",
+    includeRevocationInfo: false // can be set to true to include CRL and OCSP Requests. If not set, defaults to false.
+)
+```
+
+### ✅ Behavior Summary
+
+| includeRevocationInfo | CRL Requests | OCSP Requests | Validation Certificates |
+|----------------------|---------------|----------------|-------------------------|
+| `false` (default)    | ❌ Skipped    | ❌ Skipped     | ✅ Always included      |
+| `true`               | ✅ Included   | ✅ Included    | ✅ Always included      |
+
+This optimization reduces network requests and improves performance when revocation information is not required for the signing operation.
+
 ## [R5] - 2025-17-7 - SCA URL Removed
 
 ### 🔄 Changed
