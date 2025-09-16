@@ -29,7 +29,7 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.3.5")
+    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.3.6")
   ],
   targets: [
     .target(
