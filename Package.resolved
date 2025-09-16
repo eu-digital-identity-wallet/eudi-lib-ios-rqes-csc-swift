@@ -1,13 +1,13 @@
 {
-  "originHash" : "2d9a9cfa4843084560c37c99050b8ba1206b37e18e9d19733d9f960ae9917e86",
+  "originHash" : "2d511f77bbb05d419281bdb7142d869f0371b2de813fb77edb1eafbeb55ab50f",
   "pins" : [
     {
       "identity" : "eudi-lib-podofo",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo",
       "state" : {
-        "branch" : "main",
-        "revision" : "fe0269ba1ed58789cad865d87f759f4ba3658c67"
+        "revision" : "fe0269ba1ed58789cad865d87f759f4ba3658c67",
+        "version" : "0.3.7"
       }
     }
   ],
