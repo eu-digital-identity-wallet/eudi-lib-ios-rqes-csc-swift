@@ -20,7 +20,7 @@ import PackageDescription
 let package = Package(
   name: "eudi-lib-ios-rqes-csc-swift",
   platforms: [
-    .iOS(.v14)
+    .iOS(.v16)
   ],
   products: [
     .library(
