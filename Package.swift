@@ -20,7 +20,7 @@ import PackageDescription
 let package = Package(
   name: "eudi-lib-ios-rqes-csc-swift",
   platforms: [
-    .iOS(.v14)
+    .iOS(.v16)
   ],
   products: [
     .library(
@@ -29,7 +29,7 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.3.4")
+    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.3.7")
   ],
   targets: [
     .target(
