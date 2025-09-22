@@ -20,7 +20,7 @@ import PackageDescription
 let package = Package(
   name: "eudi-lib-ios-rqes-csc-swift",
   platforms: [
-    .iOS(.v16)
+    .iOS(.v14)
   ],
   products: [
     .library(
@@ -29,7 +29,7 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.3.7")
+    .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.3.8")
   ],
   targets: [
     .target(
@@ -42,7 +42,7 @@ let package = Package(
         .copy("Documents")
       ],
       linkerSettings: [
-        .linkedLibrary("bz2") // PoDoFo needs bz2
+        .linkedLibrary("bz2"), .linkedLibrary("c++")
       ]
     ),
     .testTarget(
