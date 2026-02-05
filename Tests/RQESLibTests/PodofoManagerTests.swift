@@ -235,7 +235,8 @@ final class PodofoManagerTests: XCTestCase {
                 tsaUrl: TestConstants.validTsaUrl
             )
           
-            print(result)
+            XCTAssert(result.hashes.count == 1)
+          
         } catch {
         }
     }
