@@ -23,6 +23,20 @@ public struct DocumentDigest: Codable, Sendable {
         self.label = label
         self.hash = hash
     }
+
+    /// Format-aware construction (for new/updated call sites)
+    public init(label: String, hash: String, output format: DigestFormat) throws {
+        self.label = label
+        self.hash = try DigestNormalizer.normalize(hash, to: format)
+    }
+
+    public static func forAuthorization(label: String, hash: String) throws -> DocumentDigest {
+        try .init(label: label, hash: hash, output: .base64URLNoPadding)
+    }
+
+    public static func forToken(label: String, hash: String) throws -> DocumentDigest {
+        try .init(label: label, hash: hash, output: .base64)
+    }
 }
 
 public struct AuthorizationDetailsItem: Codable, Sendable {
@@ -42,3 +56,59 @@ public struct AuthorizationDetailsItem: Codable, Sendable {
 }
 
 public typealias AuthorizationDetails = [AuthorizationDetailsItem]
+
+public extension AuthorizationDetailsItem {
+
+    /// Returns a new instance with the same details, but document digests normalized into the requested output format (base64 vs base64url-no-padding).
+    func copy(digestFormat: DigestFormat) throws -> AuthorizationDetailsItem {
+        let converted = try documentDigests.map { digest in
+            try DocumentDigest(label: digest.label, hash: digest.hash, output: digestFormat)
+        }
+
+        return AuthorizationDetailsItem(
+            documentDigests: converted,
+            credentialID: credentialID,
+            hashAlgorithmOID: hashAlgorithmOID,
+            locations: locations,
+            type: type
+        )
+    }
+
+    /// Variant that takes hashes directly (labels preserved by index)
+    func copy(hashes: [String], digestFormat: DigestFormat) throws -> AuthorizationDetailsItem {
+        guard hashes.count == documentDigests.count else {
+            throw NSError(
+                domain: "AuthorizationDetailsItem",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "hashes.count must match documentDigests.count"]
+            )
+        }
+
+        let converted: [DocumentDigest] = try zip(documentDigests, hashes).map { existing, newHash in
+            try DocumentDigest(label: existing.label, hash: newHash, output: digestFormat)
+        }
+
+        return AuthorizationDetailsItem(
+            documentDigests: converted,
+            credentialID: credentialID,
+            hashAlgorithmOID: hashAlgorithmOID,
+            locations: locations,
+            type: type
+        )
+    }
+
+    /// Variant that takes full digests but forces a format.
+    func copy(documentDigests: [DocumentDigest], digestFormat: DigestFormat) throws -> AuthorizationDetailsItem {
+        let converted = try documentDigests.map { digest in
+            try DocumentDigest(label: digest.label, hash: digest.hash, output: digestFormat)
+        }
+
+        return AuthorizationDetailsItem(
+            documentDigests: converted,
+            credentialID: credentialID,
+            hashAlgorithmOID: hashAlgorithmOID,
+            locations: locations,
+            type: type
+        )
+    }
+}
