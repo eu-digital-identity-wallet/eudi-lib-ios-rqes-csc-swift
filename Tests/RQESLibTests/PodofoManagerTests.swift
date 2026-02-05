@@ -211,6 +211,35 @@ final class PodofoManagerTests: XCTestCase {
         }
     }
 
+    func testCalculateDocumentHashes_SingleDocumentArray() async throws {
+      
+        let document: CalculateHashRequest.Document = .init(
+            documentInputPath: TestConstants.sampleInputFilePath,
+            documentOutputPath: TestConstants.sampleOutputFilePath,
+            signatureFormat: SignatureFormat.P,
+            conformanceLevel: ConformanceLevel.ADES_B_B,
+            signedEnvelopeProperty: SignedEnvelopeProperty.ENVELOPED,
+            container: "No"
+        )
+      
+        let request = CalculateHashRequest(
+            documents: [document],
+            endEntityCertificate: TestConstants.standardCalculateHashRequest.endEntityCertificate,
+            certificateChain: TestConstants.standardCalculateHashRequest.certificateChain,
+            hashAlgorithmOID: TestConstants.standardCalculateHashRequest.hashAlgorithmOID
+        )
+        
+        do {
+            let result = try await podofoManager.calculateDocumentHashes(
+                request: request,
+                tsaUrl: TestConstants.validTsaUrl
+            )
+          
+            print(result)
+        } catch {
+        }
+    }
+  
     func testCreateSignedDocuments_SignatureCountMismatch() async throws {
         let signatures = TestConstants.sampleSignatures
         
