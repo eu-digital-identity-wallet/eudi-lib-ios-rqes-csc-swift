@@ -37,6 +37,10 @@ public struct DocumentDigest: Codable, Sendable {
     public static func forToken(label: String, hash: String) throws -> DocumentDigest {
         try .init(label: label, hash: hash, output: .base64)
     }
+    
+    public static func forSigning(label: String, hash: String) throws -> DocumentDigest {
+        try .init(label: label, hash: hash, output: .base64)
+    }
 }
 
 public struct AuthorizationDetailsItem: Codable, Sendable {
