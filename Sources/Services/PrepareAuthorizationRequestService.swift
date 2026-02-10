@@ -26,12 +26,12 @@ final actor PrepareAuthorizationRequestService: PrepareAuthorizationRequestServi
             throw ClientError.invalidRequestURL
         }
         
-        components.queryItems = [
+        components.percentEncodedQueryItems = [
             URLQueryItem(name: "response_type", value: "code"),
             URLQueryItem(name: "client_id", value: cscClientConfig.OAuth2Client.clientId),
             URLQueryItem(name: "redirect_uri", value: cscClientConfig.authFlowRedirectionURI),
             URLQueryItem(name: "scope", value: Scope.SERVICE.rawValue),
-            URLQueryItem(name: "code_challenge", value: codeChallenge),
+            URLQueryItem(name: "code_challenge", value: codeChallenge.percentEncodedForOAuthQuery()),
             URLQueryItem(name: "code_challenge_method", value: "S256"),
             URLQueryItem(name: "state", value: walletState),
         ]
@@ -50,16 +50,17 @@ final actor PrepareAuthorizationRequestService: PrepareAuthorizationRequestServi
         guard var components = URLComponents(string: issuerURL + "/oauth2/authorize") else {
             throw ClientError.invalidRequestURL
         }
+
         
-        components.queryItems = [
+        components.percentEncodedQueryItems = [
             URLQueryItem(name: "response_type", value: "code"),
             URLQueryItem(name: "client_id", value: cscClientConfig.OAuth2Client.clientId),
             URLQueryItem(name: "redirect_uri", value: cscClientConfig.authFlowRedirectionURI),
             URLQueryItem(name: "scope", value: Scope.CREDENTIAL.rawValue),
-            URLQueryItem(name: "code_challenge", value: codeChallenge),
+            URLQueryItem(name: "code_challenge", value: codeChallenge.percentEncodedForOAuthQuery()),
             URLQueryItem(name: "code_challenge_method", value: "S256"),
             URLQueryItem(name: "state", value: walletState),
-            URLQueryItem(name: "authorization_details", value: authorizationDetails)
+            URLQueryItem(name: "authorization_details", value: authorizationDetails.percentEncodedForOAuthQuery())
         ]
         
         guard let authorizationCodeURL = components.url?.absoluteString else {
