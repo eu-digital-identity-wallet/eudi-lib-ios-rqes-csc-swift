@@ -15,7 +15,20 @@
  */
 import Foundation
 
+extension CharacterSet {
+    static let oauthQueryValueAllowed: CharacterSet = {
+        var set = CharacterSet.urlQueryAllowed
+        set.remove(charactersIn: "+")
+        return set
+    }()
+}
+
 extension String {
+    
+    func percentEncodedForOAuthQuery() -> String {
+        addingPercentEncoding(withAllowedCharacters: .oauthQueryValueAllowed) ?? self
+    }
+    
     func appendingEndpoint(_ endpoint: String) -> Result<URL, ClientError> {
         let urlString = self + endpoint
         guard let url = URL(string: urlString) else {
