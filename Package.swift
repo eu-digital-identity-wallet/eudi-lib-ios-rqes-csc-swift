@@ -48,9 +48,9 @@ let package = Package(
     .testTarget(
       name: "RQESLibTests",
       dependencies: ["RQESLib"],
-      path: "Tests/RQESLibTests",
+      path: "Tests",
       resources: [
-        .copy("sample.pdf")
+        .copy("fixtures/sample.pdf")
       ]
     )
   ]
