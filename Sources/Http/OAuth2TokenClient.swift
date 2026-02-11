@@ -34,7 +34,7 @@ final actor OAuth2TokenClient {
         
         if let authorizationDetails = request.authorizationDetails, !authorizationDetails.isEmpty {
             var components = URLComponents(url: baseUrl, resolvingAgainstBaseURL: false)
-            components?.queryItems = [URLQueryItem(name: "authorization_details", value: authorizationDetails)]
+            components?.queryItems = [URLQueryItem(name: "authorization_details", value: authorizationDetails.percentEncodedForOAuthQuery())]
             url = components?.url ?? baseUrl
         }
 
