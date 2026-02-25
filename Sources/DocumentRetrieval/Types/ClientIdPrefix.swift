@@ -1,0 +1,83 @@
+/*
+ * Copyright (c) 2023 European Commission
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import Foundation
+import SwiftyJSON
+
+/// An enumeration representing different client ID schemes.
+public enum ClientIdPrefix: String, Codable, Sendable {
+  case preRegistered = "pre-registered"
+  case redirectUri = "redirect_uri"
+  case openidFederation = "openid_federation"
+  case decentralizedIdentifier = "decentralized_identifier"
+  case x509SanDns = "x509_san_dns"
+  case x509Hash = "x509_hash"
+  case verifierAttestation = "verifier_attestation"
+}
+
+/// Extension providing additional functionality to the `ClientIdScheme` enumeration.
+extension ClientIdPrefix {
+
+  /// Initializes a `ClientIdScheme` based on the authorization request object.
+  /// - Parameter authorizationRequestObject: The authorization request object.
+  /// - Throws: An error if the client ID scheme is unsupported.
+  init(authorizationRequestObject: JSON) throws {
+    let scheme = authorizationRequestObject["client_id_scheme"].string ?? "unknown"
+    guard
+      scheme == OpenId4VPSpec.clientIdSchemeRedirectUri ||
+      scheme == OpenId4VPSpec.clientIdSchemePreRegistered ||
+      scheme == OpenId4VPSpec.clientIdSchemeX509SanDns ||
+      scheme == OpenId4VPSpec.clientIdSchemeX509Hash,
+      let clientIdScheme = ClientIdPrefix(rawValue: scheme)
+    else {
+      throw ValidationError.unsupportedClientIdScheme(scheme)
+    }
+
+    self = clientIdScheme
+  }
+
+  /// Initializes a `ClientIdScheme` based on the authorization request data.
+  /// - Parameter authorizationRequestData: The authorization request data.
+  /// - Throws: An error if the client ID scheme is unsupported.
+  init(authorizationRequestData: RequestObject) throws {
+    guard
+      authorizationRequestData.clientIdScheme == OpenId4VPSpec.clientIdSchemePreRegistered,
+      let clientIdScheme = ClientIdPrefix(rawValue: authorizationRequestData.clientIdScheme ?? "")
+    else {
+      throw ValidationError.unsupportedClientIdScheme(authorizationRequestData.clientIdScheme)
+    }
+
+    self = clientIdScheme
+  }
+
+  /// Creates a new instance of `ClientIdScheme` from a raw value.
+  ///
+  /// - Parameter rawValue: The raw string value representing the client ID scheme.
+  /// - Returns: An instance of `ClientIdScheme` if the raw value matches a valid scheme, or `nil` otherwise.
+  public init?(rawValue: String) {
+    switch rawValue {
+    case OpenId4VPSpec.clientIdSchemePreRegistered:
+      self = .preRegistered
+    case OpenId4VPSpec.clientIdSchemeRedirectUri:
+      self = .redirectUri
+    case OpenId4VPSpec.clientIdSchemeX509SanDns:
+      self = .x509SanDns
+    case OpenId4VPSpec.clientIdSchemeX509Hash:
+      self = .x509Hash
+    default:
+      return nil // Return nil if the raw value doesn't match any case
+    }
+  }
+}

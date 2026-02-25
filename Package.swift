@@ -29,12 +29,36 @@ let package = Package(
     )
   ],
   dependencies: [
+    .package(
+      url: "https://github.com/airsidemobile/JOSESwift.git",
+      from: "3.0.0"
+    ),
+    .package(
+      url: "https://github.com/SwiftyJSON/SwiftyJSON.git",
+      from: "5.0.1"
+    ),
+    .package(
+      url: "https://github.com/apple/swift-certificates.git",
+      .upToNextMajor(from: "1.15.0")
+    ),
     .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.3.8")
   ],
   targets: [
     .target(
       name: "RQESLib",
       dependencies: [
+        .product(
+          name: "JOSESwift",
+          package: "JOSESwift"
+        ),
+        .product(
+          name: "SwiftyJSON",
+          package: "SwiftyJSON"
+        ),
+        .product(
+          name: "X509",
+          package: "swift-certificates"
+        ),
         .product(name: "PoDoFo", package: "eudi-lib-podofo")
       ],
       path: "Sources",
@@ -47,7 +71,17 @@ let package = Package(
     ),
     .testTarget(
       name: "RQESLibTests",
-      dependencies: ["RQESLib"],
+      dependencies: [
+        "RQESLib",
+        .product(
+          name: "JOSESwift",
+          package: "JOSESwift"
+        ),
+        .product(
+          name: "SwiftyJSON",
+          package: "SwiftyJSON"
+        ),
+      ],
       path: "Tests",
       resources: [
         .copy("fixtures/sample.pdf")

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import Foundation
+import SwiftyJSON
 
 public struct DocumentDigest: Codable, Sendable {
     public let label: String
@@ -24,6 +25,11 @@ public struct DocumentDigest: Codable, Sendable {
         self.hash = hash
     }
 
+    init(json: JSON) {
+        self.hash = json["hash"].stringValue
+        self.label = json["label"].stringValue
+    }
+    
     /// Format-aware construction (for new/updated call sites)
     public init(label: String, hash: String, output format: DigestFormat) throws {
         self.label = label

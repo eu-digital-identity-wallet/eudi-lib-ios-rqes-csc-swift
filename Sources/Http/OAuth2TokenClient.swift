@@ -31,17 +31,10 @@ final actor OAuth2TokenClient {
         }
 
         var url = baseUrl
-        
-        if let authorizationDetails = request.authorizationDetails, !authorizationDetails.isEmpty {
-            var components = URLComponents(url: baseUrl, resolvingAgainstBaseURL: false)
-            components?.queryItems = [URLQueryItem(name: "authorization_details", value: authorizationDetails.percentEncodedForOAuthQuery())]
-            url = components?.url ?? baseUrl
-        }
-
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        urlRequest.httpBody = request.toFormBody()
+        urlRequest.httpBody = request.toEncodedFormBody()
 
         if let auth = request.auth {
             let loginString = "\(auth.username):\(auth.password)"
