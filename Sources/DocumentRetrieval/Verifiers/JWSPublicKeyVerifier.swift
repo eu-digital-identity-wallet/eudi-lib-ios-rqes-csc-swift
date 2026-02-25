@@ -16,7 +16,6 @@
 import Foundation
 import Security
 import JOSESwift
-import CryptorECC
 
 internal struct JWSPublicKeyVerifier {
 
@@ -29,7 +28,7 @@ internal struct JWSPublicKeyVerifier {
       return try? convertRSAPEMToPublicKey(pem)
 
     case .ES256, .ES384, .ES512:
-      return try? ECPublicKey(key: pem).nativeKey
+      return try? ECPublicKeyConverter.secKey(fromPEM: pem)
 
     case .HS256, .HS384, .HS512:
       return nil

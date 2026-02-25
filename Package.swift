@@ -41,10 +41,6 @@ let package = Package(
       url: "https://github.com/apple/swift-certificates.git",
       .upToNextMajor(from: "1.15.0")
     ),
-    .package(
-      url: "https://github.com/niscy-eudiw/BlueECC.git",
-      .upToNextMajor(from: "1.2.4")
-    ),
     .package(url: "https://github.com/eu-digital-identity-wallet/eudi-lib-podofo", exact: "0.3.8")
   ],
   targets: [
@@ -62,10 +58,6 @@ let package = Package(
         .product(
           name: "X509",
           package: "swift-certificates"
-        ),
-        .product(
-          name: "CryptorECC",
-          package: "BlueECC"
         ),
         .product(name: "PoDoFo", package: "eudi-lib-podofo")
       ],
