@@ -73,11 +73,30 @@ public struct OAuth2TokenRequest: Codable, Sendable {
             "grant_type": grantType,
             "code_verifier": codeVerifier,
             "code": code,
-            "state": state
+            "state": state,
+            "authorization_details": authorizationDetails
         ].compactMapValues { $0 }
 
         return formItems.map { "\($0.key)=\($0.value)" }
             .joined(separator: "&")
             .data(using: .utf8) ?? Data()
+    }
+    
+    public func toEncodedFormBody() -> Data {
+        var components = URLComponents()
+        components.percentEncodedQueryItems = [
+            URLQueryItem(name: "client_id", value: clientId),
+            URLQueryItem(name: "redirect_uri", value: redirectUri),
+            URLQueryItem(name: "grant_type", value: grantType),
+            URLQueryItem(name: "code_verifier", value: codeVerifier),
+            URLQueryItem(name: "code", value: code),
+            URLQueryItem(name: "state", value: state),
+            URLQueryItem(name: "authorization_details", value: authorizationDetails?.percentEncodedForOAuthQuery())
+        ].compactMap { item in
+            item.value == nil ? nil : item
+        }
+
+        // URLComponents produces percent-encoding; for form bodies we want the query string bytes.
+        return (components.percentEncodedQuery ?? "").data(using: .utf8) ?? Data()
     }
 }
