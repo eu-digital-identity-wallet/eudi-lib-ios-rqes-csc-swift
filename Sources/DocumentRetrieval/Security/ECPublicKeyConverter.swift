@@ -114,7 +114,7 @@ struct ECPublicKeyConverter {
 }
 
 /// Minimal ASN.1 DER reader for exactly what we need (SEQUENCE, BIT STRING, OID)
-private enum ASN1 {
+internal enum ASN1 {
 
   struct TLV {
     let tag: UInt8
