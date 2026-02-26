@@ -15,34 +15,54 @@
  */
 import Foundation
 
-protocol DocumentRetrieving: AuthorizationRequestResolving & Dispatching {
+public protocol DocumentRetrieving: AuthorizationRequestResolving & Dispatching {
+    var config: DocumentRetrievalConfiguration { get }
     func parse(url: URL) async throws -> Result<UnvalidatedRequest, Error>
 }
 
-final class DocumentRetrieval: DocumentRetrieving {
-
-        
+public final class DocumentRetrieval: DocumentRetrieving {
+    
     private let resolver: AuthorizationRequestResolving
     private let dispatcher: Dispatching
-
-    init(
+    public let config: DocumentRetrievalConfiguration
+    
+    public init(
         config: DocumentRetrievalConfiguration
     ) {
         self.resolver = AuthorizationRequestResolver()
         self.dispatcher = Dispatcher()
+        self.config = config
     }
-
     
-    func parse(url: URL) async throws -> Result<UnvalidatedRequest, Error> {
+    
+    public func parse(url: URL) async throws -> Result<UnvalidatedRequest, Error> {
         UnvalidatedRequest.make(from: url.absoluteString)
     }
     
-    func resolve(documentRetrievalConfiguration: DocumentRetrievalConfiguration, unvalidatedRequest: UnvalidatedRequest) async throws -> AuthorizationRequest {
+    public func resolve(documentRetrievalConfiguration: DocumentRetrievalConfiguration, unvalidatedRequest: UnvalidatedRequest) async throws -> AuthorizationRequest {
         try await resolver.resolve(documentRetrievalConfiguration: documentRetrievalConfiguration, unvalidatedRequest: unvalidatedRequest)
     }
     
     public func dispatch(poster: Posting, reslovedData: ResolvedRequestData, consent: Consent) async throws -> DispatchOutcome {
-        throw ValidationError.validationError("Not ready yet")
+        let documentWithSignature: [String]? = try consent.documentsWithSignature()?.compactMap { document in
+            guard let url = URL(string: document) else {
+                throw ValidationError.emptyValue
+            }
+            let data = try Data(contentsOf: url)
+            guard let text = String(data: data, encoding: .utf8) else {
+                throw ValidationError.emptyValue
+            }
+            return text
+        }
+        
+        return try await dispatcher.dispatch(
+            poster: Poster(),
+            reslovedData: reslovedData,
+            consent: .positive(
+                documentWithSignature: documentWithSignature,
+                signatureObject: nil
+            )
+        )
     }
 }
 

@@ -57,7 +57,8 @@ indirect public enum ValidationError: AuthorizationRequestError, Equatable {
   case invalidResponseEncryptionSpecification
   case invalidVerifierAttestationFormat
   case invalidVerifierAttestationCredentialIds
-
+  case hashMismatch(expected: String, actual: String)
+    
   public var errorDescription: String? {
     switch self {
     case .validationError(let message):
@@ -142,6 +143,8 @@ indirect public enum ValidationError: AuthorizationRequestError, Equatable {
       return ".invalidVerifierAttestationCredentialIds"
     case .invalidResponseEncryptionSpecification:
       return ".invalidResponseEncryptionSpecification"
+    case .hashMismatch(let expected, let actual):
+        return ".hashMismatch: expected:\(expected) actual:\(actual)"
     }
   }
 }

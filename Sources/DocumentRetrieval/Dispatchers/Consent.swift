@@ -25,5 +25,14 @@ public enum Consent: Sendable {
      No consensus. Holder decided to reject the request
       */
     case negative(message: String)
+    
+    public func documentsWithSignature() throws -> [String]? {
+        switch self {
+        case .positive(let documentWithSignature, _):
+            return documentWithSignature
+        case .negative(message: let message):
+            throw ValidationError.validationError(message)
+        }
+    }
 }
 
