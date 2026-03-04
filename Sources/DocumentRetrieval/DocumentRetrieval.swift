@@ -15,7 +15,7 @@
  */
 import Foundation
 
-public protocol DocumentRetrieving: AuthorizationRequestResolving & Dispatching {
+public protocol DocumentRetrieving: AuthorizationRequestResolving & Dispatching, Sendable {
     var config: DocumentRetrievalConfiguration { get }
     func parse(url: URL) async throws -> Result<UnvalidatedRequest, Error>
 }
