@@ -18,7 +18,7 @@ import Foundation
 public enum Consent: Sendable {
     case positive(
         documentWithSignature: [String]?,
-        signatureObject: [String]?,
+        signatureObject: [String]?
     )
 
     /**
