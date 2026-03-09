@@ -99,7 +99,7 @@ public actor AuthorizationRequestResolver: AuthorizationRequestResolving {
 
     guard let nonce = authorizedRequest.requestObject.nonce else {
       return .invalidResolution(
-        error: ValidationError.missingNonce,
+        error: ValidationError.missingNonce
       )
     }
 
