@@ -22,6 +22,10 @@ import SwiftyJSON
 public struct ValidatedRequestData: Sendable {
   let request: Request
 
+  public init(request: Request) {
+    self.request = request
+  }
+    
   public var responseMode: ResponseMode? {
     request.responseMode
   }

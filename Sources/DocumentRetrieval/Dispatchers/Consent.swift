@@ -18,12 +18,21 @@ import Foundation
 public enum Consent: Sendable {
     case positive(
         documentWithSignature: [String]?,
-        signatureObject: [String]?,
+        signatureObject: [String]?
     )
 
     /**
      No consensus. Holder decided to reject the request
       */
     case negative(message: String)
+    
+    public func documentsWithSignature() throws -> [String]? {
+        switch self {
+        case .positive(let documentWithSignature, _):
+            return documentWithSignature
+        case .negative(message: let message):
+            throw ValidationError.validationError(message)
+        }
+    }
 }
 

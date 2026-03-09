@@ -38,7 +38,7 @@ public struct DocumentRetrievalConfiguration: Sendable {
     }
 }
 
-protocol AuthorizationRequestResolving: Sendable {
+public protocol AuthorizationRequestResolving: Sendable {
   func resolve(
     documentRetrievalConfiguration: DocumentRetrievalConfiguration,
     unvalidatedRequest: UnvalidatedRequest
@@ -49,7 +49,7 @@ public actor AuthorizationRequestResolver: AuthorizationRequestResolving {
 
   init() {}
 
-  func resolve(
+  public func resolve(
     documentRetrievalConfiguration: DocumentRetrievalConfiguration,
     unvalidatedRequest: UnvalidatedRequest
   ) async -> AuthorizationRequest {
@@ -99,7 +99,7 @@ public actor AuthorizationRequestResolver: AuthorizationRequestResolving {
 
     guard let nonce = authorizedRequest.requestObject.nonce else {
       return .invalidResolution(
-        error: ValidationError.missingNonce,
+        error: ValidationError.missingNonce
       )
     }
 
