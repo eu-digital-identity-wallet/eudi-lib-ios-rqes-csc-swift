@@ -30,7 +30,7 @@ final actor OAuth2TokenClient {
             return .failure(.invalidRequestURL)
         }
 
-        var url = baseUrl
+        let url = baseUrl
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")

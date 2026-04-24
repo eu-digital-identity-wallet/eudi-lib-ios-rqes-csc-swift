@@ -66,10 +66,10 @@ public actor PodofoManager {
             }
         }
         
-        let documentDigest = DocumentDigests(
+        let documentDigests = DocumentDigests(
             hashes: hashes
         )
-        return documentDigest
+        return documentDigests
     }
 
     public func createSignedDocuments(signatures: [String], tsaUrl: String) async throws {

@@ -19,21 +19,40 @@ import SwiftyJSON
 public struct DocumentDigest: Codable, Sendable {
     public let label: String
     public let hash: String
+    public let hashType: HashType?
+    public let circumstantialData: String?
   
-    public init(label: String, hash: String) {
+    public init(
+        label: String,
+        hash: String,
+        hashType: HashType? = .DTBSR,
+        circumstantialData: String? = nil
+    ) {
         self.label = label
         self.hash = hash
+        self.hashType = hashType
+        self.circumstantialData = circumstantialData
     }
 
     init(json: JSON) {
         self.hash = json["hash"].stringValue
         self.label = json["label"].stringValue
+        self.hashType = HashType(rawValue: json["hashType"].string ?? "")
+        self.circumstantialData = json["circumstantialData"].string
     }
     
     /// Format-aware construction (for new/updated call sites)
-    public init(label: String, hash: String, output format: DigestFormat) throws {
+    public init(
+        label: String,
+        hash: String,
+        output format: DigestFormat,
+        hashType: HashType? = .DTBSR,
+        circumstantialData: String? = nil
+    ) throws {
         self.label = label
         self.hash = try DigestNormalizer.normalize(hash, to: format)
+        self.hashType = hashType
+        self.circumstantialData = circumstantialData
     }
 
     public static func forAuthorization(label: String, hash: String) throws -> DocumentDigest {
@@ -55,13 +74,15 @@ public struct AuthorizationDetailsItem: Codable, Sendable {
     public let hashAlgorithmOID: HashAlgorithmOID
     public let locations: [String]
     public let type: String
+    public let numSignatures: Int
   
-    public init(documentDigests: [DocumentDigest], credentialID: String, hashAlgorithmOID: HashAlgorithmOID, locations: [String], type: String) {
+  public init(documentDigests: [DocumentDigest], credentialID: String, hashAlgorithmOID: HashAlgorithmOID, locations: [String], type: String, numSignatures: Int = 1) {
         self.documentDigests = documentDigests
         self.credentialID = credentialID
         self.hashAlgorithmOID = hashAlgorithmOID
         self.locations = locations
         self.type = type
+        self.numSignatures = numSignatures
     }
 }
 
