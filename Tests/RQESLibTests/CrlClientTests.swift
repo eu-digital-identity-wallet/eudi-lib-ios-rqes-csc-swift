@@ -323,10 +323,10 @@ final class CrlClientTests: XCTestCase {
     
     func testHashAlgorithmOID() {
         XCTAssertEqual(HashAlgorithmOID.SHA256.rawValue, "2.16.840.1.101.3.4.2.1")
-        XCTAssertEqual(HashAlgorithmOID.SHA385.rawValue, "2.16.840.1.101.3.4.2.2") 
+        XCTAssertEqual(HashAlgorithmOID.SHA384.rawValue, "2.16.840.1.101.3.4.2.2")
         XCTAssertEqual(HashAlgorithmOID.SHA512.rawValue, "2.16.840.1.101.3.4.2.3")
         XCTAssertEqual(HashAlgorithmOID.SHA3_256.rawValue, "2.16.840.1.101.3.4.2.8")
-        XCTAssertEqual(HashAlgorithmOID.SHA3_385.rawValue, "2.16.840.1.101.3.4.2.9")
+        XCTAssertEqual(HashAlgorithmOID.SHA3_384.rawValue, "2.16.840.1.101.3.4.2.9")
         XCTAssertEqual(HashAlgorithmOID.SHA3_512.rawValue, "2.16.840.1.101.3.4.2.10")
         
         let customOID = HashAlgorithmOID("1.2.3.4.5")
@@ -334,7 +334,7 @@ final class CrlClientTests: XCTestCase {
         
         XCTAssertEqual(HashAlgorithmOID.SHA256.description, "2.16.840.1.101.3.4.2.1")
         XCTAssertEqual(HashAlgorithmOID.SHA256.rawValue, HashAlgorithmOID.SHA256.rawValue)
-        XCTAssertNotEqual(HashAlgorithmOID.SHA256.rawValue, HashAlgorithmOID.SHA385.rawValue)
+        XCTAssertNotEqual(HashAlgorithmOID.SHA256.rawValue, HashAlgorithmOID.SHA384.rawValue)
     }
     
     func testSigningAlgorithmOID() {

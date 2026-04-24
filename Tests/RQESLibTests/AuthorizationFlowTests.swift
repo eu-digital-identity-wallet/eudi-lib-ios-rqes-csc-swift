@@ -133,7 +133,8 @@ final class AuthorizationFlowTests: XCTestCase {
                 }
             ],
             "credentialID": "662e92ed-cbeb-4d4f-9a46-8fc4df3cea85",
-            "locations": []
+            "locations": [],
+            "numSignatures": 1
         }
         """
         

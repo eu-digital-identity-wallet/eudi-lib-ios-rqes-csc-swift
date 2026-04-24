@@ -54,9 +54,9 @@ final class InfoServiceTests: XCTestCase {
         XCTAssertEqual(response.validationInfo, false, "Should return mock validation info")
         
         XCTAssertTrue(response.authType.contains("oauth2code"), "Should contain mock auth type")
-        XCTAssertTrue(response.methods.contains("oauth2/authorize"), "Should contain mock method")
-        XCTAssertTrue(response.methods.contains("credentials/list"), "Should contain mock method")
-        XCTAssertTrue(response.conformance_levels.contains("Ades-B-B"), "Should contain mock conformance level")
+        XCTAssertTrue(response.methods.contains(.authorize), "Should contain mock method")
+        XCTAssertTrue(response.methods.contains(.credentialsList), "Should contain mock method")
+        XCTAssertTrue(response.conformanceLevels.contains("Ades-B-B"), "Should contain mock conformance level")
         
         XCTAssertTrue(response.signAlgorithms.algos.contains("1.2.840.10045.2.1"), "Should contain mock algorithm")
         XCTAssertTrue(response.signAlgorithms.algos.contains("1.2.840.10045.4.3.2"), "Should contain mock algorithm")
@@ -146,13 +146,13 @@ final class InfoServiceTests: XCTestCase {
         
         XCTAssertEqual(response.authType.count, 1)
         XCTAssertEqual(response.authType[0], "oauth2code")
-        
-        let expectedMethods = [
-            "oauth2/authorize",
-            "oauth2/token", 
-            "credentials/list",
-            "credentials/info",
-            "signatures/signHash"
+
+        let expectedMethods: [RSSPMethod] = [
+              .authorize,
+              .token,
+              .credentialsList,
+              .credentialsInfo,
+              .signaturesSignHash
         ]
         XCTAssertEqual(response.methods.count, expectedMethods.count)
         for method in expectedMethods {
@@ -160,9 +160,9 @@ final class InfoServiceTests: XCTestCase {
         }
         
         let expectedLevels = ["Ades-B-B", "Ades-B-T", "Ades-B-LT", "Ades-B-LTA"]
-        XCTAssertEqual(response.conformance_levels.count, expectedLevels.count)
+        XCTAssertEqual(response.conformanceLevels.count, expectedLevels.count)
         for level in expectedLevels {
-            XCTAssertTrue(response.conformance_levels.contains(level), "Should contain level: \(level)")
+            XCTAssertTrue(response.conformanceLevels.contains(level), "Should contain level: \(level)")
         }
         
         XCTAssertEqual(response.signAlgorithms.algos.count, 2)
@@ -285,7 +285,10 @@ final class InfoServiceTests: XCTestCase {
               ]
             ]
           },
-          "name" : "remote Qualifies Electronic Signature R3 QTSP"
+          "name" : "remote Qualifies Electronic Signature R3 QTSP",
+          "supportedHashTypes": [
+              "dtbsr"
+          ]
         }
         """
     }

@@ -49,11 +49,11 @@ class TypesTests: XCTestCase {
     func testHashAlgorithmOIDStaticConstants() {
         XCTAssertEqual(HashAlgorithmOID.SHA224.rawValue, "2.16.840.1.101.3.4.2.4")
         XCTAssertEqual(HashAlgorithmOID.SHA256.rawValue, "2.16.840.1.101.3.4.2.1")
-        XCTAssertEqual(HashAlgorithmOID.SHA385.rawValue, "2.16.840.1.101.3.4.2.2")
+        XCTAssertEqual(HashAlgorithmOID.SHA384.rawValue, "2.16.840.1.101.3.4.2.2")
         XCTAssertEqual(HashAlgorithmOID.SHA512.rawValue, "2.16.840.1.101.3.4.2.3")
         XCTAssertEqual(HashAlgorithmOID.SHA3_224.rawValue, "2.16.840.1.101.3.4.2.7")
         XCTAssertEqual(HashAlgorithmOID.SHA3_256.rawValue, "2.16.840.1.101.3.4.2.8")
-        XCTAssertEqual(HashAlgorithmOID.SHA3_385.rawValue, "2.16.840.1.101.3.4.2.9")
+        XCTAssertEqual(HashAlgorithmOID.SHA3_384.rawValue, "2.16.840.1.101.3.4.2.9")
         XCTAssertEqual(HashAlgorithmOID.SHA3_512.rawValue, "2.16.840.1.101.3.4.2.10")
         XCTAssertEqual(HashAlgorithmOID.MD2.rawValue, "1.2.840.113549.2.2")
         XCTAssertEqual(HashAlgorithmOID.MD5.rawValue, "1.2.840.113549.2.5")

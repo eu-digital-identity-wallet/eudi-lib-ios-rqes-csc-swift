@@ -248,7 +248,7 @@ final class SignHashServiceTests: XCTestCase {
     func testSignHashServiceWithDifferentAlgorithms() async throws {
         let algorithms = [
             (HashAlgorithmOID.SHA256, "SHA256"),
-            (HashAlgorithmOID.SHA385, "SHA384"),
+            (HashAlgorithmOID.SHA384, "SHA384"),
             (HashAlgorithmOID.SHA512, "SHA512")
         ]
         
