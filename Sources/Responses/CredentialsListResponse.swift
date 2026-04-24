@@ -25,7 +25,7 @@ public struct CredentialsListResponse: Codable, Sendable {
         public let description: String?
         public let signatureQualifier: SignatureQualifier?
         public let key: KeyInfo
-        public let cert: CertInfo
+        public let cert: CertificateListInfo
         public let auth: AuthInfo?
         public let multisign: Int?
         public let lang: String?
@@ -39,7 +39,7 @@ public struct CredentialsListResponse: Codable, Sendable {
         public let curve: String?
     }
     
-    public struct CertInfo: Codable, Sendable {
+    public struct CertificateListInfo: Codable, Sendable {
         public let status: String
         public let certificates: [String]
         public let issuerDN: String
@@ -47,6 +47,8 @@ public struct CredentialsListResponse: Codable, Sendable {
         public let subjectDN: String
         public let validFrom: String
         public let validTo: String
+        public let qcStatements: [String]?
+        public let policy: [String]?
     }
     
     public struct AuthInfo: Codable, Sendable {

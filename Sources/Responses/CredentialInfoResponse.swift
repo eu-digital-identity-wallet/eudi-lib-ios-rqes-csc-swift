@@ -40,6 +40,30 @@ public struct CredentialInfo: Codable, Sendable {
         public let subjectDN: String?
         public let validFrom: String?
         public let validTo: String?
+        public let qcStatements: [String]?
+        public let policy: [String]?
+      
+        public init(
+          status: String?,
+          certificates: [String]?,
+          issuerDN: String?,
+          serialNumber: String?,
+          subjectDN: String?,
+          validFrom: String?,
+          validTo: String?,
+          qcStatements: [String]? = [],
+          policy: [String]? = nil
+        ) {
+            self.status = status
+            self.certificates = certificates
+            self.issuerDN = issuerDN
+            self.serialNumber = serialNumber
+            self.subjectDN = subjectDN
+            self.validFrom = validFrom
+            self.validTo = validTo
+            self.qcStatements = qcStatements
+            self.policy = policy
+        }
     }
 
     public struct AuthInfo: Codable, Sendable {
