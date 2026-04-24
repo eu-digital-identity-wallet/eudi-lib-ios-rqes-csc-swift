@@ -36,11 +36,11 @@ public struct HashAlgorithmOID: RawRepresentable, Codable, Sendable, Expressible
 
     public static let SHA224 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.4")
     public static let SHA256 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.1")
-    public static let SHA385 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.2")
+    public static let SHA384 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.2")
     public static let SHA512 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.3")
     public static let SHA3_224 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.7")
     public static let SHA3_256 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.8")
-    public static let SHA3_385 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.9")
+    public static let SHA3_384 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.9")
     public static let SHA3_512 = HashAlgorithmOID(rawValue: "2.16.840.1.101.3.4.2.10")
     public static let MD2 = HashAlgorithmOID(rawValue: "1.2.840.113549.2.2")
     public static let MD5 = HashAlgorithmOID(rawValue: "1.2.840.113549.2.5")
