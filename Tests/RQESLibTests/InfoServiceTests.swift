@@ -168,7 +168,7 @@ final class InfoServiceTests: XCTestCase {
         XCTAssertEqual(response.signAlgorithms.algos.count, 2)
         XCTAssertTrue(response.signAlgorithms.algos.contains("1.2.840.10045.2.1"))
         XCTAssertTrue(response.signAlgorithms.algos.contains("1.2.840.10045.4.3.2"))
-        XCTAssertTrue(response.signAlgorithms.algoParams.isEmpty)
+        XCTAssertEqual(response.signAlgorithms.algoParams, [])
         
         let expectedFormats = ["P", "X", "C", "J"]
         XCTAssertEqual(response.signature_formats.formats.count, expectedFormats.count)
@@ -176,11 +176,12 @@ final class InfoServiceTests: XCTestCase {
             XCTAssertTrue(response.signature_formats.formats.contains(format), "Should contain format: \(format)")
         }
         
-        XCTAssertEqual(response.signature_formats.envelope_properties.count, 4)
-        XCTAssertEqual(response.signature_formats.envelope_properties[0], ["Enveloped"])
-        XCTAssertEqual(response.signature_formats.envelope_properties[1], ["Enveloped", "Enveloping", "Detached", "Internally detached"])
-        XCTAssertEqual(response.signature_formats.envelope_properties[2], ["Enveloping", "Detached"])
-        XCTAssertEqual(response.signature_formats.envelope_properties[3], ["Enveloping", "Detached"])
+        let envelopeProperties = try XCTUnwrap(response.signature_formats.envelope_properties)
+        XCTAssertEqual(envelopeProperties.count, 4)
+        XCTAssertEqual(envelopeProperties[0], ["Enveloped"])
+        XCTAssertEqual(envelopeProperties[1], ["Enveloped", "Enveloping", "Detached", "Internally detached"])
+        XCTAssertEqual(envelopeProperties[2], ["Enveloping", "Detached"])
+        XCTAssertEqual(envelopeProperties[3], ["Enveloping", "Detached"])
     }
     
     func testInfoServiceResponseWithDifferentLanguages() throws {
@@ -204,7 +205,7 @@ final class InfoServiceTests: XCTestCase {
         
         let signAlgorithms = response.signAlgorithms
         XCTAssertFalse(signAlgorithms.algos.isEmpty, "Should have algorithms")
-        XCTAssertTrue(signAlgorithms.algoParams.isEmpty, "Should have empty algo params")
+        XCTAssertEqual(signAlgorithms.algoParams, [], "Should have empty algo params")
         
         XCTAssertTrue(signAlgorithms.algos.contains("1.2.840.10045.2.1"), "Should contain ECDSA OID")
         XCTAssertTrue(signAlgorithms.algos.contains("1.2.840.10045.4.3.2"), "Should contain ECDSA with SHA256 OID")
@@ -217,12 +218,44 @@ final class InfoServiceTests: XCTestCase {
         
         let signatureFormats = response.signature_formats
         XCTAssertFalse(signatureFormats.formats.isEmpty, "Should have formats")
-        XCTAssertFalse(signatureFormats.envelope_properties.isEmpty, "Should have envelope properties")
+        let envelopeProperties = try XCTUnwrap(signatureFormats.envelope_properties)
+        XCTAssertFalse(envelopeProperties.isEmpty, "Should have envelope properties")
         
-        XCTAssertEqual(signatureFormats.formats.count, signatureFormats.envelope_properties.count, 
+        XCTAssertEqual(signatureFormats.formats.count, envelopeProperties.count, 
                       "Should have matching number of formats and envelope properties")
     }
     
+    func testInfoServiceResponseDecodesConditionalFieldsAndOAuthMethods() throws {
+        // CSC API v2.2.0.0, 11.1: algoParams and envelope_properties are
+        // "REQUIRED Conditional", and methods may list the OAuth endpoints
+        // oauth2/pushed_authorize and oauth2/revoke.
+        let json = """
+        {
+          "specs": "2.2.0.0",
+          "name": "signHash-only RSSP",
+          "logo": "img",
+          "region": "NL",
+          "lang": "en",
+          "description": "Offers signatures/signHash only",
+          "authType": ["oauth2code"],
+          "oauth2": "https://rssp.example/idp",
+          "supportedHashTypes": ["2.16.840.1.101.3.4.2.1"],
+          "methods": ["oauth2/authorize", "oauth2/pushed_authorize", "oauth2/revoke",
+                      "credentials/list", "signatures/signHash"],
+          "signAlgorithms": { "algos": ["1.2.840.10045.4.3.2"] },
+          "signature_formats": { "formats": [] },
+          "conformance_levels": []
+        }
+        """
+
+        let response = try JSONDecoder().decode(InfoServiceResponse.self, from: Data(json.utf8))
+
+        XCTAssertEqual(response.methods, [.authorize, .pushedAuthorize, .revoke, .credentialsList, .signaturesSignHash])
+        XCTAssertNil(response.signAlgorithms.algoParams)
+        XCTAssertEqual(response.signature_formats.formats, [])
+        XCTAssertNil(response.signature_formats.envelope_properties)
+    }
+
     private func createRealisticInfoResponseJSON(language: String = "en-US") -> String {
         return """
         {

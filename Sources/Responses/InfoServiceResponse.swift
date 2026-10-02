@@ -135,15 +135,15 @@ public struct InfoServiceResponse: Codable, Sendable {
 
 public struct SignAlgorithms: Codable, Sendable {
     public let algos: [String]
-    public let algoParams: [String]
+    public let algoParams: [String]?
 }
 
 public struct SignatureFormats: Codable, Sendable{
     public let formats: [String]
-    public let envelope_properties: [[String]]
+    public let envelope_properties: [[String]]?
     public let allowMix: Bool?
   
-    public init(formats: [String], envelope_properties: [[String]], allowMix: Bool? = false) {
+    public init(formats: [String], envelope_properties: [[String]]? = nil, allowMix: Bool? = false) {
         self.formats = formats
         self.envelope_properties = envelope_properties
         self.allowMix = allowMix
@@ -153,6 +153,8 @@ public struct SignatureFormats: Codable, Sendable{
 public enum RSSPMethod: String, Codable, Sendable {
     case info = "info"
     case authorize = "oauth2/authorize"
+    case pushedAuthorize = "oauth2/pushed_authorize"
+    case revoke = "oauth2/revoke"
     case token = "oauth2/token"
     case authLogin = "auth/login"
     case authRevoke = "auth/revoke"
